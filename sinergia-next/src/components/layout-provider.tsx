@@ -27,9 +27,9 @@ export function LayoutProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <>
+    <div>
       {isPublicRoute && <LandingPageHeader />}
       <main>{children}</main>
-    </>
+    </div>
   );
 }
