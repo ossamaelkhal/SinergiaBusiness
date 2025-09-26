@@ -2,7 +2,6 @@ import './globals.css';
 import { Inter } from 'next/font/google';
 import { AuthProvider } from '@/contexts/auth-context';
 import { Toaster } from '@/components/ui/sonner';
-import { LayoutProvider } from '@/components/layout-provider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -16,9 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="pt-br">
       <body className={inter.className}>
         <AuthProvider>
-          <LayoutProvider>
-            {children}
-          </LayoutProvider>
+          {children}
           <Toaster richColors />
         </AuthProvider>
       </body>
