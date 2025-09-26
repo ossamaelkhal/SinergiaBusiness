@@ -1,17 +1,17 @@
 "use client";
 
 import React from 'react';
-import EnhancedHeroSection from '@/components/enhanced-hero-section';
-import SocialProofSection from '@/components/social-proof-section';
-// import ForWhomSection from '@/components/ForWhomSection'; 
-import BenefitsSection from '@/components/benefits-section';
-import HowItWorksSection from '@/components/how-it-works-section';
-import OfferSection from '@/components/offer-section';
-import GuaranteeSection from '@/components/guarantee-section';
-import FaqSection from '@/components/faq-section';
-// import FinalCTASection from '@/components/FinalCTASection';
-import Footer from '@/components/footer';
-// import ScrollSpyNav from '@/components/ScrollSpyNav';
+import { EnhancedHeroSection } from '@/components/enhanced-hero-section';
+import { SocialProofSection } from '@/components/social-proof-section';
+// import { ForWhomSection } from '@/components/ForWhomSection'; 
+import { BenefitsSection } from '@/components/benefits-section';
+import { HowItWorksSection } from '@/components/how-it-works-section';
+import { OfferSection } from '@/components/offer-section';
+import { GuaranteeSection } from '@/components/guarantee-section';
+import { FaqSection } from '@/components/faq-section';
+// import { FinalCTASection } from '@/components/FinalCTASection';
+import { Footer } from '@/components/footer';
+// import { ScrollSpyNav } from '@/components/ScrollSpyNav';
 
 const sectionIds = ['para-quem', 'beneficios', 'como-funciona', 'oferta', 'faq'];
 
