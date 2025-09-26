@@ -3,14 +3,15 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Sparkles, Home, Building, Users, BarChart2 } from 'lucide-react';
+import { Sparkles, Home, Building, Users, BarChart2, LifeBuoy } from 'lucide-react'; // Adiciona LifeBuoy
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: Home },
   { href: '/dashboard/companies', label: 'Empresas', icon: Building },
-  { href: '/dashboard/leads', label: 'Leads', icon: Users },
+  { href: '/dashboard/leads', label: 'Leads', icon: Users, disabled: true }, // Supondo que a página de leads ainda não exista
   { href: '/dashboard/analytics', label: 'Analytics', icon: BarChart2, disabled: true },
+  { href: '/dashboard/support', label: 'Suporte', icon: LifeBuoy }, // Novo item de Suporte
 ];
 
 export function Sidebar() {
