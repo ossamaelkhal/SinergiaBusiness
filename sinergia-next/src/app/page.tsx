@@ -1,75 +1,22 @@
-'use client'; // Este componente é interativo e deve ser executado no cliente
+import { EnhancedHeroSection } from '@/components/enhanced-hero-section';
+import { SocialProofSection } from '@/components/social-proof-section';
+import { BenefitsSection } from '@/components/benefits-section';
+import { HowItWorksSection } from '@/components/how-it-works-section';
+import { OfferSection } from '@/components/offer-section';
+import { FaqSection } from '@/components/faq-section'; // Importa a nova seção
+import { Footer } from '@/components/footer';
 
-import React from 'react';
-// Importações provisórias, estes componentes serão migrados para src/components dentro do projeto Next.js
-import EnhancedHeroSection from '../components/EnhancedHeroSection';
-import SocialProofSection from '../components/SocialProofSection';
-import ForWhomSection from '../components/ForWhomSection';
-import BenefitsSection from '../components/BenefitsSection';
-import HowItWorksSection from '../components/HowItWorksSection';
-import OfferSection from '../components/OfferSection';
-import GuaranteeSection from '../components/GuaranteeSection';
-import FaqSection from '../components/FaqSection';
-import FinalCTASection from '../components/FinalCTASection';
-import Footer from '../components/Footer';
-import ScrollSpyNav from '../components/ScrollSpyNav';
-import { useScrollSpy } from '../hooks/useScrollSpy';
-
-// Apenas para que o useScrollSpy tenha os IDs para observar
-const sectionIds = ['para-quem', 'beneficios', 'como-funciona', 'oferta', 'faq'];
-
-export default function LandingPage() {
-  // O useScrollSpy é um hook de cliente, por isso a diretiva 'use client' acima
-  const activeSection = useScrollSpy(sectionIds);
-
+export default function Home() {
   return (
-    <div className="bg-secondary-background">
-      {/* O Header será um componente compartilhado no Next.js, por enquanto mantemos aqui */}
-      <header className="fixed top-0 w-full bg-secondary-background/80 backdrop-blur-md z-50 border-b border-secondary-border shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              {/* Ícone Sparkles virá de lucide-react, a ser instalado no Next.js */}
-              <div className="w-10 h-10 bg-primary-base rounded-lg flex items-center justify-center shadow-md">
-                {/* <Sparkles className="w-6 h-6 text-white" /> */}
-                <span className="text-white">AI</span>
-              </div>
-              <span className="text-2xl font-bold text-secondary-text-primary">SinergIA</span>
-            </div>
-            <nav className="hidden md:flex items-center space-x-8">
-              <a href="#beneficios" className="text-secondary-text-secondary hover:text-primary-base transition-colors">Benefícios</a>
-              <a href="#como-funciona" className="text-secondary-text-secondary hover:text-primary-base transition-colors">Como Funciona</a>
-              <a href="#faq" className="text-secondary-text-secondary hover:text-primary-base transition-colors">FAQ</a>
-            </nav>
-            <div className="hidden md:flex items-center space-x-4">
-              {/* Botões serão migrados */}
-              {/* <Button variant="ghost">Entrar</Button> */}
-              {/* <Button variant="primary" asChild><a href="#oferta">Começar Agora →</a></Button> */}
-              <button>Entrar</button>
-              <button>Começar Agora →</button>
-            </div>
-            <button className="md:hidden text-secondary-text-primary">
-              {/* <Menu className="w-6 h-6" /> */}
-              <span>Menu</span>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <ScrollSpyNav activeSection={activeSection} />
-
-      <main>
+    <div className="flex flex-col min-h-screen">
+      <main className="flex-grow">
         <EnhancedHeroSection />
         <SocialProofSection />
-        <ForWhomSection />
         <BenefitsSection />
         <HowItWorksSection />
         <OfferSection />
-        <GuaranteeSection />
         <FaqSection />
-        <FinalCTASection />
       </main>
-
       <Footer />
     </div>
   );
