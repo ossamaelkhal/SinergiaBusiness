@@ -1,23 +1,23 @@
-import { EnhancedHeroSection } from '@/components/enhanced-hero-section';
-import { SocialProofSection } from '@/components/social-proof-section';
 import { BenefitsSection } from '@/components/benefits-section';
+import { EnhancedHeroSection } from '@/components/enhanced-hero-section';
+import { FaqSection } from '@/components/faq-section';
+import { Footer } from '@/components/footer';
 import { HowItWorksSection } from '@/components/how-it-works-section';
 import { OfferSection } from '@/components/offer-section';
-import { FaqSection } from '@/components/faq-section'; // Importa a nova seção
-import { Footer } from '@/components/footer';
+import { SocialProofSection } from '@/components/social-proof-section';
+import { LandingPageHeader } from '@/components/landing-page/header';
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen">
-      <main className="flex-grow">
-        <EnhancedHeroSection />
-        <SocialProofSection />
-        <BenefitsSection />
-        <HowItWorksSection />
-        <OfferSection />
-        <FaqSection />
-      </main>
+    // O LayoutProvider no layout.tsx cuidará de adicionar o Header
+    <main>
+      <EnhancedHeroSection />
+      <SocialProofSection />
+      <BenefitsSection />
+      <HowItWorksSection />
+      <OfferSection />
+      <FaqSection />
       <Footer />
-    </div>
+    </main>
   );
 }
