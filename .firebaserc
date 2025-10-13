@@ -1,5 +1,7 @@
 {
-  "projects": {},
+  "projects": {
+    "default": "sinergia-platform"
+  },
   "targets": {},
   "etags": {}
 }
