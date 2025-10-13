@@ -1,26 +1,44 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
+ 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 84% 4.9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    /* SinergIA Ocean Palette */
+    --background: 231 60% 16%; /* Azul escuro/navy - #1a237e */
+    --foreground: 0 0% 100%; /* Branco - #ffffff */
+
+    --card: 225 40% 25%; /* Azul médio para cards */
+    --card-foreground: 0 0% 100%;
+
+    --popover: 231 60% 16%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 45 100% 50%; /* Amarelo/Dourado vibrante - #ffd700 */
+    --primary-foreground: 231 60% 16%; /* Azul escuro para texto no botão primário */
+
+    --secondary: 225 40% 35%; /* Azul médio */
+    --secondary-foreground: 45 100% 50%;
+
+    --muted: 225 40% 30%;
+    --muted-foreground: 225 10% 65%;
+
+    --accent: 45 100% 50%; /* Amarelo/Dourado para destaques */
+    --accent-foreground: 231 60% 16%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 225 40% 35%;
+    --input: 225 40% 28%;
+    --ring: 45 100% 50%; /* Dourado para o anel de foco */
+
     --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Você pode definir uma paleta escura separada se necessário */
+    /* Por enquanto, vamos manter a consistência */
   }
 }
 
@@ -30,15 +48,21 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: sans-serif; /* Uma fonte sans-serif limpa como base */
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold text-accent; /* Títulos em dourado por padrão */
   }
 }
 
 @layer components {
+  /* Efeito de vidro para um toque de profundidade oceânica */
   .glassmorphism {
-    @apply bg-white/10 backdrop-blur-md border border-white/20;
+    @apply bg-secondary/20 backdrop-blur-lg border border-secondary/30 rounded-xl;
   }
   
+  /* Texto em gradiente para títulos de destaque */
   .gradient-text {
-    @apply bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
   }
 }
