@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { getAllNiches } from '@/data/niches'
 
 export function Header() {
   const { user, userRole, logout, loading } = useAuth()
@@ -88,38 +89,22 @@ export function Header() {
                   Soluções Nichadas
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-64 bg-slate-900 border border-slate-800 uppercase p-2 mt-2 shadow-2xl" align="start">
+              <DropdownMenuContent className="w-72 bg-slate-900 border border-slate-800 uppercase p-2 mt-2 shadow-2xl" align="start">
                 <div className="text-xs font-black text-slate-500 px-2 py-2 tracking-widest">Sistemas Feitos para:</div>
-                <Link href="/solutions/saude-clinicas">
-                  <DropdownMenuItem className="cursor-pointer hover:bg-slate-800 text-slate-300 focus:text-white px-3 py-3 rounded-md flex gap-3 group">
-                    <Stethoscope className="w-5 h-5 text-rose-400" /> 
-                    <div><div className="font-bold">Saúde & Clínicas</div><div className="text-xs text-slate-500 capitalize">Recepção Viva 24/7</div></div>
-                  </DropdownMenuItem>
-                </Link>
-                <Link href="/solutions/servicos-juridicos">
-                  <DropdownMenuItem className="cursor-pointer hover:bg-slate-800 text-slate-300 focus:text-white px-3 py-3 rounded-md flex gap-3">
-                    <Scale className="w-5 h-5 text-indigo-400" />
-                    <div><div className="font-bold">Direito Corporativo</div><div className="text-xs text-slate-500 capitalize">Advogado Sintético</div></div>
-                  </DropdownMenuItem>
-                </Link>
-                <Link href="/solutions/varejo">
-                  <DropdownMenuItem className="cursor-pointer hover:bg-slate-800 text-slate-300 focus:text-white px-3 py-3 rounded-md flex gap-3">
-                    <ShoppingCart className="w-5 h-5 text-amber-400" />
-                    <div><div className="font-bold">Varejo & E-commerce</div><div className="text-xs text-slate-500 capitalize">Recuperação de Carrinho</div></div>
-                  </DropdownMenuItem>
-                </Link>
-                <Link href="/solutions/infoprodutos">
-                  <DropdownMenuItem className="cursor-pointer hover:bg-slate-800 text-slate-300 focus:text-white px-3 py-3 rounded-md flex gap-3">
-                    <GraduationCap className="w-5 h-5 text-emerald-400" />
-                    <div><div className="font-bold">Educação / Infoproduto</div><div className="text-xs text-slate-500 capitalize">Close Rate de Mentoria</div></div>
-                  </DropdownMenuItem>
-                </Link>
-                <Link href="/solutions/mercado-imobiliario">
-                  <DropdownMenuItem className="cursor-pointer hover:bg-slate-800 text-slate-300 focus:text-white px-3 py-3 rounded-md flex gap-3">
-                    <Building2 className="w-5 h-5 text-cyan-400" />
-                    <div><div className="font-bold">Mercado Imobiliário</div><div className="text-xs text-slate-500 capitalize">Qualificação de Lead Frio</div></div>
-                  </DropdownMenuItem>
-                </Link>
+                {getAllNiches().map((niche) => {
+                  const NicheIcon = niche.icon
+                  return (
+                    <Link key={niche.slug} href={`/solutions/${niche.slug}`}>
+                      <DropdownMenuItem className="cursor-pointer hover:bg-slate-800 text-slate-300 focus:text-white px-3 py-3 rounded-md flex gap-3 group">
+                        <NicheIcon className="w-5 h-5 text-emerald-400 group-hover:scale-110 transition-transform" />
+                        <div>
+                          <div className="font-bold">{niche.shortTitle}</div>
+                          <div className="text-[10px] text-slate-500 lowercase truncate max-w-[180px]">{niche.subtitle}</div>
+                        </div>
+                      </DropdownMenuItem>
+                    </Link>
+                  )
+                })}
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -196,8 +181,20 @@ export function Header() {
           <nav className="flex flex-col p-4 space-y-4">
             <Link onClick={() => setMobileMenuOpen(false)} href="/" className="text-slate-300 hover:text-white font-bold p-2">A Visão B2B</Link>
             <div className="text-slate-500 font-bold uppercase text-xs p-2 tracking-widest mt-4 border-t border-white/5 pt-4">Nossas Soluções</div>
-            <Link onClick={() => setMobileMenuOpen(false)} href="/solutions/saude-clinicas" className="text-slate-300 pl-4 py-2 flex items-center gap-2"><Stethoscope className="w-4 h-4 text-emerald-500"/> Clínicas de Saúde</Link>
-            <Link onClick={() => setMobileMenuOpen(false)} href="/solutions/servicos-juridicos" className="text-slate-300 pl-4 py-2 flex items-center gap-2"><Scale className="w-4 h-4 text-emerald-500"/> Escritórios Jurídicos</Link>
+            {getAllNiches().map((niche) => {
+              const NicheIcon = niche.icon
+              return (
+                <Link 
+                  key={niche.slug}
+                  onClick={() => setMobileMenuOpen(false)} 
+                  href={`/solutions/${niche.slug}`} 
+                  className="text-slate-300 pl-4 py-2 flex items-center gap-2"
+                >
+                  <NicheIcon className="w-4 h-4 text-emerald-500"/> 
+                  {niche.shortTitle}
+                </Link>
+              )
+            })}
             <Link onClick={() => setMobileMenuOpen(false)} href="/partners" className="text-slate-300 font-bold p-2 mt-4 border-t border-white/5 pt-4">Programa Parceiros Tech</Link>
             
             <div className="pt-6 mt-6 border-t border-white/10 flex flex-col gap-3">

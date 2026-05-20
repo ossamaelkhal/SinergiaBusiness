@@ -9,9 +9,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Domínio é obrigatório' }, { status: 400 });
     }
 
-    // AQUI VOCÊ CONECTA AO SEU MOTOR COGNITIVO (n8n / Clay / Perplexity)
+    // AQUI VOCÊ CONNETA AO SEU MOTOR COGNITIVO (n8n / Clay / Perplexity)
     // O webhook real fica escondido no back-end (segurança)
-    const N8N_AUDIT_WEBHOOK = process.env.N8N_AUDIT_WEBHOOK_URL;
+    const N8N_AUDIT_WEBHOOK = process.env.NEXT_PUBLIC_AUDIT_WEBHOOK_URL || process.env.N8N_AUDIT_WEBHOOK_URL;
 
     if (N8N_AUDIT_WEBHOOK) {
       // Disparo assíncrono para o orquestrador

@@ -113,3 +113,40 @@ export const getCompaniesStream = (userId: string, callback: (companies: Company
   });
   return unsubscribe;
 };
+
+// Applications Funnel
+export interface Application {
+  id?: string;
+  name: string;
+  email: string;
+  phone: string;
+  revenue: string;
+  teamSize: string;
+  bottleneck: string;
+  status: string;
+  createdAt?: Timestamp;
+}
+
+export const getApplicationsStream = (callback: (apps: Application[]) => void) => {
+  const q = query(
+    collection(db, 'applications'),
+    orderBy("createdAt", "desc")
+  );
+
+  const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    const apps = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Application[];
+    callback(apps);
+  }, (err) => {
+    console.error("Erro no stream de aplicações:", err);
+  });
+
+  return unsubscribe;
+};
+
+export const updateApplicationStatus = async (appId: string, status: string) => {
+  const docRef = doc(db, 'applications', appId);
+  await updateDoc(docRef, { status });
+};

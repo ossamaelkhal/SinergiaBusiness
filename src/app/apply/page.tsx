@@ -176,15 +176,33 @@ export default function ApplyPage() {
                   <div className="space-y-5">
                      <div>
                         <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Nome do C-Level / Responsável</label>
-                        <input type="text" required className="w-full px-5 py-4 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-emerald-500/50 transition-colors" />
+                        <input 
+                           type="text" 
+                           required 
+                           value={formData.name}
+                           onChange={(e) => setFormData({...formData, name: e.target.value})}
+                           className="w-full px-5 py-4 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-emerald-500/50 transition-colors" 
+                        />
                      </div>
                      <div>
                         <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">E-mail Corporativo</label>
-                        <input type="email" required className="w-full px-5 py-4 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-emerald-500/50 transition-colors" />
+                        <input 
+                           type="email" 
+                           required 
+                           value={formData.email}
+                           onChange={(e) => setFormData({...formData, email: e.target.value})}
+                           className="w-full px-5 py-4 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-emerald-500/50 transition-colors" 
+                        />
                      </div>
                      <div>
                         <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">WhatsApp (Com DDD)</label>
-                        <input type="tel" required className="w-full px-5 py-4 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-emerald-500/50 transition-colors" />
+                        <input 
+                           type="tel" 
+                           required 
+                           value={formData.phone}
+                           onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                           className="w-full px-5 py-4 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-emerald-500/50 transition-colors" 
+                        />
                      </div>
                   </div>
 
