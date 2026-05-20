@@ -17,7 +17,7 @@ export default function FloatingJetski() {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end animate-in slide-in-from-bottom-8 duration-700">
+    <div className="fixed bottom-6 left-6 z-[99] flex flex-col items-start animate-in slide-in-from-bottom-8 duration-700">
       
       {/* O Bote (Expanded Card) */}
       {isExpanded && (
