@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { Eye, EyeOff, Mail, Lock, User as UserIcon } from 'lucide-react'
 import { useAuth } from '@/providers/AuthProvider'
 import { Button } from '@/components/ui/button'
@@ -29,10 +30,12 @@ export function SignUpForm() {
     const [showPassword, setShowPassword] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const { signUp } = useAuth() 
+    const searchParams = useSearchParams()
 
     const {
         register,
         handleSubmit,
+        setValue,
         formState: { errors },
     } = useForm<SignUpFormData>({
         resolver: zodResolver(signUpSchema),
@@ -40,6 +43,13 @@ export function SignUpForm() {
             role: 'prospect'
         }
     })
+
+    useEffect(() => {
+        const roleParam = searchParams.get('role')
+        if (roleParam === 'ambassador' || roleParam === 'agency' || roleParam === 'prospect') {
+            setValue('role', roleParam)
+        }
+    }, [searchParams, setValue])
 
     const onSubmit = async (data: SignUpFormData) => {
         try {

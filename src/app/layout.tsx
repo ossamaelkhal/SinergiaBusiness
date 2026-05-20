@@ -7,7 +7,7 @@ import { Toaster } from "@/components/ui/sonner"
 import SinergiaBot from "@/components/features/bot/SinergiaBot"
 import { Analytics } from "@/components/Analytics"
 import { AffiliateTracker } from "@/components/AffiliateTracker"
-import { Header } from "@/components/Header"
+import { AppLayoutWrapper } from "@/components/navigation/AppLayoutWrapper"
 import { DevOmniSwitch } from "@/components/dev/DevOmniSwitch"
 import FloatingJetski from "@/components/FloatingJetski"
 
@@ -54,11 +54,9 @@ export default function RootLayout({
               <AffiliateTracker />
             </Suspense>
             
-            <Header />
-            
-            <div className="pt-20">
+            <AppLayoutWrapper>
               {children}
-            </div>
+            </AppLayoutWrapper>
 
             <Toaster />
             <SinergiaBot />

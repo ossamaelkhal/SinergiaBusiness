@@ -1,5 +1,6 @@
 import { SignUpForm } from "@/components/auth/SignUpForm";
 import { Metadata } from "next";
+import { Suspense } from "react";
 
 export const dynamic = 'force-dynamic';
 
@@ -24,7 +25,9 @@ export default function SignUpPage() {
                     </p>
                 </div>
 
-                <SignUpForm />
+                <Suspense fallback={<div className="text-slate-500 text-center py-4">Carregando formulário...</div>}>
+                    <SignUpForm />
+                </Suspense>
             </div>
         </div>
     );
