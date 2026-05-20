@@ -1,22 +1,63 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { 
   CheckCircle2, TrendingUp, Users, Code2, ArrowRight, 
-  ShieldAlert, Sparkles, Scale, BookOpen, UserCheck, Landmark 
+  ShieldAlert, Sparkles, Scale, BookOpen, UserCheck, Landmark,
+  DollarSign, Calculator, HelpCircle, AlertCircle, ShieldCheck, Shield
 } from 'lucide-react'
 
 export default function PartnersPage() {
+  // Calculator States
+  const [squadsCount, setSquadsCount] = useState(3)
+  const [averageSquadTicket, setAverageSquadTicket] = useState(10000) // MRR of the client
+  const [monthlyPocs, setMonthlyPocs] = useState(2) // PoC setup sells per month
+
+  // Commission Calculations based on Active Squads (Tiers)
+  const calculationResult = useMemo(() => {
+    // Determine Commission Tier based on active squads
+    let commissionPercentage = 20
+    let tierName = 'Homologado'
+    let setupRebate = 50 // % of PoC Setup Fee (R$ 997) returned to partner
+
+    if (squadsCount >= 10) {
+      commissionPercentage = 30
+      tierName = 'Black / Enterprise'
+      setupRebate = 100
+    } else if (squadsCount >= 5) {
+      commissionPercentage = 25
+      tierName = 'Growth Partner'
+      setupRebate = 70
+    }
+
+    // Calculations
+    const pocSetupPrice = 997
+    const monthlyPocCommission = monthlyPocs * pocSetupPrice * (setupRebate / 100)
+    const monthlyActiveMRR = squadsCount * averageSquadTicket
+    const monthlyRecurringCommission = monthlyActiveMRR * (commissionPercentage / 100)
+    const totalMonthlyRevenue = monthlyPocCommission + monthlyRecurringCommission
+
+    return {
+      tierName,
+      commissionPercentage,
+      setupRebate,
+      monthlyPocCommission,
+      monthlyRecurringCommission,
+      totalMonthlyRevenue,
+      monthlyActiveMRR
+    }
+  }, [squadsCount, averageSquadTicket, monthlyPocs])
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-300 font-sans selection:bg-emerald-500/30 selection:text-emerald-200">
       
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-slate-950 pt-28 pb-20 md:pt-40 md:pb-28">
         {/* Background glow animations */}
-        <div className="absolute top-0 right-0 -translate-y-12 translate-x-1/3 w-[800px] h-[800px] bg-indigo-600/10 rounded-full blur-[140px] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 translate-y-1/3 -translate-x-1/3 w-[600px] h-[600px] bg-emerald-600/5 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute top-0 right-0 -translate-y-12 translate-x-1/3 w-[800px] h-[800px] bg-emerald-600/10 rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 translate-y-1/3 -translate-x-1/3 w-[600px] h-[600px] bg-indigo-600/5 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] opacity-30 pointer-events-none" />
         
         <div className="container relative z-10 mx-auto px-4 md:px-6">
@@ -27,12 +68,12 @@ export default function PartnersPage() {
             </div>
             
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-white leading-tight">
-              Amplie sua Operação B2B<br className="hidden md:block"/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-indigo-400 to-teal-300">Com Automação Cognitiva</span>
+              A Escala do B2B com<br className="hidden md:block"/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-indigo-400 to-teal-300">Responsabilidade e SLA</span>
             </h1>
             
             <p className="text-lg md:text-xl text-slate-400 max-w-3xl font-light leading-relaxed">
-              Leve a infraestrutura de agentes inteligentes da SinergIA para seus clientes. Aumente sua receita e retenção oferecendo soluções integradas de IA com segurança jurídica e SLA de nível empresarial.
+              Distribua a infraestrutura de agentes cognitivos SinergIA para a sua carteira B2B. Ganhe recorrência agressiva enquanto nós garantimos a estabilidade tecnológica, compliance e proteção jurídica de ponta.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto pt-6">
@@ -51,58 +92,59 @@ export default function PartnersPage() {
         </div>
       </section>
 
-      {/* Realist & Legal Framework Section (Blindagem de Responsabilidade) */}
+      {/* Strict Legal Framework (Blindagem de Responsabilidade Jurídica) */}
       <section className="py-20 bg-slate-900/40 border-y border-white/5 relative">
         <div className="container mx-auto px-4 md:px-6 max-w-6xl">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="text-xs font-black uppercase text-indigo-400 tracking-widest bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">
-              Compliance & Segurança Jurídica
+              Blindagem Jurídica e Regulatória
             </span>
             <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight mt-4">
-              Automação B2B Exige Responsabilidade
+              Por que somos o canal de parcerias mais seguro do país?
             </h2>
             <p className="text-slate-400 mt-3 font-light text-lg">
-              Substituir processos em faturamento hospitalar, contencioso jurídico e conciliação bancária envolve riscos regulatórios altos. Nós fornecemos a blindagem para a sua marca.
+              Substituir processos corporativos críticos exige muito mais do que templates no Make ou n8n. Oferecemos governança total para que seu negócio não corra riscos.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 items-stretch">
+          <div className="grid md:grid-cols-3 gap-8 items-stretch">
             
-            {/* O Perigo Jurídico de Soluções Genéricas */}
-            <div className="bg-slate-950/80 p-8 rounded-3xl border border-rose-500/20 relative flex flex-col justify-between">
-              <div className="space-y-6">
-                <div className="w-12 h-12 rounded-xl bg-rose-500/10 flex items-center justify-center border border-rose-500/20">
-                  <ShieldAlert className="w-6 h-6 text-rose-500" />
-                </div>
-                <h3 className="text-xl font-bold text-white">Por que o modelo tradicional White-Label faliu?</h3>
-                <p className="text-slate-400 text-sm leading-relaxed font-light">
-                  Muitas agências tentam vender ferramentas de chat como se fossem donas da tecnologia (White-Label puro). No entanto, quando um agente de IA alucina ou comete erros operacionais (como enviar guias médicas erradas ou protocolar prazos judiciais inválidos), **a agência é processada e arca com indenizações pesadas**.
-                </p>
-                <p className="text-slate-400 text-sm leading-relaxed font-light">
-                  Sem contratos de nível de serviço (SLA), auditorias constantes e infraestrutura de ponta a ponta em conformidade com a LGPD, revender IA por conta própria é uma bomba relógio jurídica.
-                </p>
-              </div>
-              <div className="mt-8 pt-4 border-t border-white/5 flex items-center gap-2 text-xs text-rose-400 font-bold">
-                ⚠️ Evite riscos de responsabilidade por mau funcionamento de terceiros.
-              </div>
-            </div>
-
-            {/* A Abordagem SinergIA OS */}
-            <div className="bg-slate-950/80 p-8 rounded-3xl border border-emerald-500/20 relative flex flex-col justify-between">
+            {/* Responsabilidade Tecnológica */}
+            <div className="bg-slate-950/80 p-8 rounded-3xl border border-white/5 relative flex flex-col justify-between hover:border-emerald-500/20 transition-all duration-300">
               <div className="space-y-6">
                 <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
                   <Scale className="w-6 h-6 text-emerald-400" />
                 </div>
-                <h3 className="text-xl font-bold text-white">A Blindagem Contratual SinergIA</h3>
+                <h3 className="text-xl font-bold text-white tracking-tight">SLA e Garantia Direta</h3>
                 <p className="text-slate-400 text-sm leading-relaxed font-light">
-                  Nós assumimos a **garantia tecnológica**. O contrato final de licenciamento do software é feito diretamente entre a SinergIA e o cliente indicado. Isso transfere a responsabilidade de funcionamento, segurança de dados, uptime e conformidade legal da IA para a nossa holding.
-                </p>
-                <p className="text-slate-400 text-sm leading-relaxed font-light">
-                  Você atua na ponta como estrategista comercial, modelando os processos do cliente e cobrando serviços de consultoria técnica, mantendo-se juridicamente seguro de ponta a ponta.
+                  A SinergIA assume 100% da garantia e responsabilidade técnica de funcionamento do software. O contrato de licenciamento final é assinado diretamente entre a SinergIA e o cliente final, blindando o parceiro de qualquer passivo civil ou processual decorrente de mau funcionamento de fluxos de IA.
                 </p>
               </div>
-              <div className="mt-8 pt-4 border-t border-white/5 flex items-center gap-2 text-xs text-emerald-400 font-bold">
-                ✅ Você lucra com consultoria e recorrência; nós assumimos o SLA.
+            </div>
+
+            {/* Faturamento Transparente */}
+            <div className="bg-slate-950/80 p-8 rounded-3xl border border-white/5 relative flex flex-col justify-between hover:border-indigo-500/20 transition-all duration-300">
+              <div className="space-y-6">
+                <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+                  <ShieldCheck className="w-6 h-6 text-indigo-400" />
+                </div>
+                <h3 className="text-xl font-bold text-white tracking-tight">Consumo Direto de APIs</h3>
+                <p className="text-slate-400 text-sm leading-relaxed font-light">
+                  Sem taxas ocultas ou surpresas nas faturas. Todos os custos de consumo direto de APIs (como OpenAI, Anthropic, Twilio, WhatsApp Cloud API) são faturados diretamente no cartão de crédito corporativo do cliente. Isso evita despesas tributárias adicionais sobre repasses fiscais e protege a margem líquida da parceria.
+                </p>
+              </div>
+            </div>
+
+            {/* Código de Conduta */}
+            <div className="bg-slate-950/80 p-8 rounded-3xl border border-white/5 relative flex flex-col justify-between hover:border-rose-500/20 transition-all duration-300">
+              <div className="space-y-6">
+                <div className="w-12 h-12 rounded-xl bg-rose-500/10 flex items-center justify-center border border-rose-500/20">
+                  <ShieldAlert className="w-6 h-6 text-rose-400" />
+                </div>
+                <h3 className="text-xl font-bold text-white tracking-tight">Human-in-the-Loop</h3>
+                <p className="text-slate-400 text-sm leading-relaxed font-light">
+                  Nossos termos de conduta exigem que todas as integrações críticas que lidam com dados sensíveis (saúde, financeiro e jurídico) possuam um supervisor humano no fluxo operacional (human-in-the-loop). Proibimos promessas de autonomia 100% não-supervisionada para garantir a conformidade legal com a LGPD e o Banco Central.
+                </p>
               </div>
             </div>
 
@@ -110,18 +152,153 @@ export default function PartnersPage() {
         </div>
       </section>
 
+      {/* Interactive Commissions Simulation Tool */}
+      <section className="py-24 bg-slate-950 relative">
+        <div className="container mx-auto px-4 md:px-6 max-w-5xl relative z-10">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <span className="text-emerald-400 font-bold uppercase tracking-wider text-xs bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+              Simulador Realista e Transparente
+            </span>
+            <h2 className="text-3xl md:text-5xl font-black text-white mt-4 tracking-tight">
+              Calcule Seus Ganhos de Parceria
+            </h2>
+            <p className="text-slate-400 mt-4 leading-relaxed font-light text-base">
+              Ajuste as métricas de indicações e fechamentos de projetos para visualizar em tempo real a comissão vitalícia e o bônus de setup imediato que você receberá.
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-12 gap-8 bg-slate-900/40 p-8 md:p-12 rounded-[2.5rem] border border-white/10 backdrop-blur-md">
+            
+            {/* Left Col: Sliders */}
+            <div className="lg:col-span-7 space-y-8">
+              
+              {/* Squads Slider */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="font-bold text-white uppercase tracking-wider text-xs">Clientes Ativos com Esquadrão de IA:</span>
+                  <span className="text-emerald-400 font-mono font-bold text-lg">{squadsCount} {squadsCount === 1 ? 'cliente' : 'clientes'}</span>
+                </div>
+                <input 
+                  type="range" 
+                  min="0" 
+                  max="25" 
+                  step="1"
+                  value={squadsCount}
+                  onChange={(e) => setSquadsCount(Number(e.target.value))}
+                  className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-400"
+                />
+                <div className="flex justify-between text-[10px] text-slate-500 font-bold uppercase">
+                  <span>0 (Sem Recorrência)</span>
+                  <span>5 (Growth: 25%)</span>
+                  <span>10+ (Black: 30% LTV)</span>
+                </div>
+              </div>
+
+              {/* Average Ticket Selector */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="font-bold text-white uppercase tracking-wider text-xs">Ticket Médio Mensal do Cliente (MRR):</span>
+                  <span className="text-indigo-400 font-mono font-bold text-lg">R$ {averageSquadTicket.toLocaleString('pt-BR')}</span>
+                </div>
+                <input 
+                  type="range" 
+                  min="5000" 
+                  max="20000" 
+                  step="2500"
+                  value={averageSquadTicket}
+                  onChange={(e) => setAverageSquadTicket(Number(e.target.value))}
+                  className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-400"
+                />
+                <div className="flex justify-between text-[10px] text-slate-500 font-bold uppercase">
+                  <span>R$ 5k (PoC Expandido)</span>
+                  <span>R$ 10k (Squad Médio)</span>
+                  <span>R$ 20k (Enterprise Máximo)</span>
+                </div>
+              </div>
+
+              {/* Monthly PoC Sells */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="font-bold text-white uppercase tracking-wider text-xs">Novos Pilotos (PoC) Fechados no Mês:</span>
+                  <span className="text-cyan-400 font-mono font-bold text-lg">{monthlyPocs} {monthlyPocs === 1 ? 'setup' : 'setups'} / mês</span>
+                </div>
+                <input 
+                  type="range" 
+                  min="0" 
+                  max="10" 
+                  step="1"
+                  value={monthlyPocs}
+                  onChange={(e) => setMonthlyPocs(Number(e.target.value))}
+                  className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                />
+                <div className="flex justify-between text-[10px] text-slate-500 font-bold uppercase">
+                  <span>0 setups</span>
+                  <span>5 setups</span>
+                  <span>10 setups</span>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Right Col: Simulation Output Card */}
+            <div className="lg:col-span-5 bg-slate-950 p-6 md:p-8 rounded-3xl border border-white/5 flex flex-col justify-between relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+              
+              <div className="space-y-6">
+                <div>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Nível de Parceria Simulado</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl font-extrabold text-white">{calculationResult.tierName}</span>
+                    <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                      {calculationResult.commissionPercentage}% LTV
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-3 border-y border-white/5 py-4">
+                  <div className="flex justify-between items-center text-sm text-slate-400">
+                    <span>Retorno Setup (PoC):</span>
+                    <span className="font-mono text-white">R$ {calculationResult.monthlyPocCommission.toLocaleString('pt-BR')} ({calculationResult.setupRebate}%)</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm text-slate-400">
+                    <span>Recorrência Mensal (MRR):</span>
+                    <span className="font-mono text-white">R$ {calculationResult.monthlyRecurringCommission.toLocaleString('pt-BR')}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs text-slate-500 uppercase tracking-wider">
+                    <span>Volume sob custódia:</span>
+                    <span className="font-mono">R$ {calculationResult.monthlyActiveMRR.toLocaleString('pt-BR')}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-6">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Sua Estimativa de Ganhos / Mês</span>
+                <div className="text-4xl md:text-5xl font-black text-emerald-400 tracking-tighter">
+                  R$ {calculationResult.totalMonthlyRevenue.toLocaleString('pt-BR')}
+                </div>
+                <p className="text-[10px] text-slate-500 mt-2 leading-relaxed">
+                  *Valores projetados baseados em comissões nominais. Impostos incidentes aplicados em nota fiscal de serviços.
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </section>
+
       {/* 2 Modelos de Negócio Reais */}
-      <section className="py-24 bg-slate-950">
+      <section className="py-24 bg-slate-900/20 border-t border-white/5">
         <div className="container mx-auto px-4 md:px-6 max-w-6xl">
           <div className="text-center max-w-2xl mx-auto mb-20">
             <span className="text-emerald-400 font-bold uppercase tracking-wider text-xs bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-              Escolha seu Modelo de Atuação
+              Modelos Operacionais
             </span>
             <h2 className="text-3xl md:text-5xl font-black text-white mt-4 tracking-tight">
-              Duas Formas Reais de Lucrar
+              Como você deseja atuar?
             </h2>
             <p className="text-slate-400 mt-4 leading-relaxed font-light text-lg">
-              Seja você um consultor focado em vendas ou um integrador focado em código, temos um caminho homologado para a sua equipe.
+              Temos caminhos claros para quem foca exclusivamente na prospecção comercial e para quem entrega a customização técnica.
             </p>
           </div>
 
@@ -134,26 +311,26 @@ export default function PartnersPage() {
                 <div className="w-14 h-14 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-400 border border-indigo-500/20">
                   <Users className="w-7 h-7" />
                 </div>
-                <h3 className="text-2xl font-bold text-white tracking-tight">1. Indicação Estratégica (Co-Sell)</h3>
+                <h3 className="text-2xl font-bold text-white tracking-tight">1. Indicações Estratégicas (Co-Sell)</h3>
                 <p className="text-slate-400 text-sm leading-relaxed font-light">
-                  Modelo ideal para agências de marketing, assessores financeiros e consultores de negócios que possuem rede de relacionamento ativa mas não possuem equipe técnica.
+                  Desenvolvido para assessores financeiros, contadores consultivos, agências de marketing de performance ou consultores corporativos que possuem livre trânsito na mesa dos decisores de MPEs e grandes corporações.
                 </p>
                 <ul className="space-y-3 pt-2 text-sm text-slate-300">
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>De **20% a 30%** de comissão recorrente (LTV)</span>
+                    <span>Até **30% de comissão recorrente vitalícia** (LTV)</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Apresentação técnica feita em conjunto com a SinergIA</span>
+                    <span>Apresentação e proposta feitas em conjunto com nosso time técnico</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Nós cuidamos do onboarding, integrações e suporte 24h</span>
+                    <span>Nós cuidamos do onboarding, integrações, servidores e suporte</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Dashboard de indicações e cliques no link exclusivo</span>
+                    <span>Painel exclusivo de telemetria para ver o progresso dos leads</span>
                   </li>
                 </ul>
               </div>
@@ -175,24 +352,24 @@ export default function PartnersPage() {
                 </div>
                 <h3 className="text-2xl font-bold text-white tracking-tight">2. Integrador / Tech Partner</h3>
                 <p className="text-slate-400 text-sm leading-relaxed font-light">
-                  Para desenvolvedores, especialistas n8n e agências de software que desejam customizar fluxos, configurar APIs nos CRMs dos clientes e oferecer suporte dedicado.
+                  Voltado para desenvolvedores, arquitetos de n8n/make, integradores de sistemas corporativos e software houses. Você atua na modelagem técnica dos processos e na sustentação de primeiro nível dos fluxos operacionais.
                 </p>
                 <ul className="space-y-3 pt-2 text-sm text-slate-300">
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Retenha **100% do Setup Fee** de implantação</span>
+                    <span>Retenha até **100% da Taxa de Setup (PoC)** do cliente</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Comissão fixa de licença de **20%** recorrente</span>
+                    <span>**20% recorrente fixo** sobre as licenças mensais da SinergIA</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Acesso ao repositório de Playbooks de Automação n8n</span>
+                    <span>Acesso ao repositório fechado de playbooks e blueprints n8n</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Capacitação técnica no ecossistema e fórum exclusivo</span>
+                    <span>Certificação homologada e encaminhamento de demandas da holding</span>
                   </li>
                 </ul>
               </div>
@@ -209,66 +386,128 @@ export default function PartnersPage() {
         </div>
       </section>
 
-      {/* A Conexão Holística do Fluxo de Leads */}
-      <section className="py-20 bg-slate-900/20 border-t border-white/5 relative">
+      {/* Holistic Integration & Lead Telemetry */}
+      <section className="py-20 bg-slate-950 border-t border-white/5 relative">
         <div className="container mx-auto px-4 md:px-6 max-w-6xl">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
               Como Funciona a Telemetria de Indicações
             </h2>
             <p className="text-slate-400 mt-3 font-light text-lg">
-              Sem planilhas ou adivinhações. Nossa plataforma rastreia centavo por centavo em tempo real.
+              Sem planilhas manuais ou adivinhações. Nosso ecossistema rastreia a jornada em tempo real com segurança total.
             </p>
           </div>
 
           <div className="grid md:grid-cols-4 gap-8">
             
             {/* Passo 1 */}
-            <div className="bg-slate-950/60 p-6 rounded-2xl border border-white/5 relative flex flex-col space-y-4">
+            <div className="bg-slate-900/40 p-6 rounded-2xl border border-white/5 relative flex flex-col space-y-4">
               <div className="text-3xl font-black text-indigo-500/50">01</div>
-              <h4 className="font-bold text-white">Criar Conta</h4>
+              <h4 className="font-bold text-white">Cadastro & Papel</h4>
               <p className="text-xs text-slate-400 leading-relaxed font-light">
-                Crie sua conta selecionando o seu papel operacional (Parceiro de Vendas ou Tech Partner) na página de cadastro.
+                Crie sua credencial selecionando seu papel de atuação (Vendas ou Integração) na página `/signup` do ecossistema.
               </p>
               <div className="text-xs font-bold text-indigo-400 flex items-center gap-1 pt-2">
-                <UserCheck className="w-4 h-4"/> Acesso imediato
+                <UserCheck className="w-4 h-4"/> Homologação rápida
               </div>
             </div>
 
             {/* Passo 2 */}
-            <div className="bg-slate-950/60 p-6 rounded-2xl border border-white/5 relative flex flex-col space-y-4">
+            <div className="bg-slate-900/40 p-6 rounded-2xl border border-white/5 relative flex flex-col space-y-4">
               <div className="text-3xl font-black text-indigo-500/50">02</div>
-              <h4 className="font-bold text-white">Pegar Link de Rastreio</h4>
+              <h4 className="font-bold text-white">Link de Rastreio</h4>
               <p className="text-xs text-slate-400 leading-relaxed font-light">
-                Acesse o painel do parceiro em `/hub/ambassador` e obtenha seu link criptografado exclusivo com a flag de parceiro.
+                No seu painel do parceiro, copie seu link com o parâmetro de cookies exclusivo `?ref=id` estruturado e verificado.
               </p>
               <div className="text-xs font-bold text-indigo-400 flex items-center gap-1 pt-2">
-                <BookOpen className="w-4 h-4"/> Rastreamento por cookies
+                <BookOpen className="w-4 h-4"/> Cookie de 60 dias
               </div>
             </div>
 
             {/* Passo 3 */}
-            <div className="bg-slate-950/60 p-6 rounded-2xl border border-white/5 relative flex flex-col space-y-4">
+            <div className="bg-slate-900/40 p-6 rounded-2xl border border-white/5 relative flex flex-col space-y-4">
               <div className="text-3xl font-black text-indigo-500/50">03</div>
-              <h4 className="font-bold text-white">Indicação ou Co-sell</h4>
+              <h4 className="font-bold text-white">Fluxo `/apply` Seguro</h4>
               <p className="text-xs text-slate-400 leading-relaxed font-light">
-                Seu cliente entra no site, preenche o formulário `/apply` ou finaliza a compra de setups e playbooks em `/checkout`.
+                Quando o lead clica na sua indicação, preenche a análise de gargalo em `/apply` ou finaliza a compra em `/checkout`.
               </p>
               <div className="text-xs font-bold text-indigo-400 flex items-center gap-1 pt-2">
-                <Landmark className="w-4 h-4"/> Captura automatizada
+                <Landmark className="w-4 h-4"/> Atribuição por cookie/local
               </div>
             </div>
 
             {/* Passo 4 */}
-            <div className="bg-slate-950/60 p-6 rounded-2xl border border-white/5 relative flex flex-col space-y-4">
+            <div className="bg-slate-900/40 p-6 rounded-2xl border border-white/5 relative flex flex-col space-y-4">
               <div className="text-3xl font-black text-indigo-500/50">04</div>
-              <h4 className="font-bold text-white">Comissão Creditada</h4>
+              <h4 className="font-bold text-white">Atribuição por Webhook</h4>
               <p className="text-xs text-slate-400 leading-relaxed font-light">
-                A telemetria do webhook processa e atribui o lead ao seu ID de parceiro. A recorrência é auditada diretamente no seu portal.
+                Nosso endpoint `/api/apply` detecta a referência criptografada, adiciona ao Firestore e dispara o webhook para o n8n creditando o LTV.
               </p>
               <div className="text-xs font-bold text-indigo-400 flex items-center gap-1 pt-2">
-                <TrendingUp className="w-4 h-4"/> Visualização em tempo real
+                <TrendingUp className="w-4 h-4"/> Payout via dashboard
               </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* Complete Legal & Commercial FAQ Section */}
+      <section className="py-20 bg-slate-900/40 border-y border-white/5">
+        <div className="container mx-auto px-4 md:px-6 max-w-4xl">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <span className="text-xs font-black uppercase text-indigo-400 tracking-widest bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">
+              Perguntas Frequentes
+            </span>
+            <h2 className="text-3xl font-extrabold text-white tracking-tight mt-4">
+              Esclarecimentos Jurídicos e de Repasses
+            </h2>
+          </div>
+
+          <div className="space-y-6">
+            
+            {/* FAQ 1 */}
+            <div className="bg-slate-950 p-6 rounded-2xl border border-white/5">
+              <h4 className="text-base font-bold text-white flex items-center gap-2">
+                <HelpCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                Como é assinado o contrato de repasse? Existe vínculo empregatício?
+              </h4>
+              <p className="text-slate-400 text-sm mt-3 font-light leading-relaxed">
+                Não. A relação de parceria é regida por um Termo de Homologação de Indicações (MOU) de caráter estritamente mercantil. O parceiro emite Nota Fiscal (NFSe) correspondente às comissões auditadas no dashboard no fechamento de cada mês, sem qualquer subordinação ou exclusividade laboral.
+              </p>
+            </div>
+
+            {/* FAQ 2 */}
+            <div className="bg-slate-950 p-6 rounded-2xl border border-white/5">
+              <h4 className="text-base font-bold text-white flex items-center gap-2">
+                <HelpCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                Quem arca com custos de infraestrutura caso a IA pare de funcionar?
+              </h4>
+              <p className="text-slate-400 text-sm mt-3 font-light leading-relaxed">
+                A SinergIA assume integralmente o suporte operacional nível 2 e 3 e a responsabilidade de uptime dos servidores privados. Em caso de quedas de serviços de LLM externos (como interrupção nos datacenters da OpenAI ou Anthropic), o contrato de licença firmado diretamente com o cliente prevê cláusulas de força maior, isentando a agência integradora ou o parceiro comissionado de multas ou ônus judiciais.
+              </p>
+            </div>
+
+            {/* FAQ 3 */}
+            <div className="bg-slate-950 p-6 rounded-2xl border border-white/5">
+              <h4 className="text-base font-bold text-white flex items-center gap-2">
+                <HelpCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                Posso comercializar como White-Label (usando minha própria marca)?
+              </h4>
+              <p className="text-slate-400 text-sm mt-3 font-light leading-relaxed">
+                Autorizamos o modelo de **Co-branding**. Isso significa que você pode vender as automações com o selo &quot;Powered by SinergIA OS&quot;, permitindo que seu cliente saiba que a infraestrutura crítica é operada e assegurada por uma holding consolidada. Esse modelo protege sua marca de eventuais passivos regulatórios que um White-Label puro traria em caso de auditorias da LGPD.
+              </p>
+            </div>
+
+            {/* FAQ 4 */}
+            <div className="bg-slate-950 p-6 rounded-2xl border border-white/5">
+              <h4 className="text-base font-bold text-white flex items-center gap-2">
+                <HelpCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                Como funciona o repasse em caso de inadimplência do cliente?
+              </h4>
+              <p className="text-slate-400 text-sm mt-3 font-light leading-relaxed">
+                A comissão do parceiro é repassada mediante a confirmação da quitação de cada parcela da mensalidade paga pelo cliente final. Caso o cliente fique inadimplente, o repasse daquele respectivo faturamento é suspenso temporariamente e retomado de forma retroativa assim que a pendência for liquidada pela holding.
+              </p>
             </div>
 
           </div>
@@ -280,10 +519,10 @@ export default function PartnersPage() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[300px] bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none" />
         <div className="container relative z-10 mx-auto px-4 md:px-6 text-center max-w-3xl">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-6">
-            Lidere a Implementação de IA com Conformidade
+            Construa um Canal de Recorrência Seguro
           </h2>
           <p className="text-slate-300 font-light text-base md:text-lg mb-10">
-            A era das soluções fracas e amadoras acabou. Una-se à plataforma corporativa B2B que entrega estabilidade e segurança jurídica real.
+            Chega de soluções artesanais e instáveis. Ofereça infraestrutura robusta, conformidade de dados real e garanta sua margem livre de riscos.
           </p>
           <Link href="/signup?role=ambassador">
             <Button size="lg" className="h-14 px-10 text-base bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all">

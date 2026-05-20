@@ -1,5 +1,15 @@
 import { Stethoscope, ShoppingBag, Scale, Landmark, Factory, Briefcase, Activity } from 'lucide-react'
 
+export interface AutomaçãoHook {
+  title: string
+  description: string
+}
+
+export interface SubNicheGroup {
+  pequenosAlvos: string[]
+  grandesAlvos: string[]
+}
+
 export interface NicheSolution {
   slug: string
   title: string
@@ -14,12 +24,6 @@ export interface NicheSolution {
     description: string
     icon: any
   }[]
-  solutions: {
-    title: string
-    description: string
-    impact: string
-    features: string[]
-  }[]
   metrics: {
     value: string
     label: string
@@ -30,325 +34,363 @@ export interface NicheSolution {
     author: string
     role: string
   }[]
+  subNicheGroup: SubNicheGroup
+  hooks: {
+    pilotoAutomatico: AutomaçãoHook
+    resgateAtivo: AutomaçãoHook
+    backoffice: AutomaçãoHook
+  }
 }
 
 export const nichesData: Record<string, NicheSolution> = {
-  "faturamento-saude": {
-    slug: "faturamento-saude",
-    title: "SinergIA para Faturamento Médico",
-    shortTitle: "Faturamento Médico & Glosas",
-    subtitle: "Zere glosas de convênios, audite guias TISS/TUSS em tempo real e automatize recursos de negativas.",
-    description: "Clínicas e hospitais sofrem um sangramento financeiro silencioso devido às glosas dos planos de saúde. A SinergIA implementa agentes cognitivos no backoffice para auditar guias antes do envio e contestar negativas automaticamente.",
+  "faturamento-saude-bemestar": {
+    slug: "faturamento-saude-bemestar",
+    title: "SinergIA para Saúde, Estética e Bem-Estar",
+    shortTitle: "Saúde & Bem-Estar",
+    subtitle: "Elimine cadeiras vazias, reengaje pacientes inativos e automatize a validação de guias médicos.",
+    description: "Clínicas e profissionais de saúde sofrem um sangramento financeiro silencioso com agendas ociosas e pacientes antigos que não concluem tratamentos. A SinergIA cria um fluxo automático de atendimento e confirmação ultra-humanizada.",
     icon: Stethoscope,
     color: "emerald",
     painPoints: [
       {
-        title: "Glosas e Negativas Frustrantes",
-        description: "Planos de saúde recusam o pagamento de procedimentos por erro de digitação, falta de documentos ou códigos inválidos.",
+        title: "Cadeira Vazia e Ociosidade",
+        description: "Agendas com buracos e faltas de última hora que destroem o faturamento diário.",
         icon: Activity,
       },
       {
-        title: "Faturamento Manual Lento",
-        description: "Faturistas passam o dia revisando guias e recorrendo de negativas seguindo manuais de regras gigantescos que mudam constantemente.",
+        title: "Abandono de Tratamento",
+        description: "Pacientes iniciam um procedimento, mas não são acompanhados e acabam não retornando.",
         icon: Activity,
       },
       {
-        title: "Fluxo de Caixa Asfixiado",
-        description: "Dinheiro legítimo fica retido por meses nas operadoras de saúde devido à lentidão na conciliação física de guias de exames e consultas.",
+        title: "Glosas e Burocracia de Convênios",
+        description: "Erros de digitação e regras complexas de planos de saúde que retêm o caixa da clínica.",
         icon: Activity,
-      }
-    ],
-    solutions: [
-      {
-        title: "Auditor Automático de Guias",
-        description: "Agente cognitivo rodando no backoffice que cruza dados do prontuário com as regras específicas do convênio antes de enviar as guias.",
-        impact: "Redução de até 90% nas glosas de envio iniciais.",
-        features: ["Validação de Códigos TISS/TUSS", "Cruzamento com Prontuário Clínico", "Envio homologado automático"]
-      },
-      {
-        title: "Robô Contestador de Glosas",
-        description: "Motor inteligente que identifica a glosa devolvida pelo plano, redige e protocola a petição de recurso de forma 100% autônoma.",
-        impact: "Recuperação célere de valores retidos.",
-        features: ["Análise de justificativas de negativas", "Geração de minuta de recurso", "Protocolo automático em portais de convênios"]
-      },
-      {
-        title: "Conciliação de Repasses",
-        description: "Varredura automática para identificar se o valor pago bate exatamente com a tabela acordada, sinalizando desvios fiscais.",
-        impact: "Controle financeiro absoluto sobre as operadoras.",
-        features: ["Checagem de taxas administrativas", "Relatório de glosas em aberto", "Integração imediata com ERP médico"]
       }
     ],
     metrics: [
-      { value: "-85%", label: "Glosas Perdidas" },
-      { value: "Sub-10s", label: "Auditoria de Guia" },
-      { value: "+18%", label: "Aumento no Fluxo de Caixa" },
+      { value: "Sub-2%", label: "Faltas (No-Show)" },
+      { value: "+30%", label: "Retorno de Inativos" },
+      { value: "90%", label: "Redução de Glosas" },
     ],
-    demoType: "financial"
+    demoType: "scheduling",
+    subNicheGroup: {
+      pequenosAlvos: [
+        "Autônomos de Saúde (Nutricionistas, Psicólogos, Fisioterapeutas)",
+        "Clínicas de Estética e Clínicas Odontológicas de Bairro",
+        "Studios de Pilates, Ioga e Treinamento Funcional",
+        "Fonoaudiologia e Clínicas de Terapias Especializadas (TEA)"
+      ],
+      grandesAlvos: [
+        "Clínicas de Vacinação Humana",
+        "Hospitais e Redes de Franquias Médicas",
+        "Laboratórios de Análises Clínicas e Imagem"
+      ]
+    },
+    hooks: {
+      pilotoAutomatico: {
+        title: "O Guardião da Agenda",
+        description: "Inteligência de agendamento ativo fluido (conversacional, não numérico) que qualifica leads do Instagram/WhatsApp 24/7, gerencia as reposições e executa réguas de confirmação de consultas de forma natural e empática."
+      },
+      resgateAtivo: {
+        title: "O Reengajador de Pacientes",
+        description: "Agente autônomo que monitora o tempo médio de tratamento e reengaja pacientes sumidos antes que eles entrem em abandono, estimulando novas consultas e retornos programados."
+      },
+      backoffice: {
+        title: "O Auditor de Guias Médico",
+        description: "Auditoria médica digital de guias e prontuários para zerar glosas de convênios, validando códigos TISS/TUSS em tempo real antes do envio."
+      }
+    }
   },
 
-  "auditoria-marketplaces": {
-    slug: "auditoria-marketplaces",
-    title: "SinergIA para Auditoria de Marketplaces",
-    shortTitle: "E-commerce & Marketplaces",
-    subtitle: "Audite taxas de frete, tarifas variáveis e recupere até 5% do seu faturamento retido nas plataformas.",
-    description: "Lojistas que vendem no Mercado Livre, Shopee e Amazon enfrentam um pesadelo financeiro. Nossa IA monitora e audita taxas centavo por centavo, abrindo contestações automáticas contra taxas de frete abusivas e erros de repasse.",
+  "commerce-omnichannel-vendas": {
+    slug: "commerce-omnichannel-vendas",
+    title: "SinergIA para Comércio, Varejo & Marketplaces",
+    shortTitle: "Varejo & E-commerce",
+    subtitle: "Feche vendas no Direct em segundos, audite taxas de frete e automatize mesas de cotação de atacadistas.",
+    description: "Lojas físicas e e-commerces perdem vendas quando o cliente demora mais de 10 minutos para ser atendido. Nossa IA assume o balcão digital de ponta a ponta e audita todas as tarifas invisíveis do varejo moderno.",
     icon: ShoppingBag,
     color: "fuchsia",
     painPoints: [
       {
-        title: "Divergência Crônica de Taxas",
-        description: "Plataformas cobrando comissões e fretes em devoluções acima do contratado sem aviso prévio.",
-        icon: ShoppingBag,
+        title: "Fricção e Demora no Atendimento",
+        description: "Clientes desistem de comprar no Direct ou WhatsApp se a resposta sobre frete ou tamanho não for instantânea.",
+        icon: Activity,
       },
       {
-        title: "Conferência Manual Inviável",
-        description: "Equipes perdem centenas de horas cruzando planilhas financeiras gigantescas exportadas de múltiplos marketplaces.",
-        icon: ShoppingBag,
+        title: "Vazamento de Margem nos Marketplaces",
+        description: "Cobranças indevidas de frete em devoluções e discrepâncias de repasse que comem o lucro líquido.",
+        icon: Activity,
       },
       {
-        title: "Vazamento Silencioso de Lucro",
-        description: "Até 5% do faturamento líquido do lojista some em cobranças indevidas que passam despercebidas.",
-        icon: ShoppingBag,
-      }
-    ],
-    solutions: [
-      {
-        title: "Conciliador de Vendas API-First",
-        description: "Agente que roda em tempo real integrado às APIs das plataformas, comparando cada repasse com o ERP interno.",
-        impact: "Auditoria precisa de 100% dos pedidos faturados.",
-        features: ["Checagem de Taxa Fixa e Variável", "Análise de Frete de Devolução", "Sincronização imediata de ERP"]
-      },
-      {
-        title: "Contestador de Taxas Autônomo",
-        description: "Ao identificar uma discrepância de repasse ou cobrança indevida, a IA anexa as provas e abre o chamado de contestação.",
-        impact: "Recuperação de receita direto no caixa sem equipe dedicada.",
-        features: ["Abertura de chamados via API", "Anexação de relatórios XML", "Acompanhamento de status de disputa"]
-      },
-      {
-        title: "Monitoramento de Margem por SKU",
-        description: "Análise analítica de lucratividade real após taxas de marketplace e frete aplicadas a cada produto individual.",
-        impact: "Visualização clara do lucro real por mercadoria.",
-        features: ["Cálculo de custo de devolução", "Sugestão de reajuste de preço", "Alerta de SKU operando no vermelho"]
+        title: "Digitação Manual de Orçamentos",
+        description: "Vendedores de atacadistas perdendo horas digitando listas de compras rabiscadas no papel.",
+        icon: Activity,
       }
     ],
     metrics: [
-      { value: "2% a 5%", label: "Faturamento Recuperado" },
-      { value: "100%", label: "Repasses Auditados" },
-      { value: "Zero", label: "Esforço Manual de Auditoria" },
+      { value: "Sub-10s", label: "Tempo de Resposta" },
+      { value: "2% a 5%", label: "Margem Recuperada" },
+      { value: "1 min", label: "Cotação de Listas" },
     ],
-    demoType: "financial"
+    demoType: "sales",
+    subNicheGroup: {
+      pequenosAlvos: [
+        "Lojas de Roupas, Calçados e E-commerce locais (Instagram/Direct)",
+        "Ateliês de Costura, Sapatarias e Consertos",
+        "Distribuidoras e Atacadistas locais de alimentos e insumos"
+      ],
+      grandesAlvos: [
+        "Redes de Franquias (Moda, Beleza e Alimentação)",
+        "Lojistas Multi-Marketplace de Grande Escala (Mercado Livre, Shopee, Amazon)"
+      ]
+    },
+    hooks: {
+      pilotoAutomatico: {
+        title: "O Vendedor de Pista",
+        description: "Monitoramento contínuo de directs e comentários com fechamento automático de carrinho, cálculo de frete (CEP) integrado e emissão de Pix copia-e-cola de forma 100% autônoma."
+      },
+      resgateAtivo: {
+        title: "O Auditor Algorítmico",
+        description: "Conciliação centavo por centavo de taxas de marketplaces e auditoria cruzada de royalties ocultos para franqueadores (cruzando vendas fiscais NFC-e com compras de fornecedores homologados)."
+      },
+      backoffice: {
+        title: "A Mesa de Cotação Ativa",
+        description: "Processamento por visão computacional (OCR) de listas de compras enviadas por áudio, texto ou foto de papel por clientes de distribuidoras, gerando o carrinho no ERP em 1 minuto."
+      }
+    }
   },
 
-  "juridico-massa": {
-    slug: "juridico-massa",
-    title: "SinergIA para Advocacia de Massa",
-    shortTitle: "Jurídico de Massa & Contencioso",
-    subtitle: "Agentes cognitivos que leem Diários Oficiais, elaboram petições padrão e protocolam em segundos.",
-    description: "Escritórios de advocacia que lidam com contencioso perdem fortunas com advogados juniores redigindo e protocolando peças simples. A SinergIA automatiza a triagem processual e a redação de minutas com precisão técnica.",
-    icon: Scale,
-    color: "indigo",
-    painPoints: [
-      {
-        title: "Triagem Lenta de Intimações",
-        description: "Prazos em risco pela demora na leitura manual de milhares de Diários Oficiais e sistemas de tribunais.",
-        icon: Scale,
-      },
-      {
-        title: "Redação de Peças Repetitivas",
-        description: "Advogados qualificados gastando tempo produtivo copiando e colando petições padrão e contestações simples.",
-        icon: Scale,
-      },
-      {
-        title: "Jurisprudência Difusa",
-        description: "Dificuldade em mapear e cruzar decisões locais e decisões de juízes específicos para embasar defesas.",
-        icon: Scale,
-      }
-    ],
-    solutions: [
-      {
-        title: "Monitor de Diários Oficiais Inteligente",
-        description: "Varredura automática e classificação de termos e prazos em intimações, disparando tarefas diretamente no CRM jurídico.",
-        impact: "Redução a zero do risco de perda de prazos processuais.",
-        features: ["Extração automatizada de termos chave", "Atribuição imediata ao advogado responsável", "Alerta de prioridades de urgência"]
-      },
-      {
-        title: "Copiloto Redator de Petições",
-        description: "Agente cognitivo que elabora petições iniciais, recursos e defesas padrão de acordo com as diretrizes do escritório.",
-        impact: "Redação de peças em segundos e eliminação do trabalho braçal.",
-        features: ["Modelos baseados em IA generativa", "Integração com acervo histórico de peças", "Revisão e conformidade regulatória"]
-      },
-      {
-        title: "Análise Preditiva de Sucesso",
-        description: "Cruzamento e leitura de jurisprudência local para estimar a chance de êxito de acordo com o juiz da causa.",
-        impact: "Tomada de decisão estratégica sobre acordos comerciais.",
-        features: ["Mapeamento de perfil decisório de juízes", "Histórico de decisões de concorrentes", "Relatório estratégico instantâneo"]
-      }
-    ],
-    metrics: [
-      { value: "95%", label: "Processos Triados por IA" },
-      { value: "Sub-5s", label: "Redação de Petições" },
-      { value: "Zero", label: "Prazos Perdidos" },
-    ],
-    demoType: "support"
-  },
-
-  "bpo-financeiro-factoring": {
-    slug: "bpo-financeiro-factoring",
-    title: "SinergIA para BPO Financeiro & Factoring",
-    shortTitle: "BPO Financeiro & Crédito",
-    subtitle: "Zere fraudes de duplicatas frias, valide canhotos de entrega por OCR e automatize a conciliação de faturas.",
-    description: "FIDCs, Factorings e BPOs operam sob alto estresse de fraudes e verificação documental. A SinergIA implementa OCR avançado e validação automática na SEFAZ para acelerar aprovação de crédito e conciliação bancária.",
-    icon: Landmark,
-    color: "amber",
-    painPoints: [
-      {
-        title: "Risco de Duplicatas Frias",
-        description: "Perigo de antecipar notas fiscais que foram canceladas na SEFAZ ou que não possuem comprovação real de entrega.",
-        icon: Landmark,
-      },
-      {
-        title: "Conferência Manual de Canhotos",
-        description: "Processo lento de validar canhotos assinados, comprovantes de frete e recibos de logística por humanos.",
-        icon: Landmark,
-      },
-      {
-        title: "Conciliação Bancária Atrasada",
-        description: "Falta de braço para conciliar extratos e contas a pagar diariamente, gerando atrito no fechamento fiscal.",
-        icon: Landmark,
-      }
-    ],
-    solutions: [
-      {
-        title: "Validador de Notas & Canhotos (OCR)",
-        description: "Agente inteligente de visão computacional que analisa assinaturas, extrai dados de canhotos e valida a NF-e direto na SEFAZ.",
-        impact: "Aprovação de recebíveis com garantia física de entrega.",
-        features: ["Visão computacional para assinaturas", "Consulta direta de chaves na SEFAZ", "Detecção de notas canceladas"]
-      },
-      {
-        title: "Mesa de Crédito Autônoma",
-        description: "Análise automatizada de risco do sacado e do cedente em menos de 5 minutos, integrando dados de birôs externos.",
-        impact: "Liberação de capital em velocidade competitiva.",
-        features: ["Integração com Serasa/Boa Vista", "Análise de histórico de pontualidade", "Cálculo automático de taxa de deságio"]
-      },
-      {
-        title: "Conciliador de Contas Autônomo",
-        description: "Lê faturas e extratos, identifica pagamentos entrantes e faz a baixa automática no ERP financeiro da empresa.",
-        impact: "BPO financeiro rodando em tempo real com margem alta.",
-        features: ["Conciliação Pix e Boletos", "Classificação de plano de contas por IA", "Geração de DRE dinâmica"]
-      }
-    ],
-    metrics: [
-      { value: "Sub-5min", label: "Análise de Crédito" },
-      { value: "99.8%", label: "Precisão OCR Canhotos" },
-      { value: "Zero", label: "Notas Frias Antecipadas" },
-    ],
-    demoType: "financial"
-  },
-
-  "logistica-fretes-comex": {
-    slug: "logistica-fretes-comex",
-    title: "SinergIA para Logística & Comex",
-    shortTitle: "Logística & Comércio Exterior",
-    subtitle: "Otimize rotas, audite faturas de fretes e valide documentação aduaneira (BL, Invoice) sem esforço humano.",
-    description: "Erros em Commercial Invoices ou atrasos na liberação de mercadorias em portos custam milhares de dólares em multas (demurrage). A SinergIA assume a triagem de documentos de comércio exterior e a auditoria de faturas de fretes B2B.",
+  "operacoes-urgencia-logistica": {
+    slug: "operacoes-urgencia-logistica",
+    title: "SinergIA para Operações de Urgência, Logística & Infraestrutura",
+    shortTitle: "Logística & Urgência",
+    subtitle: "Despache pedidos em segundos, controle frotas e previna multas aduaneiras sem intervenção manual.",
+    description: "Em operações logísticas e de urgência, a velocidade de despacho decide quem fecha a venda. Nossa IA elimina o telefone e o papel, automatizando da roteirização de urgência até a validação aduaneira.",
     icon: Factory,
     color: "rose",
     painPoints: [
       {
-        title: "Burocracia Portuária e Demurrage",
-        description: "Atrasos em liberação aduaneira gerados por preenchimento incorreto de documentos como BL e Invoice.",
-        icon: Factory,
+        title: "Gargalo no Fechamento de Urgência",
+        description: "Negócios de entrega e disk-serviços perdem vendas por demora na triagem do endereço e do entregador.",
+        icon: Activity,
       },
       {
-        title: "Faturas de Frete sem Auditoria",
-        description: "Lojistas e indústrias pagam taxas extras abusivas de transportadoras por incapacidade operacional de auditar faturas.",
-        icon: Factory,
+        title: "Inatividade de Equipamentos e Frotas",
+        description: "Máquinas paradas sem aviso de revisão e devoluções em atraso causam ociosidade financeira.",
+        icon: Activity,
       },
       {
-        title: "Comunicação Caótica WhatsApp",
-        description: "Equipes de logística gastando o dia cobrando motoristas, transportadoras e repassando status aos clientes.",
-        icon: Factory,
-      }
-    ],
-    solutions: [
-      {
-        title: "Validador Documental Aduaneiro",
-        description: "Agente de processamento de documentos que extrai e valida 100% da papelada de importação e exportação.",
-        impact: "Carga liberada sem atrasos fiscais ou multas aduaneiras.",
-        features: ["OCR estruturado de Invoice & Packing List", "Classificação Fiscal Automática (NCM)", "Cruzamento com regras da Receita Federal"]
-      },
-      {
-        title: "Auditor de Fretes e Faturas",
-        description: "Compara faturas de frete emitidas com a tabela de preços negociada, apontando divergências fiscais.",
-        impact: "Bloqueio imediato de cobranças e taxas indevidas.",
-        features: ["Mecanismo Triple Match (Nota, Frete e Pedido)", "Relatório automático de divergência", "Sinalização de fretes com quebra de SLA"]
-      },
-      {
-        title: "Operador de Logística no WhatsApp",
-        description: "Agente que conversa com motoristas, atualiza status de rotas e responde clientes sobre rastreamento 24h.",
-        impact: "Fim das ligações intermináveis solicitando status de carga.",
-        features: ["Rastreamento por API de frotas", "Status via WhatsApp estruturado", "Abertura automática de ocorrências em trânsito"]
+        title: "Canal Vermelho Alfandegário",
+        description: "Atrasos caríssimos na liberação de importações por erros simples de Packing List e Invoices.",
+        icon: Activity,
       }
     ],
     metrics: [
-      { value: "Zero", label: "Multas Demurrage" },
-      { value: "-90%", label: "Tempo em Validação de Comex" },
-      { value: "100%", label: "Faturas de Frete Auditadas" },
+      { value: "Sub-30s", label: "Tempo de Despacho" },
+      { value: "Zero", label: "Ociosidade de Ativos" },
+      { value: "100%", label: "Documentos Auditados" },
     ],
-    demoType: "support"
+    demoType: "support",
+    subNicheGroup: {
+      pequenosAlvos: [
+        "Delivery e Gastronomia Local (WhatsApp Ordering)",
+        "Disk-Gás e Entrega de Água Mineral",
+        "Empresas de Mudanças, Fretes e Carretos locais",
+        "Locação de Caçambas Entulho e Andaimes"
+      ],
+      grandesAlvos: [
+        "Despacho Aduaneiro, Comex e Empresas de Trading",
+        "Locadoras de Frotas de Veículos e Equipamentos Industriais (Yellow Goods)"
+      ]
+    },
+    hooks: {
+      pilotoAutomatico: {
+        title: "O Despachante Expresso",
+        description: "Triagem e fechamento de pedidos de urgência sem menu numérico, integrando dados de endereço históricos do cliente para despachar entregadores em menos de 30 segundos."
+      },
+      resgateAtivo: {
+        title: "O Monitor Preditivo de Ativos",
+        description: "Gestão preditiva de prazos de locação de caçambas/maquinários e agendamento de manutenção de frotas por telemetria (IoT) antes que gerem inatividade financeira."
+      },
+      backoffice: {
+        title: "O Validador Documental Aduaneiro",
+        description: "OCR avançado de Commercial Invoices e Packing Lists cruzando com regras da Receita Federal para eliminar canais vermelhos alfandegários."
+      }
+    }
   },
 
-  "recuperacao-credito": {
-    slug: "recuperacao-credito",
-    title: "SinergIA para Recuperação de Crédito",
-    shortTitle: "Cobrança Ativa & Recuperação",
-    subtitle: "Substitua call centers caros por agentes autônomos de negociação que geram Pix e boletos no WhatsApp.",
-    description: "Empresas perdem milhões de faturamento com inadimplência e custos de assessorias de cobrança ineficientes. A SinergIA implementa agentes de negociação ativos focados em recuperação de crédito amigável e de alta conversão.",
+  "bpo-financeiro-credito-tem": {
+    slug: "bpo-financeiro-credito-tem",
+    title: "SinergIA para BPO Estratégico, Crédito & Finanças",
+    shortTitle: "BPO & Finanças",
+    subtitle: "Zere cobranças indevidas de contas de consumo, audite LMC diário e libere crédito em 5 minutos.",
+    description: "Setores financeiros tradicionais são lentos e propensos a fraudes. A SinergIA implementa agentes cognitivos no backoffice para auditar faturas corporativas de utilities e validar duplicatas na SEFAZ.",
+    icon: Landmark,
+    color: "amber",
+    painPoints: [
+      {
+        title: "Fraudes e Duplicatas Frias",
+        description: "Risco na antecipação de recebíveis sem garantia fiscal real de entrega física do produto.",
+        icon: Activity,
+      },
+      {
+        title: "Contas de Consumo Inchadas",
+        description: "Telecom, energia e água cobrando taxas de serviços não contratados sem auditoria corporativa.",
+        icon: Activity,
+      },
+      {
+        title: "Multas Fiscais de Postos",
+        description: "Preenchimento manual diário de Livros de Movimentação de Combustível (LMC) com erros de estoque.",
+        icon: Activity,
+      }
+    ],
+    metrics: [
+      { value: "Sub-5min", label: "Aprovação de Crédito" },
+      { value: "-15% a -30%", label: "Economia de Utilities" },
+      { value: "Zero", label: "Multas ANP (LMC)" },
+    ],
+    demoType: "financial",
+    subNicheGroup: {
+      pequenosAlvos: [
+        "Oficinas Mecânicas e Centros Automotivos de Bairro",
+        "Contabilidade de Postos de Combustíveis (LMC Diário)"
+      ],
+      grandesAlvos: [
+        "Empresas de Factoring / FIDCs (Antecipação de Recebíveis)",
+        "Médias Empresas com alta conta de Consumo (TEM - Telecom/Energia/Água)"
+      ]
+    },
+    hooks: {
+      pilotoAutomatico: {
+        title: "O Auditor de Utilities",
+        description: "Leitura em lote de faturas complexas de telecomunicações, energia e água, abrindo contestações automáticas nos portais das operadoras ao detectar tarifas indevidas."
+      },
+      resgateAtivo: {
+        title: "O Conciliador de Pista",
+        description: "Conciliação diária de pista de postos de combustível (LMC) cruzando tanques, encerrantes e notas fiscais para zerar multas da ANP."
+      },
+      backoffice: {
+        title: "A Mesa de Crédito Digital",
+        description: "Análise de conformidade e mesa de crédito digital para Factoring em 5 minutos, validando NF-e direto na SEFAZ e checando assinaturas em canhotos de entrega."
+      }
+    }
+  },
+
+  "servicos-tecnicos-comerciais": {
+    slug: "servicos-tecnicos-comerciais",
+    title: "SinergIA para Serviços Residenciais, Técnicos e Comerciais",
+    shortTitle: "Serviços Técnicos",
+    subtitle: "Orce projetos pelo WhatsApp com fotos, acelere trocas de carros e coordene escalas de facilities.",
+    description: "Profissionais técnicos de alto valor perdem o dia no trabalho operacional e deixam o comercial abandonado. A SinergIA automatiza a triagem, cotação prévia e gestão de mão de obra de ponta a ponta.",
     icon: Briefcase,
     color: "cyan",
     painPoints: [
       {
-        title: "Ligações de Cobrança Ignoradas",
-        description: "Call centers ligando de números desconhecidos geram taxas de atendimento de menos de 8% dos contatos.",
-        icon: Briefcase,
+        title: "Abandono da Mesa Comercial",
+        description: "Profissionais de alto ticket que passam o dia no campo e perdem orçamentos de novos clientes.",
+        icon: Activity,
       },
       {
-        title: "Custo Elevado de Operação",
-        description: "Salários de operadores, turnover alto e licenças de discadores inchando os custos de recuperação de crédito.",
-        icon: Briefcase,
+        title: "Mesa de Troca Lenta",
+        description: "Avaliação demorada de veículos usados na troca de seminovos, atrasando vendas de carros.",
+        icon: Activity,
       },
       {
-        title: "Abordagens Frias Ineficazes",
-        description: "Disparos automáticos de SMS e e-mails frios que não dão poder de negociação real ou flexibilidade ao devedor.",
-        icon: Briefcase,
-      }
-    ],
-    solutions: [
-      {
-        title: "Agente Negociador Inteligente",
-        description: "Aborda o inadimplente de forma humanizada via WhatsApp ou voz, quebra objeções e oferece parcelamento flexível.",
-        impact: "Aumento de até 35% na conversão de acordos de dívidas.",
-        features: ["Negociação baseada em margem de desconto", "Adequação cultural e tom amigável", "Integração direta com CRM de cobrança"]
-      },
-      {
-        title: "Geração de Pix & Baixa Bancária",
-        description: "Gera links de Pix copia-e-cola em tempo real e acompanha até a efetivação, dando baixa instantânea no sistema financeiro.",
-        impact: "Arrecadação líquida e imediata no caixa da empresa.",
-        features: ["Criação dinâmica de chaves Pix", "Geração de boletos atualizados", "Envio automatizado de recibo de quitação"]
-      },
-      {
-        title: "Régua de Comunicação Preditiva",
-        description: "IA que analisa o histórico e comportamento do devedor para determinar o melhor canal, tom e horário de abordagem.",
-        impact: "Abordagem cirúrgica e menor taxa de bloqueio.",
-        features: ["Machine learning para horários de conversão", "Roteamento inteligente multicanal", "Evita contato abusivo de cobrança"]
+        title: "Controle Caótico de Escalas",
+        description: "Facilities lidando com faltas de última hora e atestados em postos terceirizados de portaria e limpeza.",
+        icon: Activity,
       }
     ],
     metrics: [
-      { value: "+35%", label: "Acordos Fechados" },
-      { value: "-80%", label: "Custo Operacional de SAC" },
-      { value: "100%", label: "Abordagem Amigável (Compliance)" },
+      { value: "+4x", label: "Capacidade de Propostas" },
+      { value: "Sub-60s", label: "Mesa de Troca Usados" },
+      { value: "95%", label: "Eficiência de Escala" },
     ],
-    demoType: "sales"
+    demoType: "sales",
+    subNicheGroup: {
+      pequenosAlvos: [
+        "Construtoras e Marcenarias Sob Medida",
+        "Empresas de Dedetização e Desentupimento",
+        "Estúdios de Tatuagem e Body Art",
+        "Concessionárias e Lojas de Seminovos Multimarcas"
+      ],
+      grandesAlvos: [
+        "Empresas de Terceirização de Mão de Obra (Facilities, Limpeza, Segurança)"
+      ]
+    },
+    hooks: {
+      pilotoAutomatico: {
+        title: "O Orçamentista Técnico de Pista",
+        description: "Coleta de fotos/medidas do cliente via WhatsApp, qualificação do projeto, cálculo instantâneo baseado em tabelas de materiais e agendamento da visita do técnico apenas para fechamento do contrato."
+      },
+      resgateAtivo: {
+        title: "O Avaliador de Veículos",
+        description: "Birô de dados integrado para concessionárias, fazendo consultas automáticas de placas, sinistros, leilões e tabela FIPE em segundos para acelerar a mesa de troca de seminovos."
+      },
+      backoffice: {
+        title: "O Coordenador de Escalas",
+        description: "Controle automático de escalas, faltas e validação de atestados (OCR) via WhatsApp para trabalhadores terceirizados descentralizados."
+      }
+    }
+  },
+
+  "reputacao-recuperacao-retencao": {
+    slug: "reputacao-recuperacao-retencao",
+    title: "SinergIA para Reputação, Recuperação & CS de Alta Conversão",
+    shortTitle: "Reputação & Cobrança",
+    subtitle: "Proteja sua marca no Reclame Aqui, recupere inadimplentes e audite chargebacks automaticamente.",
+    description: "Resolva queixas antes que vire crise e resgate receitas de clientes inadimplentes. A SinergIA une análise de sentimentos e automação bancária para reter fluxo de caixa e blindar a imagem pública.",
+    icon: Scale,
+    color: "indigo",
+    painPoints: [
+      {
+        title: "Danos à Reputação Pública",
+        description: "Reclamações públicas em fóruns como Reclame Aqui sem resposta imediata do time de CS.",
+        icon: Activity,
+      },
+      {
+        title: "Inadimplência Crônica",
+        description: "Atrasos recorrentes de pagamentos em escolas livres que exigem cobrança desconfortável e demorada.",
+        icon: Activity,
+      },
+      {
+        title: "Fraudes e Chargebacks",
+        description: "Contestações indevidas de compras em portais de eventos que sugam a receita pós-show.",
+        icon: Activity,
+      }
+    ],
+    metrics: [
+      { value: "Sub-5min", label: "Resposta a Reclamações" },
+      { value: "+35%", label: "Acordos Recuperados" },
+      { value: "80%", label: "Defesa de Chargebacks" },
+    ],
+    demoType: "support",
+    subNicheGroup: {
+      pequenosAlvos: [
+        "Pequenas Agências de Marketing e Design local",
+        "Pequenas Escolas de Música, Dança e Cursos Livres",
+        "Academias de Bairro e Box de Crossfit (Mensalidades)"
+      ],
+      grandesAlvos: [
+        "Grandes Marcas e E-commerces (Reclame Aqui / Procon)",
+        "Plataformas de Grandes Eventos, Shows e Bilheterias"
+      ]
+    },
+    hooks: {
+      pilotoAutomatico: {
+        title: "O Agente de Reputação e Resolução",
+        description: "Monitoramento em tempo real do Reclame Aqui e Redes Sociais, cruzando o CPF do reclamante com o ERP interno por API, executando a solução (ex: liberar estorno) e redigindo respostas públicas humanizadas em minutos."
+      },
+      resgateAtivo: {
+        title: "O Cobrador de Linha",
+        description: "Réguas ativas de cobrança de inadimplentes para escolas e assinaturas locais, negociando descontos permitidos e emitindo a chave Pix atualizada de forma amigável e profissional."
+      },
+      backoffice: {
+        title: "O Defensor de Bilheteria",
+        description: "Triagem algorítmica de chargebacks e fraudes em plataformas de bilheteria, coletando provas de entrega do serviço para travar disputas bancárias automaticamente."
+      }
+    }
   }
 }
 

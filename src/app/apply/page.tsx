@@ -21,11 +21,13 @@ export default function ApplyPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const referrerId = typeof window !== 'undefined' ? localStorage.getItem('sinergia_affiliate_id') || '' : '';
+    
     try {
       await fetch('/api/apply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({ ...formData, referrerId })
       });
     } catch (e) {} // silent fail para UX
     setStep(5); // Success step

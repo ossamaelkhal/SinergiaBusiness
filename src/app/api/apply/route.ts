@@ -5,7 +5,7 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 export async function POST(req: Request) {
   try {
     const data = await req.json();
-    const { revenue, teamSize, bottleneck, name, email, phone } = data;
+    const { revenue, teamSize, bottleneck, name, email, phone, referrerId } = data;
 
     if (!email || !name) {
       return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 });
@@ -20,6 +20,7 @@ export async function POST(req: Request) {
         revenue,
         teamSize,
         bottleneck,
+        referrerId: referrerId || null,
         createdAt: serverTimestamp(),
         status: 'NEW'
       });
@@ -43,7 +44,8 @@ export async function POST(req: Request) {
             phone,
             revenue,
             teamSize,
-            bottleneck
+            bottleneck,
+            referrerId: referrerId || null
           },
           timestamp: new Date().toISOString()
         }),
