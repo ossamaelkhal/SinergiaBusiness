@@ -410,7 +410,7 @@ const SalesGamification: React.FC<SalesGamificationProps> = ({ onClose }) => {
                        <input 
                          type="text" 
                          readOnly 
-                         value={`https://sinergia.business/solutions/?ref=${currentUser.name.toLowerCase().replace(' ', '_')}`}
+                         value={`${typeof window !== 'undefined' ? window.location.origin : 'https://sinergia.business'}/solutions/?ref=${currentUser.name.toLowerCase().replace(' ', '_')}`}
                          className="flex-1 w-full h-16 bg-white/5 border border-white/20 rounded-xl px-4 font-mono text-white tracking-wider outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50"
                        />
                        <button className="h-16 px-8 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black whitespace-nowrap shadow-[0_0_15px_rgba(16,185,129,0.4)] transition-all">

@@ -18,7 +18,8 @@ export function PartnerHub() {
         if (user) {
             // Generate link based on user email or ID. E.g. base64 or just clean string.
             const affiliateId = user.email?.split('@')[0] || user.uid.substring(0, 6);
-            setReferralLink(`https://sinergia.business/?ref=${affiliateId}`);
+            const origin = typeof window !== 'undefined' ? window.location.origin : 'https://sinergia.business';
+            setReferralLink(`${origin}/?ref=${affiliateId}`);
         }
     }, [user]);
 
