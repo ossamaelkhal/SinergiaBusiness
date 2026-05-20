@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useEffect } from 'react'
@@ -9,7 +8,7 @@ export function usePerformance() {
 
     // Monitorar Core Web Vitals
     const observer = new PerformanceObserver((list) => {
-      list.getEntries().forEach((entry) => {
+      list.getEntries().forEach((entry: any) => {
         if (entry.entryType === 'largest-contentful-paint') {
           // Tracking LCP para Google Analytics
           if (window.gtag) {

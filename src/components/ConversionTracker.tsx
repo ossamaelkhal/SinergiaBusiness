@@ -10,11 +10,11 @@ interface ConversionTrackerProps {
   items?: any[]
 }
 
-export function ConversionTracker({ 
-  event, 
-  value = 0, 
-  currency = 'BRL', 
-  items = [] 
+export function ConversionTracker({
+  event,
+  value = 0,
+  currency = 'BRL',
+  items = []
 }: ConversionTrackerProps) {
   const { user } = useAuth()
 

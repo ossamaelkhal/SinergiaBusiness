@@ -17,7 +17,9 @@ const leadSchema = z.object({
   phone: z.string().min(10, 'Telefone inválido'),
   company: z.string().min(2, 'Nome da empresa é obrigatório'),
   employees: z.string().min(1, 'Selecione o número de funcionários'),
-  interest: z.string().min(1, 'Selecione uma área de interesse')
+  interest: z.string().min(1, 'Selecione uma área de interesse'),
+  source: z.string().optional(),
+  campaign: z.string().optional()
 })
 
 type LeadFormData = z.infer<typeof leadSchema>
@@ -42,23 +44,25 @@ export function LeadCaptureForm({ source = 'website', campaign = 'organic', onSu
     resolver: zodResolver(leadSchema),
     defaultValues: {
       source,
-      campaign
+      campaign,
+      employees: '',
+      interest: ''
     }
   })
 
   const onSubmit = async (data: LeadFormData) => {
     setIsSubmitting(true)
-    
+
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000))
-      
+
       // Here you would typically send the data to your backend
       console.log('Lead data:', { ...data, source, campaign })
-      
+
       setIsSuccess(true)
       onSuccess?.()
-      
+
       // Reset form after successful submission
       setTimeout(() => {
         setIsSuccess(false)
@@ -90,14 +94,15 @@ export function LeadCaptureForm({ source = 'website', campaign = 'organic', onSu
           <Gift className="w-8 h-8 text-purple-600" />
           <h2 className="text-2xl font-bold text-gray-900">Quero receber mais informações</h2>
         </div>
-        
+
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 gap-4">
             <div>
-              <Label htmlFor="name">Nome completo</Label>
-              <Input 
-                id="name" 
-                placeholder="Digite seu nome" 
+              <Label htmlFor="name" className="">Nome completo</Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="Digite seu nome"
                 {...register('name')}
                 className={errors.name ? 'border-red-500' : ''}
               />
@@ -105,11 +110,11 @@ export function LeadCaptureForm({ source = 'website', campaign = 'organic', onSu
             </div>
 
             <div>
-              <Label htmlFor="email">E-mail</Label>
-              <Input 
-                id="email" 
-                type="email" 
-                placeholder="seu@email.com" 
+              <Label htmlFor="email" className="">E-mail</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="seu@email.com"
                 {...register('email')}
                 className={errors.email ? 'border-red-500' : ''}
               />
@@ -117,11 +122,11 @@ export function LeadCaptureForm({ source = 'website', campaign = 'organic', onSu
             </div>
 
             <div>
-              <Label htmlFor="phone">Telefone</Label>
-              <Input 
-                id="phone" 
-                type="tel" 
-                placeholder="(00) 00000-0000" 
+              <Label htmlFor="phone" className="">Telefone</Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="(00) 00000-0000"
                 {...register('phone')}
                 className={errors.phone ? 'border-red-500' : ''}
               />
@@ -129,10 +134,11 @@ export function LeadCaptureForm({ source = 'website', campaign = 'organic', onSu
             </div>
 
             <div>
-              <Label htmlFor="company">Nome da empresa</Label>
-              <Input 
-                id="company" 
-                placeholder="Qual o nome da sua empresa?" 
+              <Label htmlFor="company" className="">Nome da empresa</Label>
+              <Input
+                id="company"
+                type="text"
+                placeholder="Qual o nome da sua empresa?"
                 {...register('company')}
                 className={errors.company ? 'border-red-500' : ''}
               />
@@ -140,43 +146,43 @@ export function LeadCaptureForm({ source = 'website', campaign = 'organic', onSu
             </div>
 
             <div>
-              <Label htmlFor="employees">Número de funcionários</Label>
-              <Select onValueChange={(value) => setValue('employees', value)} value={watch('employees')}>
+              <Label htmlFor="employees" className="">Número de funcionários</Label>
+              <Select onValueChange={(value: string) => setValue('employees', value)} value={watch('employees')}>
                 <SelectTrigger className={errors.employees ? 'border-red-500' : ''}>
                   <SelectValue placeholder="Selecione uma opção" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1-10">1 a 10 funcionários</SelectItem>
-                  <SelectItem value="11-50">11 a 50 funcionários</SelectItem>
-                  <SelectItem value="51-200">51 a 200 funcionários</SelectItem>
-                  <SelectItem value="201-500">201 a 500 funcionários</SelectItem>
-                  <SelectItem value="500+">Mais de 500 funcionários</SelectItem>
+                <SelectContent className="">
+                  <SelectItem value="1-10" className="">1 a 10 funcionários</SelectItem>
+                  <SelectItem value="11-50" className="">11 a 50 funcionários</SelectItem>
+                  <SelectItem value="51-200" className="">51 a 200 funcionários</SelectItem>
+                  <SelectItem value="201-500" className="">201 a 500 funcionários</SelectItem>
+                  <SelectItem value="500+" className="">Mais de 500 funcionários</SelectItem>
                 </SelectContent>
               </Select>
               {errors.employees && <p className="text-red-500 text-sm mt-1">{errors.employees.message}</p>}
             </div>
 
             <div>
-              <Label htmlFor="interest">Área de interesse</Label>
-              <Select onValueChange={(value) => setValue('interest', value)} value={watch('interest')}>
+              <Label htmlFor="interest" className="">Área de interesse</Label>
+              <Select onValueChange={(value: string) => setValue('interest', value)} value={watch('interest')}>
                 <SelectTrigger className={errors.interest ? 'border-red-500' : ''}>
                   <SelectValue placeholder="Selecione uma opção" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="sales">Vendas</SelectItem>
-                  <SelectItem value="marketing">Marketing</SelectItem>
-                  <SelectItem value="operations">Operações</SelectItem>
-                  <SelectItem value="hr">Recursos Humanos</SelectItem>
-                  <SelectItem value="finance">Financeiro</SelectItem>
-                  <SelectItem value="it">TI</SelectItem>
+                <SelectContent className="">
+                  <SelectItem value="sales" className="">Vendas</SelectItem>
+                  <SelectItem value="marketing" className="">Marketing</SelectItem>
+                  <SelectItem value="operations" className="">Operações</SelectItem>
+                  <SelectItem value="hr" className="">Recursos Humanos</SelectItem>
+                  <SelectItem value="finance" className="">Financeiro</SelectItem>
+                  <SelectItem value="it" className="">TI</SelectItem>
                 </SelectContent>
               </Select>
               {errors.interest && <p className="text-red-500 text-sm mt-1">{errors.interest.message}</p>}
             </div>
           </div>
 
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={isSubmitting}
             className="w-full bg-purple-600 hover:bg-purple-700 text-white py-6"
           >
@@ -197,8 +203,8 @@ export function LeadCaptureForm({ source = 'website', campaign = 'organic', onSu
           </Button>
         </form>
       </div>
-      
-      <ConversionTracker />
+
+      <ConversionTracker event="lead_capture" />
     </div>
   )
 }

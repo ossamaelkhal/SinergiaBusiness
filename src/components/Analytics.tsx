@@ -4,12 +4,7 @@
 import { useEffect } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 
-declare global {
-  interface Window {
-    gtag: (command: string, targetId: string, config?: any) => void
-    fbq: (command: string, eventName: string, parameters?: any) => void
-  }
-}
+
 
 export function Analytics() {
   const pathname = usePathname()
@@ -17,7 +12,7 @@ export function Analytics() {
 
   useEffect(() => {
     const url = `${pathname}${searchParams}`
-    
+
     // Google Analytics
     if (typeof window.gtag !== 'undefined') {
       window.gtag('config', process.env.NEXT_PUBLIC_GA_ID!, {
