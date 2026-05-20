@@ -15,6 +15,7 @@ import Features from '@/components/sections/Features'
 import NicheSolutions from '@/components/sections/NicheSolutions'
 import { ROICalculator as ROICalculatorSection } from '@/components/sections/ROICalculator'
 import SinergiaGenesis from '@/components/sections/SinergiaGenesis'
+import SinergiaCosmos from '@/components/sections/SinergiaCosmos'
 import SinergiaNexus from '@/components/sections/SinergiaNexus'
 import AuraAcademy from '@/components/sections/AuraAcademy'
 import Demos from '@/components/sections/Demos'
@@ -61,6 +62,7 @@ export default function LandingPage() {
 
                 {/* 6. A Visão de Futuro e Expansão */}
                 <SinergiaGenesis />
+                <SinergiaCosmos />
                 <SinergiaNexus />
                 
                 <div className="w-full h-px bg-gradient-to-r from-transparent via-fuchsia-500/20 to-transparent my-10" />
