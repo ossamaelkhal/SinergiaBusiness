@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Zap, BarChart, CalendarCheck, Shield, BrainCircuit, Target, Factory, TrendingUp } from 'lucide-react'
+import { Zap, Shield, TrendingUp, Layers, Lock, CheckCircle2, Sparkles } from 'lucide-react'
 
 export default function Features() {
     return (
@@ -15,87 +15,87 @@ export default function Features() {
             <div className="max-w-7xl mx-auto px-6 relative z-10">
                 <div className="grid lg:grid-cols-12 gap-16 items-center">
                     
-                    {/* Left Column - The "Factory" Narrative */}
+                    {/* Left Column - The Value Narrative */}
                     <div className="lg:col-span-5 space-y-8">
                         <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5">
-                            <Factory className="h-4 w-4 text-emerald-400" />
+                            <Sparkles className="h-4 w-4 text-emerald-400" />
                             <span className="text-xs font-bold text-emerald-400 tracking-wide uppercase">
-                                A Fábrica SinergIA
+                                Nossos Diferenciais
                             </span>
                         </div>
                         <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white leading-tight">
-                            Arquitetura de <br/>
+                            Eficiência Desenhada para <br/>
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-indigo-400">
-                                Conversão Determinística
+                                Resultados Reais
                             </span>
                         </h2>
                         <p className="max-w-[500px] text-slate-400 text-lg leading-relaxed font-medium">
-                            Nós não vendemos &quot;chatbots&quot;. Nós implementamos linhas de produção. Substituímos a variabilidade do humor humano por processos algorítmicos que rodam 24/7.
+                            Não criamos sistemas difíceis ou complicados. Nossas soluções se integram silenciosamente nos seus canais atuais para reduzir gargalos e otimizar o tempo da sua equipe.
                         </p>
                         
                         <ul className="space-y-4 pt-4 border-t border-white/10">
                             <li className="flex items-center gap-3 text-slate-300 font-bold">
-                                <TrendingUp className="w-5 h-5 text-emerald-500" /> 
-                                Escalonamento horizontal infinito.
+                                <CheckCircle2 className="w-5 h-5 text-emerald-500" /> 
+                                Integração sem interromper sua rotina.
                             </li>
                             <li className="flex items-center gap-3 text-slate-300 font-bold">
-                                <Zap className="w-5 h-5 text-indigo-500" /> 
-                                Resposta garantida em menos de 3s.
+                                <CheckCircle2 className="w-5 h-5 text-indigo-500" /> 
+                                Monitoramento constante e ajustes automáticos.
                             </li>
                         </ul>
                     </div>
 
-                    {/* Right Column - Engineering Bento Box */}
+                    {/* Right Column - Bento Box */}
                     <div className="lg:col-span-7 grid sm:grid-cols-2 gap-6">
                         
-                        {/* Box 1: Lead Scoring */}
+                        {/* Box 1: Modularity */}
                         <div className="flex flex-col space-y-4 p-8 rounded-3xl border border-white/5 bg-slate-900/50 hover:bg-slate-900 hover:border-emerald-500/30 transition-all group backdrop-blur-xl">
                             <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 group-hover:scale-110 transition-transform">
-                                <Target className="h-6 w-6 text-emerald-400" />
+                                <Layers className="h-6 w-6 text-emerald-400" />
                             </div>
                             <div>
-                                <h3 className="font-black text-lg text-white mb-2">Lead Scoring ML</h3>
+                                <h3 className="font-black text-lg text-white mb-2">Modularidade sob Medida</h3>
                                 <p className="text-sm text-slate-400 leading-relaxed">
-                                    Identifica intenção de compra invisível aos olhos humanos. Eleva as taxas de Lead-to-Opp em 75% separando curiosos de compradores.
+                                    Adote as soluções em blocos de acordo com a necessidade atual do seu negócio. Expanda a automação conforme sua operação cresce.
                                 </p>
                             </div>
                         </div>
 
-                        {/* Box 2: Agentes de Agendamento (offset) */}
+                        {/* Box 2: Security (offset) */}
                         <div className="flex flex-col space-y-4 p-8 rounded-3xl border border-white/5 bg-slate-900/50 hover:bg-slate-900 hover:border-indigo-500/30 transition-all group lg:translate-y-8 backdrop-blur-xl">
                             <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 group-hover:scale-110 transition-transform">
-                                <CalendarCheck className="h-6 w-6 text-indigo-400" />
+                                <Lock className="h-6 w-6 text-indigo-400" />
                             </div>
                             <div>
-                                <h3 className="font-black text-lg text-white mb-2">Booking Booking Autônomo</h3>
+                                <h3 className="font-black text-lg text-white mb-2">Segurança e Privacidade</h3>
                                 <p className="text-sm text-slate-400 leading-relaxed">
-                                    Agendamento B2B automatizado que destrói atritos. Transforma tráfego frio em reuniões no calendário com 3.2x mais eficácia.
+                                    Todos os dados, históricos e negociações pertencem exclusivamente à sua empresa. Processamento em conformidade total com as leis vigentes de proteção.
                                 </p>
                             </div>
                         </div>
 
-                        {/* Box 3: Qualificação BANT */}
+                        {/* Box 3: ROI focus */}
                         <div className="flex flex-col space-y-4 p-8 rounded-3xl border border-white/5 bg-slate-900/50 hover:bg-slate-900 hover:border-teal-500/30 transition-all group backdrop-blur-xl">
                             <div className="w-12 h-12 rounded-xl bg-teal-500/10 flex items-center justify-center border border-teal-500/20 group-hover:scale-110 transition-transform">
-                                <BrainCircuit className="h-6 w-6 text-teal-400" />
+                                <TrendingUp className="h-6 w-6 text-teal-400" />
                             </div>
                             <div>
-                                <h3 className="font-black text-lg text-white mb-2">SDR Engine (BANT)</h3>
+                                <h3 className="font-black text-lg text-white mb-2">Foco no Retorno Comercial</h3>
                                 <p className="text-sm text-slate-400 leading-relaxed">
-                                    Sondas de inteligência artificial que disparam em D+0 para qualificar Budget, Authority, Need e Timeframe sem intervenção.
+                                    Desenvolvemos fluxos especificamente voltados para reaver faturamento estagnado, diminuir despesas operacionais e evitar desperdício de contatos.
                                 </p>
                             </div>
                         </div>
 
-                        {/* Box 4: Telemetria (offset) */}
+                        {/* Box 4: Simplicity (offset) */}
                         <div className="flex flex-col space-y-4 p-8 rounded-3xl border border-white/5 bg-slate-900/50 hover:bg-slate-900 hover:border-cyan-500/30 transition-all group lg:translate-y-8 backdrop-blur-xl">
                             <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 group-hover:scale-110 transition-transform">
-                                <BarChart className="h-6 w-6 text-cyan-400" />
+                                <Zap className="h-6 w-6 text-cyan-400" />
                             </div>
                             <div>
-                                <h3 className="font-black text-lg text-white mb-2">Telemetria C-Level</h3>
+                                <h3 className="font-black text-lg text-white mb-2">Facilidade de Uso</h3>
                                 <p className="text-sm text-slate-400 leading-relaxed">
-                                    Dashboard Cockpit com cálculo de ROI em tempo real. Veja o MRR gerado pela máquina e o custo poupado a cada 24 horas.
+                                    Não exigimos treinamentos complexos ou adaptação a novos softwares difíceis. Nossas soluções rodam diretamente no WhatsApp e e-mail da equipe.
                                 </p>
                             </div>
                         </div>

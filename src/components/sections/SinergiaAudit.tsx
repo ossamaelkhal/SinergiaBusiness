@@ -1,165 +1,216 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ShieldAlert, Search, Activity, Target, AlertTriangle, ArrowRight, Lock, Clock } from 'lucide-react';
+import { Calculator, ArrowRight, Clock, HelpCircle, AlertCircle, RefreshCw, DollarSign, TrendingDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 export default function SinergiaAudit() {
-  const [url, setUrl] = useState('');
-  const [scanning, setScanning] = useState(false);
-  const [result, setResult] = useState<{ risk: string; leak: string; competitor: number } | null>(null);
+  const [leads, setLeads] = useState<number>(100);
+  const [delay, setDelay] = useState<string>('30min-4h');
+  const [ticket, setTicket] = useState<number>(1000);
+  const [calculating, setCalculating] = useState(false);
+  const [calculated, setCalculated] = useState(false);
+  const [result, setResult] = useState<{ leadsLost: number; revenueLeak: number } | null>(null);
 
-  const handleScan = (e: React.FormEvent) => {
+  const handleCalculate = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!url) return;
+    setCalculating(true);
     
-    setScanning(true);
-    setResult(null);
-
-    // Envio Oculto para o Middleware SinergIA (Segurança)
+    // Silent logging/sync for lead qualification insights
     try {
       fetch('/api/audit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ domain: url, source: 'SinergiaAudit', timestamp: new Date().toISOString() })
-      }).catch(() => {}); // silent error para não travar a UI
+        body: JSON.stringify({
+          leads,
+          delay,
+          ticket,
+          source: 'SinergiaAudit',
+          timestamp: new Date().toISOString()
+        })
+      }).catch(() => {});
     } catch (e) {}
 
-    // Simulate the terrifying but realistic audit process
     setTimeout(() => {
-      setScanning(false);
-      setResult({
-        risk: 'NÍVEL CRÍTICO (VERMELHO)',
-        leak: 'R$ 140.000 a R$ 280.000',
-        competitor: Math.floor(Math.random() * 4) + 2 // 2 to 5 competitors
-      });
-    }, 4500);
+      let dropRatio = 0;
+      if (delay === 'sub5m') dropRatio = 0.05; // 5% loss
+      else if (delay === '5m-30m') dropRatio = 0.40; // 40% loss
+      else if (delay === '30min-4h') dropRatio = 0.75; // 75% loss
+      else dropRatio = 0.90; // 90% loss
+
+      const conversionRate = 0.10; // Standard 10% baseline conversion rate
+      const leadsLost = Math.round(leads * dropRatio);
+      const revenueLeak = Math.round(leadsLost * ticket * conversionRate);
+
+      setResult({ leadsLost, revenueLeak });
+      setCalculating(false);
+      setCalculated(true);
+    }, 1200);
+  };
+
+  const handleReset = () => {
+    setCalculated(false);
+    setResult(null);
   };
 
   return (
-    <section className="w-full py-24 bg-[#0a0a0a] relative border-y border-rose-500/10 overflow-hidden">
-      {/* Warning Stripes Background */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-[url('/stripes.png')] opacity-20"></div>
-      
-      {/* Red/Amber glow for urgency */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-rose-600/5 rounded-full blur-[100px] pointer-events-none"></div>
+    <section className="w-full py-24 bg-slate-950 relative border-y border-white/5 overflow-hidden">
+      {/* Background ambient glows */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none"></div>
 
       <div className="max-w-4xl mx-auto px-6 relative z-10">
         
-        {/* FOMO Header */}
+        {/* Header */}
         <div className="text-center mb-12">
-           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-rose-500/10 border border-rose-500/30 text-xs font-black text-rose-400 mb-6 uppercase tracking-widest animate-pulse">
-              <AlertTriangle className="w-4 h-4" />
-              <span>O Mercado foi Dividido. De que lado você está?</span>
+           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-xs font-bold text-indigo-400 mb-6 uppercase tracking-widest">
+              <Calculator className="w-4 h-4" />
+              <span>Diagnóstico de Eficiência Comercial</span>
            </div>
            <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4 text-white">
-              O seu concorrente já ativou a Máquina.<br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-amber-400">
-                Você tem certeza que está seguro?
+              O Custo Invisível da Demora.<br/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-indigo-400">
+                Calcule a perda operacional do seu negócio.
               </span>
            </h2>
-           <p className="text-slate-400 text-lg">
-              Insira o domínio da sua empresa abaixo. O <strong>Sonar SinergIA</strong> fará uma varredura cruzada na dark web e em bancos de dados de CRM para estimar o <strong>Sangramento de Receita</strong> que sua falta de I.A. está gerando hoje.
+           <p className="text-slate-400 text-lg max-w-2xl mx-auto">
+              Estudos de mercado apontam que contatos respondidos após 5 minutos têm uma queda de até 80% na chance de conversão. Avalie seu cenário atual de forma transparente.
            </p>
         </div>
 
-        {/* The Audit Tool */}
-        <div className="bg-slate-900/80 border border-rose-500/20 rounded-3xl p-8 backdrop-blur-xl shadow-[0_0_40px_rgba(225,29,72,0.1)] relative">
+        {/* Diagnostic Card */}
+        <div className="bg-slate-900/50 border border-white/10 rounded-3xl p-8 backdrop-blur-xl shadow-xl relative">
            
-           {!result ? (
-             <form onSubmit={handleScan} className="space-y-6">
-                <div className="relative">
-                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Search className="h-5 w-5 text-slate-500" />
-                   </div>
-                   <input
-                      type="text"
-                      className="block w-full pl-12 pr-4 py-5 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500/50 transition-all text-lg"
-                      placeholder="ex: suaempresa.com.br"
-                      value={url}
-                      onChange={(e) => setUrl(e.target.value)}
-                      disabled={scanning}
+           {!calculated ? (
+             <form onSubmit={handleCalculate} className="space-y-6">
+                <div className="grid md:grid-cols-3 gap-6">
+                  {/* Monthly Leads */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">
+                      Contatos comerciais/mês:
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      className="block w-full px-4 py-4 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-bold"
+                      value={leads}
+                      onChange={(e) => setLeads(Math.max(1, parseInt(e.target.value) || 0))}
+                      disabled={calculating}
                       required
-                   />
+                    />
+                  </div>
+
+                  {/* Average Response Time */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">
+                      Tempo médio de resposta:
+                    </label>
+                    <select
+                      className="block w-full px-4 py-4 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-bold"
+                      value={delay}
+                      onChange={(e) => setDelay(e.target.value)}
+                      disabled={calculating}
+                    >
+                      <option value="sub5m">Menos de 5 minutos</option>
+                      <option value="5m-30m">De 5 a 30 minutos</option>
+                      <option value="30min-4h">De 30 minutos a 4 horas</option>
+                      <option value="plus4h">Mais de 4 horas ou outro dia</option>
+                    </select>
+                  </div>
+
+                  {/* Ticket Medio */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">
+                      Valor médio por cliente (R$):
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      className="block w-full px-4 py-4 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-bold"
+                      value={ticket}
+                      onChange={(e) => setTicket(Math.max(1, parseInt(e.target.value) || 0))}
+                      disabled={calculating}
+                      required
+                    />
+                  </div>
                 </div>
                 
                 <Button 
                    type="submit" 
-                   disabled={scanning || !url}
-                   className="w-full h-14 bg-rose-600 hover:bg-rose-500 text-white font-black text-lg rounded-xl shadow-[0_0_20px_rgba(225,29,72,0.3)] hover:shadow-[0_0_30px_rgba(225,29,72,0.5)] transition-all uppercase tracking-widest disabled:opacity-70"
+                   disabled={calculating}
+                   className="w-full h-14 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-lg rounded-xl shadow-[0_0_30px_rgba(16,185,129,0.2)] transition-all uppercase tracking-widest disabled:opacity-70"
                 >
-                   {scanning ? (
+                   {calculating ? (
                       <span className="flex items-center gap-2">
-                         <Activity className="w-5 h-5 animate-pulse" />
-                         Varrendo o Dark Funnel...
+                         <RefreshCw className="w-5 h-5 animate-spin" />
+                         Processando métricas...
                       </span>
                    ) : (
                       <span className="flex items-center gap-2">
-                         <Target className="w-5 h-5" />
-                         Diagnosticar Sangramento de Receita
+                         <Calculator className="w-5 h-5" />
+                         Calcular Impacto Operacional
                       </span>
                    )}
                 </Button>
-
-                {/* Progress Simulation text */}
-                {scanning && (
-                   <div className="text-center text-xs font-mono text-rose-400 space-y-1 animate-pulse mt-4">
-                      <p>&gt; Cruzando dados de concorrência B2B...</p>
-                      <p>&gt; Calculando latência de resposta do CRM (delay humano)...</p>
-                      <p>&gt; Estimando vazamento de Leads no topo do funil...</p>
-                   </div>
-                )}
              </form>
            ) : (
-             <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+             <div className="animate-in fade-in duration-500">
                 <div className="text-center mb-8 border-b border-white/5 pb-8">
-                   <ShieldAlert className="w-16 h-16 text-rose-500 mx-auto mb-4 animate-pulse" />
-                   <h3 className="text-2xl font-black text-white mb-2">Relatório de Risco Comercial Gerado</h3>
-                   <p className="text-slate-400">Domínio analisado: <span className="text-rose-400 font-mono">{url}</span></p>
+                   <div className="w-16 h-16 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto mb-4">
+                      <AlertCircle className="w-8 h-8 text-indigo-400" />
+                   </div>
+                   <h3 className="text-2xl font-black text-white mb-2">Diagnóstico de Latência Comercial</h3>
+                   <p className="text-slate-400 text-sm">Resumo baseado nos parâmetros fornecidos da sua operação comercial</p>
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-6 mb-8">
-                   <div className="bg-slate-950 rounded-2xl p-6 border border-rose-500/30">
-                      <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Nível de Exposição</div>
-                      <div className="text-2xl font-black text-rose-500">{result.risk}</div>
-                      <p className="text-sm text-slate-400 mt-2">O tempo de resposta humano atual está resultando no abandono de propostas quentes.</p>
+                   <div className="bg-slate-950 rounded-2xl p-6 border border-white/5">
+                      <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Contatos Desperdiçados/Mês</div>
+                      <div className="text-3xl font-black text-indigo-400 flex items-center gap-2">
+                        <TrendingDown className="w-6 h-6 text-rose-500" />
+                        {result?.leadsLost} contatos
+                      </div>
+                      <p className="text-xs text-slate-400 mt-2">Oportunidades de negócios que perdem interesse devido à demora no primeiro contato comercial.</p>
                    </div>
-                   <div className="bg-slate-950 rounded-2xl p-6 border border-amber-500/30">
-                      <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Concorrentes Blindados</div>
-                      <div className="text-2xl font-black text-amber-500">{result.competitor} Players</div>
-                      <p className="text-sm text-slate-400 mt-2">Identificamos empresas na sua região que já estão usando I.A. para capturar seus leads em tempo real.</p>
+                   <div className="bg-slate-950 rounded-2xl p-6 border border-white/5">
+                      <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Vazamento de Receita Estimado/Mês</div>
+                      <div className="text-3xl font-black text-emerald-400 flex items-center gap-1">
+                        <DollarSign className="w-6 h-6 text-emerald-400 shrink-0" />
+                        R$ {result?.revenueLeak.toLocaleString('pt-BR')}
+                      </div>
+                      <p className="text-xs text-slate-400 mt-2">Receita não realizada considerando uma taxa básica de fechamento de 10% sobre os leads perdidos.</p>
                    </div>
                 </div>
 
-                <div className="bg-rose-950/30 border border-rose-500/50 rounded-2xl p-6 text-center mb-8">
-                   <div className="text-sm font-bold text-rose-300 uppercase tracking-widest mb-2">Sangramento de Receita Anual Estimado (LTV Perdido)</div>
-                   <div className="text-4xl md:text-5xl font-black text-white drop-shadow-[0_0_15px_rgba(225,29,72,0.8)]">{result.leak}</div>
-                </div>
-
-                <div className="bg-emerald-950/30 border border-emerald-500/30 rounded-2xl p-6 text-center">
-                   <div className="flex items-center justify-center gap-2 text-emerald-400 font-bold mb-4">
-                      <Lock className="w-5 h-5" />
-                      <span>Protocolo de Exclusividade (Proteção de Nicho)</span>
-                   </div>
-                   <p className="text-sm text-slate-300 mb-6 max-w-lg mx-auto">
-                      A SinergIA opera com <strong>exclusividade geográfica/nicho</strong>. Se nós fecharmos com o seu concorrente, nós não podemos atender você. Pare o sangramento hoje.
+                <div className="bg-indigo-950/20 border border-indigo-500/20 rounded-2xl p-6 text-center mb-8">
+                   <p className="text-sm text-slate-300 leading-relaxed max-w-xl mx-auto">
+                      Desenvolvemos fluxos integrados que garantem **atendimento imediato** nos seus canais de vendas. Ao eliminar esse atraso, sua equipe recebe apenas contatos já validados e no momento ideal de compra.
                    </p>
-                   <Link href="/apply" className="block w-full">
-                     <Button className="w-full h-14 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-lg rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:scale-105 transition-all uppercase tracking-widest">
-                        Blindar Minha Operação Agora <ArrowRight className="w-5 h-5 ml-2" />
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                   <Link href="/apply" className="w-full sm:w-auto">
+                     <Button className="w-full h-12 bg-white hover:bg-slate-200 text-slate-950 font-black rounded-xl transition-all uppercase tracking-widest">
+                        Falar com Especialista <ArrowRight className="w-4 h-4 ml-2" />
                      </Button>
                    </Link>
+                   <Button 
+                     variant="outline"
+                     onClick={handleReset}
+                     className="h-12 border-white/10 bg-slate-950/40 text-slate-300 hover:bg-slate-900 rounded-xl"
+                   >
+                     Novo Cálculo
+                   </Button>
                 </div>
              </div>
            )}
 
         </div>
-        
-        {/* Scarcity Footer */}
+
+        {/* Small Note */}
         <div className="mt-6 flex items-center justify-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest">
-           <Clock className="w-4 h-4 text-amber-500" />
-           Vagas na incubadora deste mês: <span className="text-white">2 restantes</span>
+           <Clock className="w-4 h-4 text-indigo-400" />
+           Cálculo baseado em padrões médios de funil de vendas consultivo
         </div>
       </div>
     </section>

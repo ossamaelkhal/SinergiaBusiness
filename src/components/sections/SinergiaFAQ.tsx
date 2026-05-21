@@ -5,24 +5,24 @@ import { ChevronDown, HelpCircle } from 'lucide-react';
 
 const faqs = [
   {
-    question: "O SinergIA OS integra com o meu CRM atual (RD Station, Salesforce, HubSpot)?",
-    answer: "Sim. Nossa infraestrutura Nível 5 possui webhooks e APIs abertas. Nós conectamos a máquina de vendas diretamente ao seu ecossistema atual. O lead é atendido pela IA no WhatsApp e, em segundos, todas as informações são atualizadas no seu CRM automaticamente."
+    question: "As automações integram com minhas ferramentas atuais (CRMs, planilhas, e-mails)?",
+    answer: "Sim. Nossos sistemas são desenhados para se conectar diretamente às ferramentas que sua empresa já utiliza. Seja o seu CRM atual, planilhas de controle ou sistemas de gestão internos, a informação é sincronizada de forma imediata e automática."
   },
   {
-    question: "Quanto tempo demora para a minha operação estar rodando?",
-    answer: "Nosso protocolo TTFV (Time To First Value) é agressivo. Em média, após a reunião de Setup, seus Agentes Inteligentes (Clones Digitais) são forjados, treinados com os dados da sua empresa e colocados no ar em até 48 horas."
+    question: "Quanto tempo demora para a minha operação estar no ar?",
+    answer: "Prezamos por uma entrega ágil. Após alinharmos as prioridades e fluxos da sua empresa, nossos módulos são configurados e integrados para rodar em sua operação em poucos dias, gerando valor logo nas primeiras semanas."
   },
   {
-    question: "A Inteligência Artificial vai soar como um 'robô burro' para o meu cliente?",
-    answer: "Definitivamente não. Nós não usamos 'chatbots de fluxo' com opções de 1 a 9. O SinergIA Genesis Core utiliza LLMs avançados (Modelos de Linguagem Grande) com Fine-Tuning específico para o seu negócio. Ele negocia, entende áudios, tem empatia e quebra objeções exatamente como o seu melhor vendedor faria."
+    question: "As respostas automáticas não vão soar robóticas ou frias para o meu cliente?",
+    answer: "De forma alguma. Não utilizamos menus rígidos de 'digite 1 para financeiro, 2 para suporte'. Nossos assistentes virtuais são configurados para utilizar linguagem natural, empática e totalmente adaptada ao tom de voz do seu negócio, respondendo de forma clara e fluida."
   },
   {
-    question: "Meus dados de clientes e segredos de venda estão seguros?",
-    answer: "Soberania de Dados é nossa regra número um. Seu 'cérebro' IA é instanciado em um silo privado. Cada venda que ele faz treina apenas o SEU modelo. Suas conversas não são usadas para alimentar o ChatGPT público ou seus concorrentes."
+    question: "Os dados dos meus clientes e segredos comerciais estão protegidos?",
+    answer: "A segurança da informação é nossa prioridade absoluta. Todo o histórico operacional e de atendimento é armazenado em ambiente seguro e privado. Seus dados pertencem exclusivamente à sua empresa e nunca são compartilhados ou utilizados externamente."
   },
   {
-    question: "E se a IA cometer um erro grave em uma negociação?",
-    answer: "A Frota Multi-Agente possui uma camada chamada 'SinergIA Guardrail'. Você define as regras de segurança (ex: 'NUNCA dê desconto maior que 10%'). A IA é fisicamente impossibilitada de cruzar essas barreiras. Em caso de dúvidas complexas, ela transfere a conversa para um humano da sua equipe suavemente."
+    question: "Como garanto que o sistema não tome decisões erradas ou envie mensagens indevidas?",
+    answer: "Nossos sistemas operam sob regras de segurança estritas e personalizadas por você (como limites de descontos ou alçadas de decisão). Caso o cliente faça uma pergunta extremamente complexa ou fora do escopo, o sistema transfere o atendimento para uma pessoa da sua equipe de forma simples."
   }
 ];
 
@@ -45,7 +45,7 @@ export default function SinergiaFAQ() {
             Dúvidas Frequentes
           </h2>
           <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-            Decisões de alto impacto exigem clareza absoluta. Abaixo, quebramos as objeções mais comuns de operações Enterprise.
+            Decisões de alto impacto exigem clareza absoluta. Abaixo, respondemos as principais dúvidas dos nossos clientes e parceiros.
           </p>
         </div>
 

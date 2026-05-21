@@ -7,29 +7,29 @@ export default function SinergiaBlueprint() {
   const steps = [
     {
       icon: <Target className="w-6 h-6 text-rose-500" />,
-      title: "1. O Radar (SinergIA Sonar)",
-      desc: "Nós não esperamos o cliente vir até você. Nossa I.A. vasculha a internet 24/7 procurando pessoas que precisam do seu serviço agora e alerta nosso sistema.",
+      title: "1. O Mapeamento (Conectar Pontos)",
+      desc: "Analisamos seu fluxo de trabalho atual para identificar gargalos manuais, mensagens perdidas e lentidões operacionais.",
       color: "border-rose-500/30 bg-rose-500/5",
       line: "from-rose-500/50 to-amber-500/50"
     },
     {
       icon: <Zap className="w-6 h-6 text-amber-500" />,
-      title: "2. O Esquadrão (Multi-Agentes)",
-      desc: "Em vez de um atendente humano demorar 2 horas para responder, nossos Agentes Inteligentes abordam o lead na mesma hora, tiram dúvidas, quebram objeções e agendam a reunião.",
+      title: "2. A Montagem (Módulos Inteligentes)",
+      desc: "Selecionamos e customizamos os módulos de atendimento e backoffice ideais para as necessidades específicas da sua empresa.",
       color: "border-amber-500/30 bg-amber-500/5",
       line: "from-amber-500/50 to-emerald-500/50"
     },
     {
       icon: <Building className="w-6 h-6 text-emerald-500" />,
-      title: "3. A Operação (SinergIA OS)",
-      desc: "Conectamos essa máquina de vendas direto no seu sistema atual (WhatsApp, CRM, Agenda). Tudo funciona sozinho, nos bastidores, como um relógio suíço.",
+      title: "3. A Orquestração (Integração Direta)",
+      desc: "Conectamos as soluções diretamente nos canais e sistemas que você já usa hoje (WhatsApp, e-mail, agendas e ERPs).",
       color: "border-emerald-500/30 bg-emerald-500/5",
       line: "from-emerald-500/50 to-cyan-500/50"
     },
     {
       icon: <LineChart className="w-6 h-6 text-cyan-500" />,
-      title: "4. O Resultado (Evolução Constante)",
-      desc: "Você recebe um painel para acompanhar o lucro gerado. E o melhor: nossa I.A. (Genesis) aprende com cada venda e fica mais inteligente a cada dia, sem cobrar hora extra.",
+      title: "4. A Evolução (Melhoria Contínua)",
+      desc: "Seus sistemas são otimizados constantemente a partir dos dados gerados, aumentando o retorno comercial dia após dia.",
       color: "border-cyan-500/30 bg-cyan-500/5",
       line: "hidden"
     }
@@ -45,7 +45,7 @@ export default function SinergiaBlueprint() {
             Como funciona a nossa <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Parceria Estratégica?</span>
           </h2>
           <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-            Sem jargões técnicos ou falsas promessas. Aqui está o mapa exato de como transformamos o seu negócio em uma máquina autônoma em 4 passos simples:
+            Sem termos técnicos difíceis ou promessas vazias. Aqui está o mapa exato de como estruturamos a sua operação em 4 passos simples:
           </p>
         </div>
 

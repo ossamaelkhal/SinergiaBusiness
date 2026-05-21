@@ -29,7 +29,7 @@ export default function ApplyPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...formData, referrerId })
       });
-    } catch (e) {} // silent fail para UX
+    } catch (e) {} // silent fail for UX
     setStep(5); // Success step
   };
 
@@ -62,10 +62,10 @@ export default function ApplyPage() {
               Sessão Confidencial
             </div>
             <h1 className="text-5xl font-black text-white leading-tight">
-              O primeiro passo para a <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Autonomia.</span>
+              O primeiro passo para a <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-indigo-400">Autonomia.</span>
             </h1>
             <p className="text-slate-400 text-lg leading-relaxed">
-              Devido à alta demanda e ao nosso protocolo de exclusividade de nicho, nós filtramos rigorosamente com quem trabalhamos. Queremos garantir que o SinergIA OS traga um ROI de pelo menos 10x para a sua operação.
+              Devido à alta demanda e ao nosso protocolo de exclusividade de atuação, nós analisamos cuidadosamente cada aplicação. Queremos garantir que nossos sistemas de automação tragam um retorno expressivo para a sua operação.
             </p>
             
             <div className="pt-8 border-t border-white/10 space-y-4">
@@ -74,8 +74,8 @@ export default function ApplyPage() {
                   <Zap className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
-                  <h4 className="text-white font-bold mb-1">Implementação Rápida</h4>
-                  <p className="text-sm text-slate-500">Se aprovado, seu ecossistema estará operacional em 48 horas.</p>
+                  <h4 className="text-white font-bold mb-1">Implementação sem Complicação</h4>
+                  <p className="text-sm text-slate-500">Integração gradual e suporte dedicado para não interromper sua rotina comercial.</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
@@ -83,8 +83,8 @@ export default function ApplyPage() {
                   <Server className="w-5 h-5 text-indigo-400" />
                 </div>
                 <div>
-                  <h4 className="text-white font-bold mb-1">Infraestrutura Privada</h4>
-                  <p className="text-sm text-slate-500">Seus dados e seus leads nunca são compartilhados ou usados em modelos públicos.</p>
+                  <h4 className="text-white font-bold mb-1">Estrutura Segura</h4>
+                  <p className="text-sm text-slate-500">Seus dados e históricos comerciais são protegidos sob rígidos padrões de segurança.</p>
                 </div>
               </div>
             </div>
@@ -94,21 +94,21 @@ export default function ApplyPage() {
           <div className="bg-slate-900 border border-slate-800 rounded-[32px] p-8 md:p-12 shadow-2xl relative overflow-hidden">
              {/* Progress Bar */}
              {step < 5 && (
-               <div className="w-full h-1 bg-slate-800 rounded-full mb-10 overflow-hidden">
-                 <div 
-                   className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 transition-all duration-500 ease-out"
-                   style={{ width: `${(step / 4) * 100}%` }}
-                 ></div>
-               </div>
+                <div className="w-full h-1 bg-slate-800 rounded-full mb-10 overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-emerald-500 to-indigo-500 transition-all duration-500 ease-out"
+                    style={{ width: `${(step / 4) * 100}%` }}
+                  ></div>
+                </div>
              )}
 
              {step === 1 && (
                 <div className="animate-in fade-in slide-in-from-right-4 duration-500">
                   <h3 className="text-2xl font-black text-white mb-2">Qual o faturamento mensal médio atual?</h3>
-                  <p className="text-sm text-slate-400 mb-8">Precisamos saber o volume da sua operação para dimensionar a capacidade dos servidores (TTFV).</p>
+                  <p className="text-sm text-slate-400 mb-8">Precisamos saber o volume da sua operação para entender a complexidade dos fluxos.</p>
                   
                   <div className="space-y-3">
-                     {['Até R$ 50.000', 'De R$ 50k a R$ 200k', 'De R$ 200k a R$ 500k', 'Acima de R$ 500.000'].map((opt) => (
+                     {['Até R$ 100 mil', 'De R$ 100 mil a R$ 500 mil', 'De R$ 500 mil a R$ 2 milhões', 'Acima de R$ 2 milhões'].map((opt) => (
                         <button
                           key={opt}
                           onClick={() => { setFormData({...formData, revenue: opt}); nextStep(); }}
@@ -123,11 +123,11 @@ export default function ApplyPage() {
 
              {step === 2 && (
                 <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-                  <h3 className="text-2xl font-black text-white mb-2">Qual o tamanho do seu time de vendas hoje?</h3>
-                  <p className="text-sm text-slate-400 mb-8">Para calcularmos quantos Agentes de IA serão necessários para substituir ou escalar o gargalo.</p>
+                  <h3 className="text-2xl font-black text-white mb-2">Qual o tamanho da sua equipe comercial/operação hoje?</h3>
+                  <p className="text-sm text-slate-400 mb-8">Para entendermos como as automações podem apoiar ou otimizar a rotina atual do time.</p>
                   
                   <div className="space-y-3">
-                     {['Apenas eu (Autônomo)', '1 a 3 vendedores', '4 a 10 vendedores', 'Mais de 10 vendedores'].map((opt) => (
+                     {['1 a 5 pessoas', '6 a 20 pessoas', '21 a 50 pessoas', 'Mais de 50 pessoas'].map((opt) => (
                         <button
                           key={opt}
                           onClick={() => { setFormData({...formData, teamSize: opt}); nextStep(); }}
@@ -145,15 +145,15 @@ export default function ApplyPage() {
 
              {step === 3 && (
                 <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-                  <h3 className="text-2xl font-black text-white mb-2">Qual é o seu maior gargalo hoje?</h3>
-                  <p className="text-sm text-slate-400 mb-8">Seja brutalmente honesto. Onde o dinheiro está vazando?</p>
+                  <h3 className="text-2xl font-black text-white mb-2">Qual é o seu maior gargalo operacional hoje?</h3>
+                  <p className="text-sm text-slate-400 mb-8">Onde estão os maiores pontos de fricção ou perdas?</p>
                   
                   <div className="space-y-3">
                      {[
-                       'Leads desqualificados (muito curioso)', 
-                       'Demora no atendimento (lead esfria)', 
-                       'Dificuldade de escalar (dependo de pessoas)', 
-                       'Custo alto com SDRs e time comercial'
+                       'Demora no atendimento comercial (oportunidades esfriam)', 
+                       'Contatos repetitivos e desqualificados sobrecarregando o time', 
+                       'Dificuldade em acompanhar e cobrar faturamento atrasado', 
+                       'Sistemas desconectados e muito trabalho manual interno'
                      ].map((opt) => (
                         <button
                           key={opt}
@@ -173,11 +173,11 @@ export default function ApplyPage() {
              {step === 4 && (
                 <form onSubmit={handleSubmit} className="animate-in fade-in slide-in-from-right-4 duration-500">
                   <h3 className="text-2xl font-black text-white mb-2">Última etapa.</h3>
-                  <p className="text-sm text-slate-400 mb-8">Para onde enviamos o link de agendamento ou aprovação do setup?</p>
+                  <p className="text-sm text-slate-400 mb-8">Para onde enviamos o retorno do seu diagnóstico operacional?</p>
                   
                   <div className="space-y-5">
                      <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Nome do C-Level / Responsável</label>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Nome Completo</label>
                         <input 
                            type="text" 
                            required 
@@ -197,7 +197,7 @@ export default function ApplyPage() {
                         />
                      </div>
                      <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">WhatsApp (Com DDD)</label>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">WhatsApp de Contato (Com DDD)</label>
                         <input 
                            type="tel" 
                            required 
@@ -213,7 +213,7 @@ export default function ApplyPage() {
                       <ArrowLeft className="w-4 h-4 mr-2" /> Voltar
                     </Button>
                     <Button type="submit" className="h-14 px-8 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-black rounded-xl transition-all hover:scale-105 uppercase tracking-widest">
-                      Enviar Aplicação <ArrowRight className="w-5 h-5 ml-2" />
+                      Enviar Diagnóstico <ArrowRight className="w-5 h-5 ml-2" />
                     </Button>
                   </div>
                 </form>
@@ -226,19 +226,19 @@ export default function ApplyPage() {
                   </div>
                   <h3 className="text-3xl font-black text-white mb-4">Aplicação Recebida!</h3>
                   <p className="text-slate-400 leading-relaxed mb-8">
-                    Nosso sistema já processou os seus dados. Um de nossos diretores analisará seu perfil de faturamento em relação ao seu gargalo atual.
+                    Nosso sistema já processou os seus dados. Um de nossos especialistas analisará seu perfil de faturamento em relação ao seu gargalo atual.
                   </p>
                   <div className="bg-slate-950 border border-slate-800 rounded-xl p-6 mb-8 text-left">
                      <p className="text-sm font-medium text-slate-300 mb-2">Próximos passos:</p>
                      <ul className="space-y-2 text-sm text-slate-500">
-                        <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Você receberá um e-mail em até 1 hora.</li>
-                        <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Caso aprovado, agendaremos a reunião de Setup.</li>
-                        <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> SinergIA OS será implementado em 48h (TTFV).</li>
+                        <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Você receberá um e-mail de confirmação em breve.</li>
+                        <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Entraremos em contato via WhatsApp para marcar uma conversa.</li>
+                        <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Mapearemos os fluxos de integração ideais para sua operação.</li>
                      </ul>
                   </div>
                   <Link href="/">
                     <Button variant="outline" className="h-12 px-8 border-white/10 text-slate-300 hover:text-white hover:bg-white/5 rounded-xl">
-                      Voltar ao Painel
+                      Voltar à Página Inicial
                     </Button>
                   </Link>
                 </div>
