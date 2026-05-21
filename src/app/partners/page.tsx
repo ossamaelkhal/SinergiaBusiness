@@ -386,6 +386,113 @@ export default function PartnersPage() {
         </div>
       </section>
 
+      {/* Playbook de Oportunidades (Como Prospectar) */}
+      <section className="py-24 bg-slate-950 border-t border-white/5 relative">
+        <div className="container mx-auto px-4 md:px-6 max-w-6xl">
+          <div className="text-center max-w-3xl mx-auto mb-20">
+            <span className="text-emerald-400 font-bold uppercase tracking-wider text-xs bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+              Guia de Indicações
+            </span>
+            <h2 className="text-3xl md:text-5xl font-black text-white mt-4 tracking-tight">
+              Playbook de Oportunidades
+            </h2>
+            <p className="text-slate-400 mt-4 leading-relaxed font-light text-lg">
+              Identifique dores comuns no dia a dia de potenciais clientes e saiba qual solução exata do portfólio da SinergIA indicar.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              {
+                title: "Automação de Vendas",
+                badge: "Sales Ops",
+                oQueE: "Conectar o CRM (Pipedrive, RD Station) com WhatsApp e e-mail de forma direta.",
+                oQueFaz: "O lead chega, é cadastrado, o vendedor é notificado e o acompanhamento inicial é imediato.",
+                indicacao: "Empresas que perdem vendas devido à demora no retorno comercial ou falta de organização.",
+              },
+              {
+                title: "Atendimento Inteligente",
+                badge: "Agentes de IA",
+                oQueE: "Assistentes virtuais que entendem e respondem de forma natural no WhatsApp.",
+                oQueFaz: "Triagem de leads, qualificação ativa, resposta de dúvidas complexas e agendamentos 24/7.",
+                indicacao: "Negócios com alto fluxo de suporte inicial ou que precisam filtrar curiosos antes do comercial.",
+              },
+              {
+                title: "Integração de Sistemas",
+                badge: "Workflows",
+                oQueE: "Fazer ferramentas distintas trabalharem juntas sem digitação humana.",
+                oQueFaz: "Sincronização de planilhas, bancos de dados, faturas e ERPs de forma automática.",
+                indicacao: "Gestores que identificam a equipe gastando horas copiando e colando dados manualmente.",
+              },
+              {
+                title: "Arquitetura de Receita",
+                badge: "Stack Digital",
+                oQueE: "Desenho da infraestrutura digital para suportar o crescimento da empresa.",
+                oQueFaz: "Seleção, montagem e integração de todas as ferramentas e fluxos da área comercial.",
+                indicacao: "Empresas em rápida expansão que sentem que a operação virou um caos de sistemas desconexos.",
+              },
+              {
+                title: "Dashboards & BI",
+                badge: "Telemetria",
+                oQueE: "Transformação de dados brutos e planilhas em painéis visuais fáceis de ler.",
+                oQueFaz: "Gráficos de vendas, margem líquida e gargalos integrados automaticamente em tempo real.",
+                indicacao: "Empresários que sentem que estão pilotando às cegas e não sabem suas métricas reais.",
+              },
+              {
+                title: "Landing Pages com IA",
+                badge: "Atração",
+                oQueE: "Páginas de captura com sistemas inteligentes de qualificação acoplados.",
+                oQueFaz: "Criação do site com formulários integrados que iniciam conversas imediatas no WhatsApp.",
+                indicacao: "Profissionais liberais (advogados, médicos) ou produtores que precisam captar clientes ativamente.",
+              },
+              {
+                title: "Consultoria de Maturidade",
+                badge: "Roadmap",
+                oQueE: "Diagnóstico profundo para estruturar a modernização tecnológica.",
+                oQueFaz: "Análise de processos e entrega de roteiro técnico focado em eficiência e retorno financeiro.",
+                indicacao: "Empresas tradicionais que desejam se digitalizar, mas não sabem por qual etapa começar.",
+              },
+              {
+                title: "Multi-Agentes Autónomos",
+                badge: "Sistemas Autónomos",
+                oQueE: "IAs coordenadas cooperando em tarefas complexas e em lote.",
+                oQueFaz: "Fluxo sequencial de tarefas (ex: uma IA pesquisa, outra redige, e uma terceira revisa).",
+                indicacao: "Agências, equipes de marketing ou times que demandam alta escala em processos repetitivos.",
+              }
+            ].map((item, idx) => (
+              <div key={idx} className="bg-slate-900/40 border border-white/5 p-6 rounded-3xl hover:border-indigo-500/20 hover:bg-slate-900/80 transition-all flex flex-col justify-between group">
+                <div>
+                  <div className="flex justify-between items-start mb-4">
+                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+                      {item.badge}
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-extrabold text-white mb-3 group-hover:text-emerald-400 transition-colors">
+                    {item.title}
+                  </h3>
+                  <div className="space-y-3 mb-6 text-xs text-slate-400">
+                    <div>
+                      <span className="block font-bold text-slate-500 uppercase tracking-widest text-[9px] mb-1">O que é</span>
+                      <p className="font-light leading-relaxed">{item.oQueE}</p>
+                    </div>
+                    <div>
+                      <span className="block font-bold text-slate-500 uppercase tracking-widest text-[9px] mb-1">O que fazemos</span>
+                      <p className="font-light leading-relaxed">{item.oQueFaz}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="pt-4 border-t border-white/5">
+                  <span className="block font-bold text-emerald-400 uppercase tracking-widest text-[9px] mb-1">Gatilho de Prospecção</span>
+                  <p className="text-xs text-slate-300 font-medium leading-relaxed">
+                    💡 &quot;{item.indicacao}&quot;
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Holistic Integration & Lead Telemetry */}
       <section className="py-20 bg-slate-950 border-t border-white/5 relative">
         <div className="container mx-auto px-4 md:px-6 max-w-6xl">

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Calculator, ArrowRight, Clock, HelpCircle, AlertCircle, RefreshCw, DollarSign, TrendingDown } from 'lucide-react';
+import { Calculator, ArrowRight, Clock, AlertCircle, RefreshCw, DollarSign, TrendingDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
@@ -54,6 +54,34 @@ export default function SinergiaAudit() {
     setResult(null);
   };
 
+  // Strategic recommendation mapping based on inputs
+  const getRecommendation = () => {
+    if (delay !== 'sub5m') {
+      return {
+        title: "Recuperação Comercial e Triagem Ativa",
+        primary: "Automação de Vendas (Sales Ops)",
+        secondary: "Agentes de Atendimento Inteligente",
+        desc: "Seus contatos comerciais estão esfriando na fila. Para estancar a perda de receita, a recomendação é estruturar a distribuição de leads via CRM (Sales Ops) associada a assistentes virtuais de atendimento rápido, garantindo resposta em menos de 10 segundos no WhatsApp."
+      };
+    } else if (leads > 300) {
+      return {
+        title: "Escala Operacional e Redução de Gargalos",
+        primary: "Integração de Sistemas (Workflows)",
+        secondary: "Orquestração de Multi-Agentes",
+        desc: "Excelente tempo de resposta! Porém, com um volume superior a 300 contatos/mês, sua equipe provavelmente está sobrecarregada com tarefas repetitivas e digitação manual. A prioridade é automatizar fluxos de dados internos (Workflows) e implementar robôs coordenados de backoffice."
+      };
+    } else {
+      return {
+        title: "Telemetria Estratégica e Roteiro de Crescimento",
+        primary: "Dashboards e Monitoramento (BI)",
+        secondary: "Consultoria de Maturidade Digital",
+        desc: "Seu fluxo comercial inicial está saudável e sob controle. Para crescer de forma sustentável, recomendamos mapear seus números reais em painéis integrados (BI) e realizar uma auditoria de processos para entender qual setor deve ser digitalizado primeiro."
+      };
+    }
+  };
+
+  const rec = getRecommendation();
+
   return (
     <section className="w-full py-24 bg-slate-950 relative border-y border-white/5 overflow-hidden">
       {/* Background ambient glows */}
@@ -73,14 +101,14 @@ export default function SinergiaAudit() {
                 Calcule a perda operacional do seu negócio.
               </span>
            </h2>
-           <p className="text-slate-400 text-lg max-w-2xl mx-auto">
+           <p className="text-slate-400 text-lg max-w-2xl mx-auto font-light leading-relaxed">
               Estudos de mercado apontam que contatos respondidos após 5 minutos têm uma queda de até 80% na chance de conversão. Avalie seu cenário atual de forma transparente.
            </p>
         </div>
 
         {/* Diagnostic Card */}
         <div className="bg-slate-900/50 border border-white/10 rounded-3xl p-8 backdrop-blur-xl shadow-xl relative">
-           
+            
            {!calculated ? (
              <form onSubmit={handleCalculate} className="space-y-6">
                 <div className="grid md:grid-cols-3 gap-6">
@@ -170,7 +198,7 @@ export default function SinergiaAudit() {
                         <TrendingDown className="w-6 h-6 text-rose-500" />
                         {result?.leadsLost} contatos
                       </div>
-                      <p className="text-xs text-slate-400 mt-2">Oportunidades de negócios que perdem interesse devido à demora no primeiro contato comercial.</p>
+                      <p className="text-xs text-slate-400 mt-2 font-light">Oportunidades de negócios que perdem interesse devido à demora no primeiro contato comercial.</p>
                    </div>
                    <div className="bg-slate-950 rounded-2xl p-6 border border-white/5">
                       <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Vazamento de Receita Estimado/Mês</div>
@@ -178,14 +206,27 @@ export default function SinergiaAudit() {
                         <DollarSign className="w-6 h-6 text-emerald-400 shrink-0" />
                         R$ {result?.revenueLeak.toLocaleString('pt-BR')}
                       </div>
-                      <p className="text-xs text-slate-400 mt-2">Receita não realizada considerando uma taxa básica de fechamento de 10% sobre os leads perdidos.</p>
+                      <p className="text-xs text-slate-400 mt-2 font-light">Receita não realizada considerando uma taxa básica de fechamento de 10% sobre os leads perdidos.</p>
                    </div>
                 </div>
 
-                <div className="bg-indigo-950/20 border border-indigo-500/20 rounded-2xl p-6 text-center mb-8">
-                   <p className="text-sm text-slate-300 leading-relaxed max-w-xl mx-auto">
-                      Desenvolvemos fluxos integrados que garantem **atendimento imediato** nos seus canais de vendas. Ao eliminar esse atraso, sua equipe recebe apenas contatos já validados e no momento ideal de compra.
-                   </p>
+                {/* Dynamic Strategic Recommendation */}
+                <div className="bg-slate-950/80 border border-indigo-500/30 rounded-2xl p-6 text-left mb-8">
+                  <div className="flex items-center gap-2 mb-3 text-xs font-bold text-emerald-400 uppercase tracking-wider">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Solução Recomendada: {rec.title}
+                  </div>
+                  <p className="text-slate-300 text-sm leading-relaxed mb-6 font-light">{rec.desc}</p>
+                  <div className="grid sm:grid-cols-2 gap-3 pt-3 border-t border-white/5">
+                    <div className="bg-slate-900 px-4 py-3 rounded-xl border border-white/5 text-xs text-white">
+                      <span className="block font-bold text-slate-500 mb-1 uppercase tracking-wider">Módulo Principal</span>
+                      {rec.primary}
+                    </div>
+                    <div className="bg-slate-900 px-4 py-3 rounded-xl border border-white/5 text-xs text-white">
+                      <span className="block font-bold text-slate-500 mb-1 uppercase tracking-wider">Módulo de Apoio</span>
+                      {rec.secondary}
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
