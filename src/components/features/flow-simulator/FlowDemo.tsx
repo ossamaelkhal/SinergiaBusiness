@@ -214,6 +214,238 @@ const FlowDemo: React.FC<FlowDemoProps> = ({ isOpen, onClose }) => {
                     automation: 'Integração com ERPs principais'
                 }
             ]
+        },
+        {
+            id: 'active-billing',
+            name: 'Cobrança & Conciliação Ativa',
+            description: 'Régua inteligente de contas a receber com acordos no WhatsApp e baixa automática no ERP',
+            category: 'Financeiro',
+            estimatedTime: '45 segundos',
+            efficiency: '90%',
+            steps: [
+                {
+                    id: 1,
+                    name: 'Identificação de Atraso',
+                    description: 'Sistema identifica faturas vencidas no ERP corporativo',
+                    type: 'trigger',
+                    duration: 5,
+                    automation: 'Verificação diária programada por API'
+                },
+                {
+                    id: 2,
+                    name: 'Análise de Histórico',
+                    description: 'IA avalia o perfil de pagamento e atrasos do cliente',
+                    type: 'ai',
+                    duration: 10,
+                    automation: 'Algoritmo de comportamento financeiro'
+                },
+                {
+                    id: 3,
+                    name: 'Geração de Proposta',
+                    description: 'Criação de link de pagamento Pix com descontos autorizados',
+                    type: 'integration',
+                    duration: 8,
+                    automation: 'Conexão instantânea com gateway bancário'
+                },
+                {
+                    id: 4,
+                    name: 'Disparo de Mensagem',
+                    description: 'Envio amigável de cobrança e negociação no WhatsApp',
+                    type: 'notification',
+                    duration: 4,
+                    automation: 'Régua inteligente de disparo individual'
+                },
+                {
+                    id: 5,
+                    name: 'Confirmação do Pix',
+                    description: 'Identificação imediata da liquidação bancária',
+                    type: 'validation',
+                    duration: 5,
+                    automation: 'Webhook de confirmação de pagamento'
+                },
+                {
+                    id: 6,
+                    name: 'Baixa e Envio de Recibo',
+                    description: 'Compensação no ERP e recibo enviado ao cliente',
+                    type: 'integration',
+                    duration: 8,
+                    automation: 'Lançamento automático de receita no ERP'
+                }
+            ]
+        },
+        {
+            id: 'order-quoting',
+            name: 'Cotação Autônoma de Pedidos',
+            description: 'Processamento de orçamentos e listas de compras via foto/WhatsApp direto no ERP',
+            category: 'Operações',
+            estimatedTime: '1 minuto',
+            efficiency: '94%',
+            steps: [
+                {
+                    id: 1,
+                    name: 'Entrada de Imagem/Áudio',
+                    description: 'Cliente envia foto de lista manuscrita no WhatsApp',
+                    type: 'trigger',
+                    duration: 10,
+                    automation: 'Recepção de arquivos e mídias por WhatsApp API'
+                },
+                {
+                    id: 2,
+                    name: 'Leitura de Lista (OCR)',
+                    description: 'IA decodifica produtos, marcas e quantidades da foto',
+                    type: 'ai',
+                    duration: 15,
+                    automation: 'Visão computacional e processamento textual'
+                },
+                {
+                    id: 3,
+                    name: 'Consulta de Estoque',
+                    description: 'Verificação de disponibilidade e preços no ERP',
+                    type: 'integration',
+                    duration: 8,
+                    automation: 'Consulta paralela em banco de dados'
+                },
+                {
+                    id: 4,
+                    name: 'Aplicação de Regras',
+                    description: 'Determinação de descontos e custos de frete',
+                    type: 'automation',
+                    duration: 6,
+                    automation: 'Motor de cálculo comercial parametrizado'
+                },
+                {
+                    id: 5,
+                    name: 'Geração de PDF e Pix',
+                    description: 'Montagem do orçamento final e chave de pagamento',
+                    type: 'integration',
+                    duration: 10,
+                    automation: 'Geração e upload em lote de propostas comerciais'
+                },
+                {
+                    id: 6,
+                    name: 'Envio de Proposta',
+                    description: 'WhatsApp com PDF e Pix enviado ao comprador',
+                    type: 'notification',
+                    duration: 4,
+                    automation: 'Notificação automática com botões de ação'
+                }
+            ]
+        },
+        {
+            id: 'margin-alert',
+            name: 'Consolidação de Métricas (BI)',
+            description: 'Unificação diária de dados de tráfego, CRM e ERP com alertas executivos no WhatsApp',
+            category: 'Gestão',
+            estimatedTime: '15 segundos',
+            efficiency: '96%',
+            steps: [
+                {
+                    id: 1,
+                    name: 'Fechamento de Custos',
+                    description: 'Coleta de investimentos em campanhas (Meta/Google Ads)',
+                    type: 'trigger',
+                    duration: 4,
+                    automation: 'Extração automática de relatórios de tráfego'
+                },
+                {
+                    id: 2,
+                    name: 'Coleta de Leads',
+                    description: 'Resumo de oportunidades ganhas e perdidas no CRM',
+                    type: 'integration',
+                    duration: 8,
+                    automation: 'Integração de funis comerciais'
+                },
+                {
+                    id: 3,
+                    name: 'Faturamento do ERP',
+                    description: 'Leitura de faturamento fiscal bruto e líquido do dia',
+                    type: 'integration',
+                    duration: 6,
+                    automation: 'Consulta de extrato de vendas fiscais'
+                },
+                {
+                    id: 4,
+                    name: 'Cálculo de ROI/Margem',
+                    description: 'Consolidação de CAC, LTV e margem de lucro operacional',
+                    type: 'ai',
+                    duration: 10,
+                    automation: 'Algoritmo de consolidação financeira'
+                },
+                {
+                    id: 5,
+                    name: 'Validação de Alertas',
+                    description: 'Verificação de desvios contra a meta mensal',
+                    type: 'validation',
+                    duration: 4,
+                    automation: 'Verificação de limites de margens de segurança'
+                },
+                {
+                    id: 6,
+                    name: 'Relatório Executivo',
+                    description: 'Resumo com gráficos e insights enviado aos diretores',
+                    type: 'notification',
+                    duration: 3,
+                    automation: 'Mensagem formatada para leitura rápida no WhatsApp'
+                }
+            ]
+        },
+        {
+            id: 'staff-scheduling',
+            name: 'Gestão de Escalas e Ausências',
+            description: 'Processamento de atestados médicos, busca e agendamento automático de suplentes de equipes',
+            category: 'Operações',
+            estimatedTime: '2 minutos',
+            efficiency: '95%',
+            steps: [
+                {
+                    id: 1,
+                    name: 'Envio de Atestado',
+                    description: 'Colaborador envia foto de atestado pelo WhatsApp',
+                    type: 'trigger',
+                    duration: 8,
+                    automation: 'Captura de documentos de forma descentralizada'
+                },
+                {
+                    id: 2,
+                    name: 'Leitura e Validação',
+                    description: 'IA lê o CID, período de afastamento e dados do CRM',
+                    type: 'ai',
+                    duration: 12,
+                    automation: 'OCR clínico de alta precisão'
+                },
+                {
+                    id: 3,
+                    name: 'Busca de Suplentes',
+                    description: 'Filtro de profissionais qualificados na mesma região',
+                    type: 'integration',
+                    duration: 10,
+                    automation: 'Cruzamento com banco de talentos geolocalizado'
+                },
+                {
+                    id: 4,
+                    name: 'Convite Automático',
+                    description: 'Disparo de propostas de plantão via WhatsApp',
+                    type: 'notification',
+                    duration: 6,
+                    automation: 'Fila inteligente de mensagens de aceite'
+                },
+                {
+                    id: 5,
+                    name: 'Confirmação do Plantão',
+                    description: 'Primeiro suplente a aceitar garante a escala',
+                    type: 'validation',
+                    duration: 5,
+                    automation: 'Webhook de confirmação de presença'
+                },
+                {
+                    id: 6,
+                    name: 'Atualização do Sistema',
+                    description: 'Escala e folha de pagamento atualizadas no ERP',
+                    type: 'integration',
+                    duration: 8,
+                    automation: 'Integração direta com ERP de Recursos Humanos'
+                }
+            ]
         }
     ]
 
