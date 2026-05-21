@@ -1,47 +1,48 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Card, CardContent } from "@/components/ui/card";
-import { Calculator, TrendingUp, Users, DollarSign, ArrowRight, Activity, Percent, MessageSquare, Target, Calendar, FileText } from "lucide-react";
+import { Calculator, TrendingUp, Users, DollarSign, ArrowRight, Activity, Percent, Workflow, Cpu, Database, Landmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-type SolutionType = 'chatbot' | 'scoring' | 'meeting' | 'proposal';
+type SolutionType = 'salesops' | 'agents' | 'workflows' | 'billing';
 
 export function ROICalculator() {
   const [leadsPorMes, setLeadsPorMes] = useState(500);
   const [ticketMedio, setTicketMedio] = useState(2500);
   const [taxaConversaoAtual, setTaxaConversaoAtual] = useState(2); // %
-  const [activeSolution, setActiveSolution] = useState<SolutionType>('chatbot');
+  const [activeSolution, setActiveSolution] = useState<SolutionType>('salesops');
 
-  // Soluções de IA com dados de Benchmarks (Pesquisa 2026)
+  // Soluções de IA SinergIA alinhadas ao catálogo de 8 ofertas
   const solutions = {
-    chatbot: {
-      name: 'Agente BDR (Chatbot)',
-      icon: <MessageSquare className="w-5 h-5" />,
-      multiplier: 2.4,
-      desc: 'Atende em 3 segundos. Aumenta a conversão em até 2.4x e corta custos de SDR em 65% (Efeito Cliff evitado).',
-      extraImpact: 'Redução de ~65% em custos de SDR'
+    salesops: {
+      name: 'Automação de Vendas',
+      icon: <Workflow className="w-5 h-5" />,
+      multiplier: 2.2,
+      desc: 'Integração ativa do CRM com WhatsApp. Distribuição instantânea de leads e réguas de follow-up automático para evitar que contatos esfriem comercialmente.',
+      extraImpact: 'Aproveitamento de contatos comerciais até 2.2x maior'
     },
-    scoring: {
-      name: 'Lead Scoring Preditivo',
-      icon: <Target className="w-5 h-5" />,
-      multiplier: 1.75,
-      desc: 'Encontra a agulha no palheiro. O Machine Learning aumenta a conversão Lead-to-Opp em 75%.',
-      extraImpact: 'Ciclo de vendas 28% mais curto'
+    agents: {
+      name: 'Agentes de Atendimento',
+      icon: <Cpu className="w-5 h-5" />,
+      multiplier: 2.8,
+      desc: 'Qualificação de contatos e resposta de dúvidas técnicas 24/7 de forma humanizada via WhatsApp, passando ao vendedor apenas oportunidades quentes.',
+      extraImpact: 'Redução drástica no tempo de triagem comercial'
     },
-    meeting: {
-      name: 'Booking Automatizado',
-      icon: <Calendar className="w-5 h-5" />,
-      multiplier: 3.2,
-      desc: 'Agendamento em 1 clique sem atrito. Gera 3.2x mais reuniões agendadas que o fluxo normal.',
-      extraImpact: 'Queda de 50% em No-Shows'
+    workflows: {
+      name: 'Integração de Sistemas',
+      icon: <Database className="w-5 h-5" />,
+      multiplier: 1.4,
+      desc: 'Sincronização automática de dados entre CRM, planilhas e ERPs principais, poupando a equipe de digitar e copiar relatórios de forma manual.',
+      extraImpact: 'Economia média de 15h semanais por vendedor'
     },
-    proposal: {
-      name: 'Gerador de Propostas IA',
-      icon: <FileText className="w-5 h-5" />,
-      multiplier: 1.1,
-      desc: 'Cria propostas hiper-personalizadas em segundos, aumentando a taxa de fechamento final em 10%.',
-      extraImpact: 'Economiza 2.2h/dia por vendedor'
+    billing: {
+      name: 'Recuperação de Contas',
+      icon: <Landmark className="w-5 h-5" />,
+      multiplier: 1.8,
+      desc: 'Lembretes de cobrança automáticos e amigáveis via WhatsApp integrados ao banco e gateway, resolvendo pendências financeiras de forma amigável.',
+      extraImpact: 'Recuperação média de até 40% de caixa vencido'
     }
   };
 
@@ -60,7 +61,7 @@ export function ROICalculator() {
   const aumentoPercentual = Math.round(((receitaSinergia - receitaAtual) / receitaAtual) * 100) || 0;
 
   return (
-    <section className="py-24 bg-slate-950 relative overflow-hidden">
+    <section id="roi-calculator" className="py-24 bg-slate-950 relative overflow-hidden">
       {/* Background Orbs */}
       <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none -translate-y-1/2"></div>
       <div className="absolute top-1/2 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none -translate-y-1/2"></div>
@@ -74,9 +75,9 @@ export function ROICalculator() {
           <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight mb-4">
             Quanto dinheiro seu CRM está <span className="text-emerald-400">queimando?</span>
           </h2>
-          <p className="text-slate-400 text-lg">
-            A cada 5 minutos de atraso na resposta, a chance de qualificar um lead <strong className="text-white">cai 21 vezes</strong>. 
-            Simule o impacto financeiro de implantar soluções autônomas na sua operação B2B.
+          <p className="text-slate-400 text-lg font-light leading-relaxed">
+            A cada 5 minutos de atraso na resposta, a chance de qualificar um lead <strong className="text-white">cai drasticamente</strong>. 
+            Simule o impacto financeiro de implantar soluções autônomas na sua operação comercial.
           </p>
         </div>
 
@@ -107,7 +108,7 @@ export function ROICalculator() {
               <h3 className="text-xl font-bold text-white mb-2">
                 Simulador de Entradas
               </h3>
-              <p className="text-slate-500 text-sm mb-8 border-b border-white/5 pb-4">
+              <p className="text-slate-500 text-sm mb-8 border-b border-white/5 pb-4 leading-relaxed font-light">
                 {activeConfig.desc}
               </p>
 
@@ -240,14 +241,16 @@ export function ROICalculator() {
                     + R$ {receitaAdicional.toLocaleString('pt-BR')} <span className="text-2xl text-emerald-500/50">/mês</span>
                   </div>
                   <div className="mt-2 text-sm text-slate-500 font-bold tracking-wide uppercase">
-                    Crescimento direto de {aumentoPercentual}% no Bottom-Line.
+                    Crescimento direto de {aumentoPercentual}% no faturamento analisado.
                   </div>
                </div>
 
-               <Button className="relative z-10 bg-white text-slate-950 hover:bg-emerald-400 rounded-xl px-8 h-14 whitespace-nowrap font-black uppercase tracking-wider w-full md:w-auto hover:scale-105 transition-transform duration-300">
-                  Resgatar minha Receita
-                  <ArrowRight className="w-5 h-5 ml-2" />
-               </Button>
+               <Link href="/apply" className="relative z-10 w-full md:w-auto">
+                 <Button className="bg-white text-slate-950 hover:bg-emerald-400 rounded-xl px-8 h-14 whitespace-nowrap font-black uppercase tracking-wider w-full hover:scale-105 transition-transform duration-300">
+                    Resgatar minha Receita
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                 </Button>
+               </Link>
             </div>
 
           </div>
