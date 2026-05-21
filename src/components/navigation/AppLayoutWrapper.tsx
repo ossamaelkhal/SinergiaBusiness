@@ -34,9 +34,7 @@ export function AppLayoutWrapper({ children }: AppLayoutWrapperProps) {
   return (
     <>
       <Header />
-      <div className="pt-20">
-        {children}
-      </div>
+      {children}
     </>
   )
 }

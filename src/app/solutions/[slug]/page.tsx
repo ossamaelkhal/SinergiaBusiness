@@ -110,7 +110,7 @@ export default function NicheSolutionPage({ params }: { params: { slug: string }
 
       <div className="relative z-10 flex flex-col min-h-screen">
         {/* Navigation Breadcrumb */}
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 pt-28 pb-8">
           <Link href="/solutions" className="inline-flex items-center text-sm font-medium text-slate-400 hover:text-white transition-colors group">
             <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
             Catálogo de Soluções

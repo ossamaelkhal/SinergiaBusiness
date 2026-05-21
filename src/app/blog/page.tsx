@@ -40,7 +40,7 @@ export default function BlogPage() {
     return (
         <div className="min-h-screen bg-slate-950">
             {/* Header */}
-            <div className="bg-slate-950 py-20 text-center text-white border-b border-white/5">
+            <div className="bg-slate-950 pt-32 pb-20 text-center text-white border-b border-white/5">
                 <h1 className="text-4xl font-bold mb-4">Blog SinergIA</h1>
                 <p className="text-xl text-slate-400 max-w-2xl mx-auto">
                     Insights práticos sobre Automação, IA e Vendas para escalar sua operação.

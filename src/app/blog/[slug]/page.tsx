@@ -52,35 +52,35 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
     }
 
     return (
-        <article className="min-h-screen bg-white pb-20">
+        <article className="min-h-screen bg-slate-950 text-slate-100 pb-20">
             {/* Header Image Area (Placeholder) */}
-            <div className="h-64 md:h-96 bg-slate-100 w-full relative">
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/90"></div>
+            <div className="pt-20 h-80 md:h-[400px] bg-slate-900/40 w-full relative">
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-950"></div>
                 <div className="container mx-auto px-4 h-full flex flex-col justify-end pb-8 relative z-10">
                     <Link href="/blog">
-                        <Button variant="ghost" className="mb-6 hover:bg-white/50">
+                        <Button variant="ghost" className="mb-6 hover:bg-white/10 text-white">
                             <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para o Blog
                         </Button>
                     </Link>
                     <div className="flex gap-2 mb-4">
-                        <span className="bg-orange-100 text-orange-800 text-xs font-semibold px-2.5 py-0.5 rounded">{post.category}</span>
+                        <span className="bg-emerald-500/20 text-emerald-400 text-xs font-semibold px-2.5 py-0.5 rounded border border-emerald-500/20">{post.category}</span>
                     </div>
-                    <h1 className="text-3xl md:text-5xl font-bold text-slate-900 mb-4">{post.title}</h1>
-                    <p className="text-slate-500">{post.date} • Leitura de 5 min</p>
+                    <h1 className="text-3xl md:text-5xl font-bold text-white mb-4">{post.title}</h1>
+                    <p className="text-slate-400">{post.date} • Leitura de 5 min</p>
                 </div>
             </div>
 
-            <div className="container mx-auto px-4 max-w-3xl mt-8">
+            <div className="container mx-auto px-4 max-w-3xl mt-8 text-slate-300">
                 <div
-                    className="prose prose-lg prose-slate hover:prose-a:text-orange-500"
+                    className="prose prose-lg prose-invert hover:prose-a:text-emerald-400"
                     dangerouslySetInnerHTML={{ __html: post.content }}
                 />
 
-                <div className="mt-16 pt-8 border-t border-slate-200">
-                    <h3 className="text-2xl font-bold mb-4">Gostou deste conteúdo?</h3>
-                    <p className="mb-6 text-slate-600">Inscreva-se na nossa newsletter para receber dicas semanais de automação.</p>
+                <div className="mt-16 pt-8 border-t border-white/10">
+                    <h3 className="text-2xl font-bold mb-4 text-white">Gostou deste conteúdo?</h3>
+                    <p className="mb-6 text-slate-400">Inscreva-se na nossa newsletter para receber dicas semanais de automação.</p>
                     <div className="flex gap-2">
-                        <Button className="bg-orange-500 hover:bg-orange-600">Inscrever-se</Button>
+                        <Button className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold">Inscrever-se</Button>
                     </div>
                 </div>
             </div>
