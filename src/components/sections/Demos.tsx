@@ -48,7 +48,7 @@ export default function Demos({ onFlowClick, onBuilderClick, onGamificationClick
                                 </div>
                                 <h3 className="text-xl font-bold mb-3 text-white group-hover:text-emerald-300 transition-colors">Calculadora ROI</h3>
                                 <p className="text-indigo-100/60 text-sm leading-relaxed mb-8 flex-1">
-                                    Simule o impacto financeiro exato de trocar tarefas manuais por IAs focadas em lucro.
+                                    Identifique os vazamentos de receita da sua operação e veja quanto pode recuperar através da otimização de processos.
                                 </p>
                                 <div className="flex items-center justify-between mt-auto border-t border-white/10 pt-4">
                                     <span className="text-sm font-bold tracking-tight text-emerald-400 group-hover:text-white transition-colors">Calcular Agora</span>
@@ -115,7 +115,7 @@ export default function Demos({ onFlowClick, onBuilderClick, onGamificationClick
                             </div>
                             <h3 className="text-xl font-bold mb-3 text-white group-hover:text-amber-300 transition-colors">Tropa Simulator</h3>
                             <p className="text-indigo-100/60 text-sm leading-relaxed mb-8 flex-1">
-                                Bata objeções com um cliente agressivo gerado por IA (Áudio e Texto). Treino duro, jogo fácil.
+                                Treine seu time comercial simulando interações realistas com compradores exigentes em tempo real. Treino duro, jogo fácil.
                             </p>
                             <div className="flex items-center justify-between mt-auto border-t border-white/10 pt-4">
                                 <span className="text-sm font-bold tracking-tight text-amber-400 group-hover:text-white transition-colors">Iniciar Treino</span>
