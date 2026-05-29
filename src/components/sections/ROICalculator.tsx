@@ -3,258 +3,503 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent } from "@/components/ui/card";
-import { Calculator, TrendingUp, Users, DollarSign, ArrowRight, Activity, Percent, Workflow, Cpu, Database, Landmark } from "lucide-react";
+import { 
+  Calculator, 
+  TrendingUp, 
+  Users, 
+  DollarSign, 
+  ArrowRight, 
+  Activity, 
+  Clock, 
+  Workflow, 
+  Cpu, 
+  Database, 
+  Landmark, 
+  AlertTriangle,
+  HelpCircle,
+  Sparkles
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-type SolutionType = 'salesops' | 'agents' | 'workflows' | 'billing';
+const respostaOptions = [
+  { label: 'Menos de 5 minutos', value: 'under5', lossFactor: 0.0, desc: 'Ideal. Quase 100% de aproveitamento de leads.' },
+  { label: '5 a 15 minutos', value: '5-15min', lossFactor: 0.18, desc: 'Leve perda de tração comercial (~18% perdidos).' },
+  { label: '15 a 60 minutos', value: '15-60min', lossFactor: 0.38, desc: 'Gargalo visível. 38% dos leads esfriam antes do contato.' },
+  { label: '1 a 4 horas', value: '1-4h', lossFactor: 0.58, desc: 'Perda crítica. Mais da metade dos leads não respondem.' },
+  { label: 'Mais de 4 horas', value: 'over4h', lossFactor: 0.78, desc: 'Vazamento grave. 78% de desperdício em aquisição.' }
+];
 
 export function ROICalculator() {
-  const [leadsPorMes, setLeadsPorMes] = useState(500);
-  const [ticketMedio, setTicketMedio] = useState(2500);
-  const [taxaConversaoAtual, setTaxaConversaoAtual] = useState(2); // %
-  const [activeSolution, setActiveSolution] = useState<SolutionType>('salesops');
+  // 1. Inputs Gerais
+  const [leadsPorMes, setLeadsPorMes] = useState(300);
+  const [ticketMedio, setTicketMedio] = useState(2000);
+  const [taxaConversaoAtual, setTaxaConversaoAtual] = useState(3.0); // %
 
-  // Soluções de IA SinergIA alinhadas ao catálogo de 8 ofertas
-  const solutions = {
-    salesops: {
-      name: 'Automação de Vendas',
-      icon: <Workflow className="w-5 h-5" />,
-      multiplier: 2.2,
-      desc: 'Integração ativa do CRM com WhatsApp. Distribuição instantânea de leads e réguas de follow-up automático para evitar que contatos esfriem comercialmente.',
-      extraImpact: 'Aproveitamento de contatos comerciais até 2.2x maior'
-    },
-    agents: {
-      name: 'Agentes de Atendimento',
-      icon: <Cpu className="w-5 h-5" />,
-      multiplier: 2.8,
-      desc: 'Qualificação de contatos e resposta de dúvidas técnicas 24/7 de forma humanizada via WhatsApp, passando ao vendedor apenas oportunidades quentes.',
-      extraImpact: 'Redução drástica no tempo de triagem comercial'
-    },
-    workflows: {
-      name: 'Integração de Sistemas',
-      icon: <Database className="w-5 h-5" />,
-      multiplier: 1.4,
-      desc: 'Sincronização automática de dados entre CRM, planilhas e ERPs principais, poupando a equipe de digitar e copiar relatórios de forma manual.',
-      extraImpact: 'Economia média de 15h semanais por vendedor'
-    },
-    billing: {
-      name: 'Recuperação de Contas',
-      icon: <Landmark className="w-5 h-5" />,
-      multiplier: 1.8,
-      desc: 'Lembretes de cobrança automáticos e amigáveis via WhatsApp integrados ao banco e gateway, resolvendo pendências financeiras de forma amigável.',
-      extraImpact: 'Recuperação média de até 40% de caixa vencido'
-    }
-  };
+  // 2. Tempo de Resposta (Vendas)
+  const [tempoResposta, setTempoResposta] = useState('15-60min');
 
-  // Cálculos Atuais
-  const clientesAtuais = Math.round(leadsPorMes * (taxaConversaoAtual / 100));
-  const receitaAtual = clientesAtuais * ticketMedio;
+  // 3. Custos de Equipe (Overhead)
+  const [tamanhoEquipe, setTamanhoEquipe] = useState(4);
+  const [custoVendedor, setCustoVendedor] = useState(4500); // R$ por mês
+  const [tempoAdmin, setTempoAdmin] = useState(35); // % de tempo perdido em tarefas repetitivas
 
-  // Cálculos SinergIA
-  const activeConfig = solutions[activeSolution];
-  const taxaConversaoSinergia = Math.min(taxaConversaoAtual * activeConfig.multiplier, 100);
-  const clientesSinergia = Math.round(leadsPorMes * (taxaConversaoSinergia / 100));
-  const receitaSinergia = clientesSinergia * ticketMedio;
+  // 4. Financeiro (Inadimplência)
+  const [faturamentoFaturado, setFaturamentoFaturado] = useState(80000); // Faturamento via boleto/parcelado
+  const [taxaInadimplencia, setTaxaInadimplencia] = useState(6.0); // % de inadimplência ativa
 
-  // Ganhos
-  const receitaAdicional = receitaSinergia - receitaAtual;
-  const aumentoPercentual = Math.round(((receitaSinergia - receitaAtual) / receitaAtual) * 100) || 0;
+  // 5. Clientes / Contatos inativos (Base)
+  const [baseLeadsFrios, setBaseLeadsFrios] = useState(2000); // Base estagnada no CRM
+
+  // --- CÁLCULOS DETALHADOS DE PERDAS (Dinheiro deixado na mesa) ---
+
+  // A. Perda por Latência de Leads
+  const selectedResposta = respostaOptions.find(o => o.value === tempoResposta) || respostaOptions[2];
+  const fatorPerdaLatencia = selectedResposta.lossFactor;
+  // Perda = leads que converteriam se o atendimento fosse imediato (<5m), mas que são perdidos pela lentidão
+  const receitaPerdidaLatencia = Math.round(leadsPorMes * (taxaConversaoAtual / 100) * fatorPerdaLatencia * ticketMedio);
+
+  // B. Desperdício Operacional (Overhead)
+  // Horas ou salários pagos a vendedores para fazer trabalho de inserção manual, digitação e controle
+  const desperdicioOperacional = Math.round(tamanhoEquipe * custoVendedor * (tempoAdmin / 100));
+
+  // C. Caixa Preso por Inadimplência Ativa
+  const perdaInadimplencia = Math.round(faturamentoFaturado * (taxaInadimplencia / 100));
+
+  // D. Oportunidades Esquecidas na Base Fria
+  // Conversão de 0.3% ao mês de contatos inativos se houvesse régua ativa automática
+  const receitaEsquecidaBase = Math.round((baseLeadsFrios * 0.003) * ticketMedio);
+
+  // Soma de todas as perdas
+  const totalDesperdicio = receitaPerdidaLatencia + desperdicioOperacional + perdaInadimplencia + receitaEsquecidaBase;
+
+  // --- CÁLCULOS DE RECUPERAÇÃO COM SINERGIA ---
+  // Taxas de mitigação realistas após implantação da plataforma
+  const recuperadoLatencia = Math.round(receitaPerdidaLatencia * 0.85); // Agente 24h atende em <10 segundos
+  const recuperadoOverhead = Math.round(desperdicioOperacional * 0.75); // Automações eliminam 75% da digitação
+  const recuperadoInadimplencia = Math.round(perdaInadimplencia * 0.45); // Régua de cobrança reduz 45% do atraso
+  const recuperadoBase = Math.round(receitaEsquecidaBase * 0.70); // Nutrição automatizada recupera 70% do potencial
+
+  const totalRecuperado = recuperadoLatencia + recuperadoOverhead + recuperadoInadimplencia + recuperadoBase;
+
+  // Porcentagem das perdas totais que conseguimos recuperar
+  const percentualRecuperado = totalDesperdicio > 0 ? Math.round((totalRecuperado / totalDesperdicio) * 100) : 0;
 
   return (
-    <section id="roi-calculator" className="py-24 bg-slate-950 relative overflow-hidden">
-      {/* Background Orbs */}
-      <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none -translate-y-1/2"></div>
-      <div className="absolute top-1/2 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none -translate-y-1/2"></div>
+    <section id="roi-calculator" className="py-24 bg-slate-950 relative overflow-hidden border-t border-white/5">
+      {/* Background Glows */}
+      <div className="absolute top-1/4 left-10 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="absolute bottom-1/4 right-10 w-[500px] h-[500px] bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none"></div>
 
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-bold uppercase tracking-wider mb-6">
+      <div className="container mx-auto px-4 relative z-10 max-w-7xl">
+        
+        {/* Header */}
+        <div className="text-center max-w-3xl mx-auto mb-20">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-bold uppercase tracking-wider mb-6">
             <Calculator className="w-4 h-4" />
-            Raio-X de Receita Oculta
+            Diagnóstico de Eficiência Comercial
           </div>
-          <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight mb-4">
-            Quanto dinheiro seu CRM está <span className="text-emerald-400">queimando?</span>
+          <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight mb-6 leading-tight">
+            Raio-X de <span className="text-emerald-400">Receita Oculta</span>
           </h2>
           <p className="text-slate-400 text-lg font-light leading-relaxed">
-            A cada 5 minutos de atraso na resposta, a chance de qualificar um lead <strong className="text-white">cai drasticamente</strong>. 
-            Simule o impacto financeiro de implantar soluções autônomas na sua operação comercial.
+            Sua empresa pode estar perdendo dinheiro todos os dias com gargalos invisíveis. 
+            Preencha os dados reais da sua operação para mapear seus vazamentos financeiros.
           </p>
         </div>
 
-        {/* Tabs / Soluções */}
-        <div className="flex flex-wrap justify-center gap-3 mb-12 max-w-4xl mx-auto">
-          {(Object.entries(solutions) as [SolutionType, typeof solutions[SolutionType]][]).map(([key, sol]) => (
-            <button
-              key={key}
-              onClick={() => setActiveSolution(key)}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${
-                activeSolution === key 
-                  ? 'bg-emerald-500 text-emerald-950 shadow-[0_0_20px_rgba(16,185,129,0.3)]' 
-                  : 'bg-slate-900 border border-white/5 text-slate-400 hover:text-white hover:bg-slate-800'
-              }`}
-            >
-              {sol.icon}
-              {sol.name}
-            </button>
-          ))}
-        </div>
-
-        <div className="max-w-5xl mx-auto grid lg:grid-cols-12 gap-8 items-start">
+        <div className="grid lg:grid-cols-12 gap-8 items-start">
           
-          {/* Controls - Left Side */}
-          <Card className="lg:col-span-5 bg-slate-900 border-white/5 shadow-2xl relative overflow-hidden">
-             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-indigo-500"></div>
-            <CardContent className="p-8">
-              <h3 className="text-xl font-bold text-white mb-2">
-                Simulador de Entradas
-              </h3>
-              <p className="text-slate-500 text-sm mb-8 border-b border-white/5 pb-4 leading-relaxed font-light">
-                {activeConfig.desc}
-              </p>
-
-              <div className="space-y-8">
-                {/* Leads Slider */}
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <label className="text-sm font-bold text-slate-300 flex items-center gap-2">
-                       <Users className="w-4 h-4 text-slate-500" />
-                       Volume de Leads /mês
-                    </label>
-                    <span className="text-lg font-black text-indigo-400">{leadsPorMes}</span>
+          {/* LEFT COLUMN: INPUTS */}
+          <div className="lg:col-span-7 space-y-6">
+            
+            {/* Card 1: Vendas e Latência */}
+            <Card className="bg-slate-900/60 backdrop-blur-md border-white/5 shadow-xl relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div>
+              <CardContent className="p-6 md:p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-indigo-400" />
                   </div>
-                  <input 
-                    type="range" 
-                    min="50" max="5000" step="50" 
-                    value={leadsPorMes} 
-                    onChange={(e) => setLeadsPorMes(Number(e.target.value))}
-                    className="w-full accent-indigo-500" 
-                  />
-                  <div className="flex justify-between text-xs text-slate-600 font-medium">
-                    <span>50</span>
-                    <span>5.000+</span>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">Vendas & Resposta Comercial</h3>
+                    <p className="text-xs text-slate-500">Tempo de atendimento e taxas de conversão de novos contatos</p>
                   </div>
                 </div>
 
-                {/* Ticket Slider */}
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <label className="text-sm font-bold text-slate-300 flex items-center gap-2">
-                       <DollarSign className="w-4 h-4 text-slate-500" />
-                       Ticket Médio (LTV)
-                    </label>
-                    <span className="text-lg font-black text-emerald-400">
-                      R$ {ticketMedio.toLocaleString('pt-BR')}
-                    </span>
+                <div className="space-y-6">
+                  {/* Leads Slider */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center text-sm">
+                      <label className="font-bold text-slate-300 flex items-center gap-2">
+                        <Users className="w-4 h-4 text-slate-500" /> Volume de Leads /mês
+                      </label>
+                      <span className="text-base font-black text-indigo-400">{leadsPorMes} leads</span>
+                    </div>
+                    <input 
+                      type="range" min="10" max="3000" step="10" 
+                      value={leadsPorMes} 
+                      onChange={(e) => setLeadsPorMes(Number(e.target.value))}
+                      className="w-full accent-indigo-500" 
+                    />
+                  </div>
+
+                  {/* Ticket Médio & Conversão */}
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-slate-400 block uppercase tracking-wider">Ticket Médio (LTV)</label>
+                      <div className="relative">
+                        <span className="absolute left-4 top-3 text-slate-500 font-bold text-sm">R$</span>
+                        <input 
+                          type="number"
+                          value={ticketMedio}
+                          onChange={(e) => setTicketMedio(Math.max(0, Number(e.target.value)))}
+                          className="w-full bg-slate-950 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-white font-bold focus:border-indigo-500 focus:outline-none text-sm"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-slate-400 block uppercase tracking-wider">Taxa de Conversão Atual</label>
+                      <div className="relative">
+                        <input 
+                          type="number"
+                          step="0.1"
+                          value={taxaConversaoAtual}
+                          onChange={(e) => setTaxaConversaoAtual(Math.max(0.1, Number(e.target.value)))}
+                          className="w-full bg-slate-950 border border-white/10 rounded-xl py-2.5 px-4 text-white font-bold focus:border-indigo-500 focus:outline-none text-sm"
+                        />
+                        <span className="absolute right-4 top-3 text-slate-500 font-bold text-sm">%</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tempo de Resposta Selector */}
+                  <div className="space-y-2 pt-2">
+                    <label className="text-xs font-bold text-slate-400 block uppercase tracking-wider">Tempo Médio de Primeiro Contato</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                      {respostaOptions.map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => setTempoResposta(opt.value)}
+                          className={`py-2 px-1 rounded-lg text-xs font-bold border transition-all ${
+                            tempoResposta === opt.value
+                              ? 'bg-indigo-500 text-white border-indigo-400 shadow-[0_0_10px_rgba(99,102,241,0.3)]'
+                              : 'bg-slate-950 text-slate-400 border-white/5 hover:bg-slate-800'
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-[11px] text-slate-500 mt-1 italic">{selectedResposta.desc}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Card 2: Burocracia e Operacional */}
+            <Card className="bg-slate-900/60 backdrop-blur-md border-white/5 shadow-xl relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-1 h-full bg-amber-500"></div>
+              <CardContent className="p-6 md:p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                    <Workflow className="w-5 h-5 text-amber-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">Overhead & Processos Manuais</h3>
+                    <p className="text-xs text-slate-500">Tempo da equipe de vendas desperdiçado em tarefas administrativas</p>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Vendedores & Custo */}
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-slate-400 block uppercase tracking-wider">Número de Vendedores</label>
+                      <input 
+                        type="number"
+                        value={tamanhoEquipe}
+                        onChange={(e) => setTamanhoEquipe(Math.max(1, Number(e.target.value)))}
+                        className="w-full bg-slate-950 border border-white/10 rounded-xl py-2.5 px-4 text-white font-bold focus:border-amber-500 focus:outline-none text-sm"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-slate-400 block uppercase tracking-wider">Custo Médio p/ Vendedor (Mensal)</label>
+                      <div className="relative">
+                        <span className="absolute left-4 top-3 text-slate-500 font-bold text-sm">R$</span>
+                        <input 
+                          type="number"
+                          value={custoVendedor}
+                          onChange={(e) => setCustoVendedor(Math.max(0, Number(e.target.value)))}
+                          className="w-full bg-slate-950 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-white font-bold focus:border-amber-500 focus:outline-none text-sm"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tempo Administativo Slider */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center text-sm">
+                      <label className="font-bold text-slate-300">
+                        Tempo perdido em planilhas/digitação/follow-up
+                      </label>
+                      <span className="text-base font-black text-amber-400">{tempoAdmin}% do dia</span>
+                    </div>
+                    <input 
+                      type="range" min="5" max="80" step="5" 
+                      value={tempoAdmin} 
+                      onChange={(e) => setTempoAdmin(Number(e.target.value))}
+                      className="w-full accent-amber-500" 
+                    />
+                    <p className="text-[11px] text-slate-500 italic">Copiar e colar no WhatsApp, preencher CRM, agendar reuniões e gerar relatórios.</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Card 3: Financeiro e Inadimplência */}
+            <Card className="bg-slate-900/60 backdrop-blur-md border-white/5 shadow-xl relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-1 h-full bg-rose-500"></div>
+              <CardContent className="p-6 md:p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
+                    <Landmark className="w-5 h-5 text-rose-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">Inadimplência & Caixa Retido</h3>
+                    <p className="text-xs text-slate-500">Impacto financeiro de cobranças manuais e falta de réguas</p>
+                  </div>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-400 block uppercase tracking-wider">Faturamento via Boleto/Faturado</label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-3 text-slate-500 font-bold text-sm">R$</span>
+                      <input 
+                        type="number"
+                        value={faturamentoFaturado}
+                        onChange={(e) => setFaturamentoFaturado(Math.max(0, Number(e.target.value)))}
+                        className="w-full bg-slate-950 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-white font-bold focus:border-rose-500 focus:outline-none text-sm"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-400 block uppercase tracking-wider">Taxa de Inadimplência Média</label>
+                    <div className="relative">
+                      <input 
+                        type="number"
+                        step="0.5"
+                        value={taxaInadimplencia}
+                        onChange={(e) => setTaxaInadimplencia(Math.max(0, Number(e.target.value)))}
+                        className="w-full bg-slate-950 border border-white/10 rounded-xl py-2.5 px-4 text-white font-bold focus:border-rose-500 focus:outline-none text-sm"
+                      />
+                      <span className="absolute right-4 top-3 text-slate-500 font-bold text-sm">%</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Card 4: Base Esquecida */}
+            <Card className="bg-slate-900/60 backdrop-blur-md border-white/5 shadow-xl relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
+              <CardContent className="p-6 md:p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                    <Database className="w-5 h-5 text-emerald-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">Base Inativa (Clientes Frios)</h3>
+                    <p className="text-xs text-slate-500">Contatos no CRM que nunca mais receberam ações de reengajamento</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-sm">
+                    <label className="font-bold text-slate-300">Tamanho da base inativa</label>
+                    <span className="text-base font-black text-emerald-400">{baseLeadsFrios.toLocaleString()} contatos</span>
                   </div>
                   <input 
-                    type="range" 
-                    min="100" max="25000" step="100" 
-                    value={ticketMedio} 
-                    onChange={(e) => setTicketMedio(Number(e.target.value))}
+                    type="range" min="100" max="15000" step="100" 
+                    value={baseLeadsFrios} 
+                    onChange={(e) => setBaseLeadsFrios(Number(e.target.value))}
                     className="w-full accent-emerald-500" 
                   />
-                  <div className="flex justify-between text-xs text-slate-600 font-medium">
-                    <span>R$ 100</span>
-                    <span>R$ 25k+</span>
+                  <p className="text-[11px] text-slate-500 italic">Clientes antigos ou oportunidades perdidas no passado que estão abandonados no CRM.</p>
+                </div>
+              </CardContent>
+            </Card>
+
+          </div>
+
+          {/* RIGHT COLUMN: REPORT & RESULTS */}
+          <div className="lg:col-span-5 lg:sticky lg:top-24 space-y-6">
+            
+            {/* Main Result Card */}
+            <Card className="bg-slate-900 border-white/10 shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 via-amber-500 to-emerald-500"></div>
+              <CardContent className="p-8">
+                
+                <div className="text-center pb-6 border-b border-white/5 mb-6">
+                  <span className="text-slate-500 text-xs font-black uppercase tracking-widest">Desperdício Mensal Estimado</span>
+                  <div className="text-4xl md:text-5xl font-black text-rose-500 mt-2 tracking-tight">
+                    R$ {totalDesperdicio.toLocaleString('pt-BR')}
+                  </div>
+                  <p className="text-slate-400 text-xs mt-2">Dinheiro que a sua operação atual está deixando na mesa</p>
+                </div>
+
+                {/* Leakage Breakdown Progress Bars */}
+                <div className="space-y-4 mb-8">
+                  <h4 className="text-xs font-bold uppercase text-slate-400 tracking-wider">Origem do Vazamento Financeiro:</h4>
+                  
+                  {/* Latency Leak */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-xs font-medium text-slate-300">
+                      <span>Perda por Latência (Comercial)</span>
+                      <span className="font-bold text-rose-400">R$ {receitaPerdidaLatencia.toLocaleString('pt-BR')}</span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-indigo-500 rounded-full" 
+                        style={{ width: `${totalDesperdicio > 0 ? (receitaPerdidaLatencia / totalDesperdicio) * 100 : 0}%` }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  {/* Operational Overhead Leak */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-xs font-medium text-slate-300">
+                      <span>Overhead Burocrático (Mão de obra)</span>
+                      <span className="font-bold text-rose-400">R$ {desperdicioOperacional.toLocaleString('pt-BR')}</span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-amber-500 rounded-full" 
+                        style={{ width: `${totalDesperdicio > 0 ? (desperdicioOperacional / totalDesperdicio) * 100 : 0}%` }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  {/* Defaults Leak */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-xs font-medium text-slate-300">
+                      <span>Inadimplência e Contas Atrasadas</span>
+                      <span className="font-bold text-rose-400">R$ {perdaInadimplencia.toLocaleString('pt-BR')}</span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-rose-500 rounded-full" 
+                        style={{ width: `${totalDesperdicio > 0 ? (perdaInadimplencia / totalDesperdicio) * 100 : 0}%` }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  {/* Inactive Database Leak */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-xs font-medium text-slate-300">
+                      <span>Oportunidades Inativas (Base CRM)</span>
+                      <span className="font-bold text-rose-400">R$ {receitaEsquecidaBase.toLocaleString('pt-BR')}</span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-emerald-500 rounded-full" 
+                        style={{ width: `${totalDesperdicio > 0 ? (receitaEsquecidaBase / totalDesperdicio) * 100 : 0}%` }}
+                      ></div>
+                    </div>
                   </div>
                 </div>
 
-                {/* Conversion Slider */}
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <label className="text-sm font-bold text-slate-300 flex items-center gap-2">
-                       <Percent className="w-4 h-4 text-slate-500" />
-                       Taxa de Conversão Atual
-                    </label>
-                    <span className="text-lg font-black text-amber-400">{taxaConversaoAtual}%</span>
+                {/* SinergIA Optimization Box */}
+                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-6 relative overflow-hidden mb-6">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/10 blur-xl rounded-full"></div>
+                  
+                  <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">
+                    <Sparkles className="w-4 h-4" /> Projeção de Recuperação SinergIA
                   </div>
-                  <input 
-                    type="range" 
-                    min="0.5" max="15" step="0.5" 
-                    value={taxaConversaoAtual} 
-                    onChange={(e) => setTaxaConversaoAtual(Number(e.target.value))}
-                    className="w-full accent-amber-500" 
-                  />
-                  <div className="flex justify-between text-xs text-slate-600 font-medium">
-                    <span>0.5%</span>
-                    <span>15%</span>
+
+                  <div className="text-3xl font-black text-white tracking-tight">
+                    + R$ {totalRecuperado.toLocaleString('pt-BR')} <span className="text-xs text-slate-400 font-normal">/mês</span>
                   </div>
+                  <p className="text-slate-300 text-xs mt-2 leading-relaxed">
+                    Você pode recuperar até <strong className="text-emerald-400">{percentualRecuperado}%</strong> do seu desperdício financeiro mensal aplicando automações integradas nas áreas mapeadas.
+                  </p>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
 
-          {/* Results - Right Side */}
-          <div className="lg:col-span-7 space-y-6">
-            <div className="grid sm:grid-cols-2 gap-6">
-              
-              {/* CURRENT RESULT BOX */}
-              <div className="bg-slate-900 border border-white/5 rounded-2xl p-6 relative">
-                 <div className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4">Sua Operação Hoje</div>
-                 <div className="space-y-1 mb-6">
-                   <div className="text-slate-400 text-sm">Faturamento Mensal</div>
-                   <div className="text-3xl font-bold text-white">
-                      R$ {receitaAtual.toLocaleString('pt-BR')}
-                   </div>
-                 </div>
-                 <div className="flex items-center gap-2 text-sm">
-                   <Users className="w-4 h-4 text-slate-500" />
-                   <span className="text-slate-400">Apenas <strong className="text-white">{clientesAtuais} clientes</strong> fechados.</span>
-                 </div>
-              </div>
+                <Link href="/apply" className="w-full">
+                  <Button className="w-full bg-white text-slate-950 hover:bg-emerald-400 font-bold h-14 rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2">
+                    Receber Laudo Detalhado Grátis
+                    <ArrowRight className="w-5 h-5" />
+                  </Button>
+                </Link>
 
-              {/* SINERGIA RESULT BOX */}
-              <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-6 relative overflow-hidden group">
-                 <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/20 blur-[30px] rounded-full group-hover:scale-150 transition-transform duration-700"></div>
-                 <div className="text-sm font-bold text-emerald-400 uppercase tracking-widest mb-4 flex items-center justify-between">
-                    Com a SinergIA
-                    <TrendingUp className="w-4 h-4 text-emerald-400" />
-                 </div>
-                 <div className="space-y-1 mb-6">
-                   <div className="text-slate-300 text-sm">Projeção Mensal Pós-Setup</div>
-                   <div className="text-4xl font-black text-white">
-                      R$ {receitaSinergia.toLocaleString('pt-BR')}
-                   </div>
-                 </div>
-                 <div className="flex flex-col gap-2 relative z-10">
-                   <div className="flex items-center gap-2 text-sm text-emerald-300">
-                     <Activity className="w-4 h-4" />
-                     Cresce para <strong className="text-white">{clientesSinergia} clientes</strong> fechados.
-                   </div>
-                   <div className="flex items-center gap-2 text-sm text-emerald-300">
-                     <DollarSign className="w-4 h-4" />
-                     <strong className="text-white">{activeConfig.extraImpact}</strong>
-                   </div>
-                 </div>
-              </div>
+              </CardContent>
+            </Card>
 
-            </div>
+            {/* Diagnostic Details / Laudo Técnico */}
+            <div className="space-y-4">
+              <h4 className="text-xs font-bold uppercase text-slate-400 tracking-wider flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-500" /> Laudo de Oportunidades:
+              </h4>
 
-            {/* BIG IMPACT BANNER */}
-            <div className="bg-slate-900 border border-emerald-500/20 rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden shadow-[0_0_30px_rgba(16,185,129,0.05)]">
-               {/* Pattern overlay */}
-               <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(#34d399 2px, transparent 2px)', backgroundSize: '16px 16px' }}></div>
-               
-               <div className="relative z-10 text-center md:text-left">
-                  <div className="text-slate-400 font-medium mb-1">Receita Adicional Desbloqueada</div>
-                  <div className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400 leading-tight">
-                    + R$ {receitaAdicional.toLocaleString('pt-BR')} <span className="text-2xl text-emerald-500/50">/mês</span>
+              {/* Latency Feedback */}
+              {receitaPerdidaLatencia > 0 && (
+                <div className="p-4 bg-slate-900/40 border border-white/5 rounded-xl text-xs space-y-1.5 leading-relaxed text-slate-300">
+                  <div className="font-bold text-white flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> 
+                    Perda Comercial (Tempo de Resposta)
                   </div>
-                  <div className="mt-2 text-sm text-slate-500 font-bold tracking-wide uppercase">
-                    Crescimento direto de {aumentoPercentual}% no faturamento analisado.
-                  </div>
-               </div>
+                  <p>
+                    Com tempo de contato em <strong className="text-white">{selectedResposta.label}</strong>, você perde aproximadamente <strong className="text-rose-400">R$ {receitaPerdidaLatencia.toLocaleString('pt-BR')}</strong> mensais de receita por leads que esfriam ou fecham com concorrentes mais rápidos.
+                  </p>
+                </div>
+              )}
 
-               <Link href="/apply" className="relative z-10 w-full md:w-auto">
-                 <Button className="bg-white text-slate-950 hover:bg-emerald-400 rounded-xl px-8 h-14 whitespace-nowrap font-black uppercase tracking-wider w-full hover:scale-105 transition-transform duration-300">
-                    Resgatar minha Receita
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                 </Button>
-               </Link>
+              {/* Overhead Feedback */}
+              {desperdicioOperacional > 0 && (
+                <div className="p-4 bg-slate-900/40 border border-white/5 rounded-xl text-xs space-y-1.5 leading-relaxed text-slate-300">
+                  <div className="font-bold text-white flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span> 
+                    Desperdício de Salário (Burocracia)
+                  </div>
+                  <p>
+                    Seus {tamanhoEquipe} vendedores passam {tempoAdmin}% do tempo copiando dados, organizando planilhas ou fazendo follow-ups manuais. Isso joga <strong className="text-rose-400">R$ {desperdicioOperacional.toLocaleString('pt-BR')}</strong> no ralo em salários improdutivos.
+                  </p>
+                </div>
+              )}
+
+              {/* Inadimplência Feedback */}
+              {perdaInadimplencia > 0 && (
+                <div className="p-4 bg-slate-900/40 border border-white/5 rounded-xl text-xs space-y-1.5 leading-relaxed text-slate-300">
+                  <div className="font-bold text-white flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span> 
+                    Caixa Retido por Atrasos
+                  </div>
+                  <p>
+                    A taxa de inadimplência de {taxaInadimplencia}% faz com que <strong className="text-rose-400">R$ {perdaInadimplencia.toLocaleString('pt-BR')}</strong> de faturamento legítimo fiquem presos ou perdidos. Cobranças automáticas amigáveis via WhatsApp recuperam esse caixa de forma automática.
+                  </p>
+                </div>
+              )}
+
+              {/* Base Inativa Feedback */}
+              {receitaEsquecidaBase > 0 && (
+                <div className="p-4 bg-slate-900/40 border border-white/5 rounded-xl text-xs space-y-1.5 leading-relaxed text-slate-300">
+                  <div className="font-bold text-white flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 
+                    Receita Adormecida na Base
+                  </div>
+                  <p>
+                    Sua base com {baseLeadsFrios.toLocaleString()} contatos inativos sem ações de reengajamento representa uma mina de ouro de <strong className="text-emerald-400">R$ {receitaEsquecidaBase.toLocaleString('pt-BR')}</strong> por mês em reativações não aproveitadas.
+                  </p>
+                </div>
+              )}
+
             </div>
 
           </div>
+
         </div>
+
       </div>
     </section>
   );
