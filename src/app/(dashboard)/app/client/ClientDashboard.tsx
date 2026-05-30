@@ -22,6 +22,56 @@ import {
 } from "lucide-react"
 import { nichesData } from '@/data/niches'
 import { getOperationLogsStream, OperationLog } from '@/services/firestoreService'
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from "@/components/ui/chart"
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, AreaChart, Area, XAxis, YAxis, CartesianGrid, BarChart, Bar } from "recharts"
+
+const darkFunnelConfig = {
+  score: {
+    label: "Intensidade",
+    color: "hsl(var(--emerald-500))",
+  },
+  direct: { label: "Tráfego Direto", color: "hsl(var(--emerald-500))" },
+  social: { label: "Dark Social", color: "hsl(var(--indigo-500))" },
+  intent: { label: "Intenção de Busca", color: "hsl(var(--cyan-500))" },
+  outbound: { label: "Outbound Ativo", color: "hsl(var(--amber-500))" },
+} satisfies ChartConfig
+
+const revenueRecoveryConfig = {
+  recovered: { label: "Receita Blindada (R$)", color: "#10b981" },
+} satisfies ChartConfig
+
+const allocationConfig = {
+  comercial: { label: "Comercial (Aura Sales)", color: "#10b981" },
+  suporte: { label: "Atendimento (Aura CX)", color: "#6366f1" },
+  backoffice: { label: "Backoffice (Aura Ops)", color: "#06b6d4" },
+} satisfies ChartConfig
+
+const recoveryData = [
+  { period: "Semana 1", recovered: 4200 },
+  { period: "Semana 2", recovered: 8500 },
+  { period: "Semana 3", recovered: 15400 },
+  { period: "Semana 4", recovered: 23100 },
+  { period: "Semana 5", recovered: 31200 },
+  { period: "Semana 6", recovered: 45000 },
+]
+
+const sonarData = [
+  { item: "Tráfego Direto", score: 85 },
+  { item: "Dark Social", score: 65 },
+  { item: "Intenção de Busca", score: 90 },
+  { item: "Outbound Ativo", score: 45 },
+  { item: "Menções de Marca", score: 70 },
+  { item: "Pesquisa Concorrentes", score: 80 },
+]
+
+const cognitiveLoadData = [
+  {
+    category: "Carga de IA",
+    comercial: 42,
+    suporte: 30,
+    backoffice: 24,
+  }
+]
 
 interface LeadData {
   id?: string
@@ -41,6 +91,10 @@ interface ClientDashboardProps {
 
 export default function ClientDashboard({ lead }: ClientDashboardProps) {
   const [logs, setLogs] = useState<OperationLog[]>([])
+
+  const radarChartId = React.useId()
+  const areaChartId = React.useId()
+  const barChartId = React.useId()
 
   // Buscar os playbooks e o nicho ativo
   const activeNicheSlug = lead.nichoSlug || 'commerce-omnichannel-vendas'
@@ -239,90 +293,198 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
         </section>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* SEÇÃO 2: TERMINAL DE LOGS DE IA EM TEMPO REAL */}
-          <section className="lg:col-span-2 space-y-4">
-            <h3 className="text-xl font-bold text-white flex items-center gap-2">
-               <Terminal className="w-5 h-5 text-indigo-400" /> Console de Telemetria Viva
-            </h3>
-            <Card className="bg-slate-900/60 border-white/10 backdrop-blur-md overflow-hidden">
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="border-b border-white/5 bg-slate-950/40 text-xs font-black text-slate-500 uppercase tracking-widest">
-                        <th className="py-3 px-6">Timestamp</th>
-                        <th className="py-3 px-6">Agente</th>
-                        <th className="py-3 px-6">Ação Realizada</th>
-                        <th className="py-3 px-6 text-right">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5 text-xs md:text-sm font-mono">
-                      {displayLogs.map((log, idx) => (
-                        <tr key={log.id || idx} className="hover:bg-white/5 transition-colors">
-                          <td className="py-4 px-6 text-slate-500 font-semibold whitespace-nowrap">
-                            {formatLogTime(log.createdAt)}
-                          </td>
-                          <td className="py-4 px-6 text-indigo-400 font-bold whitespace-nowrap">
-                            {log.agentName}
-                          </td>
-                          <td className="py-4 px-6 text-slate-300">
-                            {log.action}
-                          </td>
-                          <td className="py-4 px-6 text-right">
-                            <Badge className="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border-0 text-[10px]">
-                              SUCCESS
-                            </Badge>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+          {/* COLUNA ESQUERDA: GRÁFICO FINANCEIRO + TERMINAL DE LOGS */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* CURVA DE RECUPERAÇÃO FINANCEIRA */}
+            <Card className="bg-slate-900/60 border border-white/10 backdrop-blur-md overflow-hidden relative">
+              <div className="absolute top-0 w-full h-[3px] bg-gradient-to-r from-emerald-500 to-teal-400"></div>
+              <CardContent className="p-6 space-y-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h4 className="text-lg font-bold text-white">Curva de Recuperação Financeira</h4>
+                    <p className="text-xs text-slate-400">Receita blindada e no-shows evitados acumulados (6 semanas)</p>
+                  </div>
+                  <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono text-sm">
+                    Total: R$ 45.000
+                  </Badge>
                 </div>
-              </CardContent>
-            </Card>
-          </section>
-
-          {/* SEÇÃO 3: VELOCÍMETRO DE CONSUMO DE RECURSOS */}
-          <section className="space-y-4">
-            <h3 className="text-xl font-bold text-white flex items-center gap-2">
-               <Activity className="w-5 h-5 text-teal-400 animate-pulse" /> Consumo de Recursos
-            </h3>
-            <Card className="bg-slate-900/60 border-white/10 backdrop-blur-md h-[340px] flex flex-col justify-center">
-              <CardContent className="p-8 space-y-6">
                 
-                {/* LLM Tokens */}
-                <div className="space-y-2">
-                  <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-slate-400">
-                    <span>Uso de Tokens de LLM</span>
-                    <span className="text-white font-mono">420.000 / 1.000.000</span>
-                  </div>
-                  <Progress value={42} className="h-2 bg-slate-950 border border-white/5" />
-                  <div className="text-[10px] text-slate-500">Estimativa baseada em chamadas GPT-4o / Claude 3.5 Sonnet.</div>
+                <div className="h-64">
+                  <ChartContainer id={areaChartId} config={revenueRecoveryConfig} className="w-full h-full">
+                    <AreaChart data={recoveryData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="colorRecovered" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
+                          <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                      <XAxis 
+                        dataKey="period" 
+                        stroke="rgba(255,255,255,0.3)" 
+                        fontSize={11}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis 
+                        stroke="rgba(255,255,255,0.3)" 
+                        fontSize={11}
+                        tickLine={false}
+                        axisLine={false}
+                        tickFormatter={(val) => `R$ ${val}`}
+                      />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Area 
+                        type="monotone" 
+                        dataKey="recovered" 
+                        stroke="#10b981" 
+                        strokeWidth={2}
+                        fillOpacity={1} 
+                        fill="url(#colorRecovered)" 
+                      />
+                    </AreaChart>
+                  </ChartContainer>
                 </div>
-
-                {/* n8n Workflows */}
-                <div className="space-y-2">
-                  <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-slate-400">
-                    <span>Execuções de Workflows n8n</span>
-                    <span className="text-white font-mono">12.450 / 50.000</span>
-                  </div>
-                  <Progress value={24.9} className="h-2 bg-slate-950 border border-white/5" />
-                  <div className="text-[10px] text-slate-500">Rotas e requisições de webhook integradas ao CRM.</div>
-                </div>
-
-                {/* WhatsApp Messages */}
-                <div className="space-y-2">
-                  <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-slate-400">
-                    <span>Disparos de WhatsApp</span>
-                    <span className="text-white font-mono">2.800 / 5.000</span>
-                  </div>
-                  <Progress value={56} className="h-2 bg-slate-950 border border-white/5" />
-                  <div className="text-[10px] text-slate-500">Saldo de créditos ativos contratados para o WhatsApp API.</div>
-                </div>
-
               </CardContent>
             </Card>
-          </section>
+
+            {/* TERMINAL DE LOGS DE IA EM TEMPO REAL */}
+            <section className="space-y-4">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                 <Terminal className="w-5 h-5 text-indigo-400" /> Console de Telemetria Viva
+              </h3>
+              <Card className="bg-slate-900/60 border border-white/10 backdrop-blur-md overflow-hidden">
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="border-b border-white/5 bg-slate-950/40 text-xs font-black text-slate-500 uppercase tracking-widest">
+                          <th className="py-3 px-6">Timestamp</th>
+                          <th className="py-3 px-6">Agente</th>
+                          <th className="py-3 px-6">Ação Realizada</th>
+                          <th className="py-3 px-6 text-right">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5 text-xs md:text-sm font-mono">
+                        {displayLogs.map((log, idx) => (
+                          <tr key={log.id || idx} className="hover:bg-white/5 transition-colors">
+                            <td className="py-4 px-6 text-slate-500 font-semibold whitespace-nowrap">
+                              {formatLogTime(log.createdAt)}
+                            </td>
+                            <td className="py-4 px-6 text-indigo-400 font-bold whitespace-nowrap">
+                              {log.agentName}
+                            </td>
+                            <td className="py-4 px-6 text-slate-300">
+                              {log.action}
+                            </td>
+                            <td className="py-4 px-6 text-right">
+                              <Badge className="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border-0 text-[10px]">
+                                SUCCESS
+                              </Badge>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+          </div>
+          
+          {/* COLUNA DIREITA: SONAR RADAR + ALOCAÇÃO COGNITIVA */}
+          <div className="space-y-8">
+            {/* SONAR MILITAR (RADAR CHART) */}
+            <Card className="bg-slate-900/60 border border-white/10 backdrop-blur-md overflow-hidden relative group">
+              <div className="absolute top-0 w-full h-[3px] bg-gradient-to-r from-cyan-500 to-indigo-500"></div>
+              <CardContent className="p-6 space-y-4">
+                <div>
+                  <h4 className="text-lg font-bold text-white flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Sonar de Interceptação de Intenção
+                  </h4>
+                  <p className="text-xs text-slate-400">Varredura em tempo real do &quot;Dark Funnel&quot; de leads</p>
+                </div>
+                
+                <div className="flex justify-center items-center h-[260px]">
+                  <ChartContainer id={radarChartId} config={darkFunnelConfig} className="w-full h-full aspect-square max-h-[250px]">
+                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={sonarData}>
+                      <PolarGrid stroke="rgba(255,255,255,0.08)" />
+                      <PolarAngleAxis dataKey="item" tick={{ fill: "rgba(255,255,255,0.6)", fontSize: 10 }} />
+                      <Radar 
+                        name="Intensidade" 
+                        dataKey="score" 
+                        stroke="#10b981" 
+                        fill="#10b981" 
+                        fillOpacity={0.25} 
+                        dot={{ r: 4, fill: "#10b981", stroke: "#020617", strokeWidth: 2 }}
+                      />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                    </RadarChart>
+                  </ChartContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* MATRIZ DE ALOCAÇÃO DE CARGA COGNITIVA (BAR CHART EMPILHADO HORIZONTAL) */}
+            <Card className="bg-slate-900/60 border border-white/10 backdrop-blur-md overflow-hidden relative">
+              <div className="absolute top-0 w-full h-[3px] bg-gradient-to-r from-emerald-500 to-cyan-500"></div>
+              <CardContent className="p-6 space-y-6">
+                <div>
+                  <h4 className="text-lg font-bold text-white flex items-center gap-2">
+                    <Cpu className="w-5 h-5 text-emerald-400" />
+                    Matriz de Alocação Cognitiva
+                  </h4>
+                  <p className="text-xs text-slate-400">Distribuição de processamento do Swarm AI ativo</p>
+                </div>
+                
+                <div className="h-16">
+                  <ChartContainer id={barChartId} config={allocationConfig} className="w-full h-full">
+                    <BarChart 
+                      data={cognitiveLoadData} 
+                      layout="vertical" 
+                      margin={{ top: 0, right: 10, left: -40, bottom: 0 }}
+                    >
+                      <XAxis type="number" hide domain={[0, 100]} />
+                      <YAxis type="category" dataKey="category" hide />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Bar dataKey="comercial" stackId="a" fill="#10b981" radius={[4, 0, 0, 4]} />
+                      <Bar dataKey="suporte" stackId="a" fill="#6366f1" />
+                      <Bar dataKey="backoffice" stackId="a" fill="#06b6d4" radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ChartContainer>
+                </div>
+
+                {/* Legendas de consumo */}
+                <div className="grid grid-cols-3 gap-2 pt-2 text-center border-t border-white/5">
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                      Aura Sales
+                    </div>
+                    <div className="text-white font-bold font-mono text-sm">42%</div>
+                    <div className="text-[9px] text-slate-500">Comercial / BANT</div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                      <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
+                      Aura CX
+                    </div>
+                    <div className="text-white font-bold font-mono text-sm">30%</div>
+                    <div className="text-[9px] text-slate-500">Suporte / Clientes</div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                      <span className="w-2 h-2 rounded-full bg-cyan-500"></span>
+                      Aura Ops
+                    </div>
+                    <div className="text-white font-bold font-mono text-sm">24%</div>
+                    <div className="text-[9px] text-slate-500">Workflows / ERP</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* Quick Base References */}
