@@ -2,22 +2,26 @@
 
 import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, ArrowRight, ShieldCheck, Zap, Server, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { submitApplication } from '@/actions/apply';
+import { submitApplication } from '@/actions/leads';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 function ApplyContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const domainParam = searchParams.get('domain') || '';
 
   const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     revenue: '',
     teamSize: '',
     bottleneck: '',
     name: '',
     email: '',
+    document: '',
     phone: '',
     domain: domainParam
   });
@@ -27,17 +31,35 @@ function ApplyContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     const referrerId = typeof window !== 'undefined' ? localStorage.getItem('sinergia_affiliate_id') || '' : '';
     
+    const utm_source = searchParams.get('utm_source') || '';
+    const utm_medium = searchParams.get('utm_medium') || '';
+    const utm_campaign = searchParams.get('utm_campaign') || '';
+    const utm_content = searchParams.get('utm_content') || '';
+    
     try {
-      await submitApplication({ 
+      const res = await submitApplication({ 
         ...formData, 
-        referrerId 
+        referrerId,
+        utm_source,
+        utm_medium,
+        utm_campaign,
+        utm_content,
+        nichoSlug: searchParams.get('nicho') || ''
       });
+      
+      if (res.success) {
+        router.push('/app/discover');
+      } else {
+        alert(res.error || 'Erro ao processar aplicação.');
+      }
     } catch (err) {
       console.error("Erro ao enviar formulário de aplicação:", err);
+    } finally {
+      setIsSubmitting(false);
     }
-    setStep(5); // Passo de sucesso
   };
 
 
@@ -189,9 +211,22 @@ function ApplyContent() {
                         <input 
                            type="text" 
                            required 
+                           disabled={isSubmitting}
                            value={formData.name}
                            onChange={(e) => setFormData({...formData, name: e.target.value})}
-                           className="w-full px-5 py-4 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-emerald-500/50 transition-colors" 
+                           className="w-full px-5 py-4 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-emerald-500/50 transition-colors disabled:opacity-55" 
+                        />
+                     </div>
+                     <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">CNPJ / CPF da Empresa</label>
+                        <input 
+                           type="text" 
+                           required 
+                           disabled={isSubmitting}
+                           placeholder="00.000.000/0001-00"
+                           value={formData.document}
+                           onChange={(e) => setFormData({...formData, document: e.target.value})}
+                           className="w-full px-5 py-4 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-emerald-500/50 transition-colors disabled:opacity-55" 
                         />
                      </div>
                      <div>
@@ -199,9 +234,10 @@ function ApplyContent() {
                         <input 
                            type="email" 
                            required 
+                           disabled={isSubmitting}
                            value={formData.email}
                            onChange={(e) => setFormData({...formData, email: e.target.value})}
-                           className="w-full px-5 py-4 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-emerald-500/50 transition-colors" 
+                           className="w-full px-5 py-4 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-emerald-500/50 transition-colors disabled:opacity-55" 
                         />
                      </div>
                      <div>
@@ -209,19 +245,28 @@ function ApplyContent() {
                         <input 
                            type="tel" 
                            required 
+                           disabled={isSubmitting}
                            value={formData.phone}
                            onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                           className="w-full px-5 py-4 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-emerald-500/50 transition-colors" 
+                           className="w-full px-5 py-4 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-emerald-500/50 transition-colors disabled:opacity-55" 
                         />
                      </div>
                   </div>
 
                   <div className="flex justify-between items-center mt-10">
-                    <Button variant="ghost" type="button" onClick={prevStep} className="text-slate-500 hover:text-white">
+                    <Button variant="ghost" type="button" disabled={isSubmitting} onClick={prevStep} className="text-slate-500 hover:text-white">
                       <ArrowLeft className="w-4 h-4 mr-2" /> Voltar
                     </Button>
-                    <Button type="submit" className="h-14 px-8 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-black rounded-xl transition-all hover:scale-105 uppercase tracking-widest">
-                      Enviar Diagnóstico <ArrowRight className="w-5 h-5 ml-2" />
+                    <Button type="submit" disabled={isSubmitting} className="h-14 px-8 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-black rounded-xl transition-all hover:scale-105 uppercase tracking-widest flex items-center justify-center">
+                      {isSubmitting ? (
+                        <>
+                          <LoadingSpinner size="sm" className="mr-2" /> Processando...
+                        </>
+                      ) : (
+                        <>
+                          Enviar Diagnóstico <ArrowRight className="w-5 h-5 ml-2" />
+                        </>
+                      )}
                     </Button>
                   </div>
                 </form>

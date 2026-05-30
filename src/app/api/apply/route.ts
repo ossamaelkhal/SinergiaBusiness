@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { submitApplication } from '@/actions/apply';
+import { submitApplication } from '@/actions/leads';
 
 export async function POST(req: Request) {
   try {
