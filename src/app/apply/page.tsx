@@ -1,11 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { ArrowLeft, ArrowRight, ShieldCheck, Zap, Server, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { submitApplication } from '@/actions/apply';
 
-export default function ApplyPage() {
+function ApplyContent() {
+  const searchParams = useSearchParams();
+  const domainParam = searchParams.get('domain') || '';
+
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     revenue: '',
@@ -13,7 +18,8 @@ export default function ApplyPage() {
     bottleneck: '',
     name: '',
     email: '',
-    phone: ''
+    phone: '',
+    domain: domainParam
   });
 
   const nextStep = () => setStep(prev => prev + 1);
@@ -24,14 +30,16 @@ export default function ApplyPage() {
     const referrerId = typeof window !== 'undefined' ? localStorage.getItem('sinergia_affiliate_id') || '' : '';
     
     try {
-      await fetch('/api/apply', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, referrerId })
+      await submitApplication({ 
+        ...formData, 
+        referrerId 
       });
-    } catch (e) {} // silent fail for UX
-    setStep(5); // Success step
+    } catch (err) {
+      console.error("Erro ao enviar formulário de aplicação:", err);
+    }
+    setStep(5); // Passo de sucesso
   };
+
 
   return (
     <div className="min-h-screen bg-[#020617] text-slate-50 font-sans relative overflow-hidden flex flex-col">
@@ -248,5 +256,20 @@ export default function ApplyPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function ApplyPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#020617] text-slate-100 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-12 h-12 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-emerald-400 font-mono text-xs uppercase tracking-widest animate-pulse">Carregando Formulário...</p>
+        </div>
+      </div>
+    }>
+      <ApplyContent />
+    </Suspense>
   );
 }

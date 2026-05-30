@@ -77,6 +77,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setUserRole(finalRole)
       setLoading(false)
       
+      // Sincronizar sessão server-side via cookies HttpOnly para o middleware
+      if (finalUser) {
+        try {
+          const idToken = finalUser.uid === 'mock-uid-123456' ? 'mock-token' : await finalUser.getIdToken()
+          await fetch('/api/auth/session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken })
+          })
+        } catch (err) {
+          console.error("Falha ao criar sessão HttpOnly no servidor (auth state change):", err)
+        }
+      } else {
+        try {
+          await fetch('/api/auth/session', { method: 'DELETE' })
+        } catch (err) {
+          console.error("Falha ao deletar sessão HttpOnly no servidor (auth state change):", err)
+        }
+      }
+      
       // Analytics para conversão
       if (typeof window !== 'undefined' && window.gtag) {
         window.gtag('event', finalUser ? 'login' : 'logout', {
@@ -122,6 +142,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
         })
       }
       
+      // Sincronizar sessão HttpOnly síncronamente antes de redirecionar para evitar race condition no middleware
+      try {
+        const idToken = await credential.user.getIdToken()
+        await fetch('/api/auth/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken })
+        })
+      } catch (err) {
+        console.error("Falha na sincronização síncrona pós-login:", err)
+      }
+
       toast.success('Login realizado com sucesso!')
       router.push(routeByRole(discoveredRole))
     } catch (error: any) {
@@ -168,6 +200,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
         })
       }
 
+      // Sincronizar sessão HttpOnly síncronamente antes de redirecionar para evitar race condition no middleware
+      try {
+        const idToken = await user.getIdToken()
+        await fetch('/api/auth/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken })
+        })
+      } catch (err) {
+        console.error("Falha na sincronização síncrona pós-cadastro:", err)
+      }
+
       toast.success('Conta criada com sucesso!')
       router.push(routeByRole(role))
     } catch (error: any) {
@@ -192,6 +236,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (typeof window !== 'undefined') {
           localStorage.setItem('SINERGIA_DEV_MOCK_ROLE', role)
           localStorage.setItem('SINERGIA_DEV_MOCK_EMAIL', email)
+          try {
+            await fetch('/api/auth/session', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ idToken: 'mock-token' })
+            })
+          } catch (err) {
+            console.error("Falha ao sincronizar mock session pós-cadastro:", err)
+          }
       }
       
       router.push(routeByRole(role))
@@ -210,6 +263,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (typeof window !== 'undefined') {
           localStorage.removeItem('SINERGIA_DEV_MOCK_ROLE')
           localStorage.removeItem('SINERGIA_DEV_MOCK_EMAIL')
+      }
+
+      // Limpar sessão HttpOnly no servidor
+      try {
+        await fetch('/api/auth/session', { method: 'DELETE' })
+      } catch (err) {
+        console.error("Falha ao limpar sessão no logout:", err)
       }
 
       toast.success('Logout realizado com sucesso!')

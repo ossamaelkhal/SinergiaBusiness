@@ -3,29 +3,45 @@
 import React, { useState, useEffect } from 'react';
 import { Radar, Target, Wifi, AlertTriangle, Crosshair, ArrowRight, Activity, DatabaseZap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
-export default function SinergiaSonar() {
+interface SinergiaSonarProps {
+  domain?: string;
+}
+
+export default function SinergiaSonar({ domain }: SinergiaSonarProps = {}) {
   const [scanning, setScanning] = useState(true);
   const [foundLeads, setFoundLeads] = useState<any[]>([]);
 
   // Simulated Deep Intent Data Feeds
-  const mockLeads = [
-    { id: 1, company: 'Logística Alfa', intent: 'Reclamação pública sobre atraso do CRM atual', source: 'LinkedIn Post', match: '98%', time: '2 min atrás' },
-    { id: 2, company: 'Clínica Revitalize', intent: 'Acabou de contratar 4 Recepcionistas', source: 'Vagas.com API', match: '94%', time: '12 min atrás' },
-    { id: 3, company: 'TechCorp SaaS', intent: 'Busca por "Alternativas para reduzir custo de SDR"', source: 'Dark Funnel Search', match: '89%', time: '45 min atrás' },
-  ];
-
   useEffect(() => {
+    const mockLeads = [
+      { 
+        id: 1, 
+        company: domain ? domain.split('.')[0].toUpperCase() : 'Logística Alfa', 
+        intent: domain 
+          ? `Vazamento crítico detectado no domínio ${domain} devido a tempo de resposta comercial de 15+ min.` 
+          : 'Reclamação pública sobre atraso do CRM atual', 
+        source: 'Sonar Telemetry', 
+        match: '98%', 
+        time: '1 min atrás' 
+      },
+      { id: 2, company: 'Logística Alfa', intent: 'Reclamação pública sobre atraso do CRM atual', source: 'LinkedIn Post', match: '95%', time: '3 min atrás' },
+      { id: 3, company: 'Clínica Revitalize', intent: 'Acabou de contratar 4 Recepcionistas', source: 'Vagas.com API', match: '94%', time: '12 min atrás' },
+      { id: 4, company: 'TechCorp SaaS', intent: 'Busca por "Alternativas para reduzir custo de SDR"', source: 'Dark Funnel Search', match: '89%', time: '45 min atrás' },
+    ];
+
     if (scanning) {
+      setFoundLeads([]);
       const timers = mockLeads.map((lead, index) => 
         setTimeout(() => {
           setFoundLeads(prev => [...prev, lead]);
-        }, (index + 1) * 2000)
+        }, (index + 1) * 1500)
       );
       
       return () => timers.forEach(clearTimeout);
     }
-  }, [scanning]);
+  }, [scanning, domain]);
 
   return (
     <section className="w-full py-32 bg-slate-950 relative overflow-hidden border-t border-indigo-500/10">
@@ -79,10 +95,12 @@ export default function SinergiaSonar() {
               </li>
             </ul>
 
-            <Button className="h-14 px-8 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-xl shadow-[0_0_30px_rgba(79,70,229,0.3)] transition-all hover:scale-105 uppercase tracking-widest mt-4">
-              Ativar Radar de Intenção
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+            <Link href={`/apply${domain ? `?domain=${encodeURIComponent(domain)}` : ''}`} className="inline-block mt-4">
+              <Button className="h-14 px-8 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-xl shadow-[0_0_30px_rgba(79,70,229,0.3)] transition-all hover:scale-105 uppercase tracking-widest">
+                Ativar Radar de Intenção
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
           </div>
 
           {/* Right: The Sonar Visualizer */}
@@ -133,9 +151,11 @@ export default function SinergiaSonar() {
                     
                     {/* Hover Action */}
                     <div className="absolute inset-0 bg-indigo-900/90 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                       <Button size="sm" className="bg-white text-indigo-950 hover:bg-indigo-100 font-bold">
-                          Disparar Abordagem Autônoma <Crosshair className="w-4 h-4 ml-2" />
-                       </Button>
+                       <Link href={`/apply${domain ? `?domain=${encodeURIComponent(domain)}` : ''}`}>
+                          <Button size="sm" className="bg-white text-indigo-950 hover:bg-indigo-100 font-bold">
+                             Disparar Abordagem Autônoma <Crosshair className="w-4 h-4 ml-2" />
+                          </Button>
+                       </Link>
                     </div>
                  </div>
                ))}

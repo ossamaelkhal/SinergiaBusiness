@@ -7,7 +7,6 @@ import { Toaster } from "@/components/ui/sonner"
 import SinergiaBot from "@/components/features/bot/SinergiaBot"
 import { Analytics } from "@/components/Analytics"
 import { AffiliateTracker } from "@/components/AffiliateTracker"
-import { AppLayoutWrapper } from "@/components/navigation/AppLayoutWrapper"
 import { DevOmniSwitch } from "@/components/dev/DevOmniSwitch"
 import FloatingJetski from "@/components/FloatingJetski"
 
@@ -47,24 +46,21 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className="dark">
       <body className={`${inter.className} bg-slate-950 text-slate-100 min-h-screen antialiased`}>
-        <main>
-          <AuthProvider>
-            <Suspense fallback={null}>
-              <Analytics />
-              <AffiliateTracker />
-            </Suspense>
-            
-            <AppLayoutWrapper>
-              {children}
-            </AppLayoutWrapper>
+        <AuthProvider>
+          <Suspense fallback={null}>
+            <Analytics />
+            <AffiliateTracker />
+          </Suspense>
+          
+          {children}
 
-            <Toaster />
-            <SinergiaBot />
-            <DevOmniSwitch />
-            <FloatingJetski />
-          </AuthProvider>
-        </main>
+          <Toaster />
+          <SinergiaBot />
+          <DevOmniSwitch />
+          <FloatingJetski />
+        </AuthProvider>
       </body>
     </html>
   )
 }
+

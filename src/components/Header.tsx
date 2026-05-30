@@ -5,8 +5,8 @@ import Link from 'next/link'
 import { useAuth } from '@/providers/AuthProvider'
 import { Button } from '@/components/ui/button'
 import { 
-  Menu, X, Sparkles, LayoutDashboard, Rocket, 
-  Stethoscope, Scale, ShoppingCart, GraduationCap, Building2, LogOut, ChevronDown, Check
+  Menu, X, Sparkles, LayoutDashboard, LogOut, ChevronDown, Check,
+  BookOpen, Users, Code2
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -33,6 +33,7 @@ export function Header() {
   const handleLogout = async () => {
     try {
       await logout()
+      setMobileMenuOpen(false)
     } catch (error) {
       console.error('Erro ao fazer logout:', error)
     }
@@ -81,14 +82,10 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            <Link href="/" className="text-sm font-bold text-slate-300 hover:text-white transition-colors tracking-wide hover:shadow-[0_0_15px_rgba(255,255,255,0.1)]">
-              A Visão
-            </Link>
-
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="text-sm font-bold text-slate-300 hover:text-white transition-colors flex items-center gap-1 focus:outline-none tracking-wide">
-                  Soluções por Nicho <ChevronDown className="w-4 h-4 text-emerald-400 group-hover:translate-y-0.5 transition-transform" />
+                  Soluções <ChevronDown className="w-4 h-4 text-emerald-400 group-hover:translate-y-0.5 transition-transform" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-80 bg-slate-950/95 border border-white/10 backdrop-blur-xl p-2 rounded-2xl shadow-2xl mt-2" align="center">
@@ -115,11 +112,7 @@ export function Header() {
             </DropdownMenu>
 
             <Link href="/partners" className="text-sm font-bold text-slate-300 hover:text-white transition-colors tracking-wide">
-              Parcerias & SLA
-            </Link>
-
-            <Link href="/#audit" className="text-sm font-bold text-slate-400 hover:text-white transition-colors tracking-wide flex items-center gap-1">
-              Auditar Domínio
+              Seja um Parceiro
             </Link>
           </nav>
 
@@ -132,7 +125,7 @@ export function Header() {
                     <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-[10px] font-black text-slate-950 shadow-[0_0_10px_rgba(52,211,153,0.3)]">
                        {user.email?.charAt(0).toUpperCase()}
                     </div>
-                    Sua Nave
+                    Área do Cliente
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-60 bg-slate-950/95 border border-white/10 backdrop-blur-xl p-2 rounded-2xl shadow-2xl mt-2" align="end">
@@ -148,11 +141,6 @@ export function Header() {
                       <LayoutDashboard className="w-4 h-4" /> Acessar Meu Painel
                     </DropdownMenuItem>
                   </Link>
-                  <Link href="/admin">
-                    <DropdownMenuItem className="cursor-pointer hover:bg-white/5 text-slate-300 focus:text-white py-3 gap-2 rounded-xl transition-all">
-                      Configurações Subordinadas
-                    </DropdownMenuItem>
-                  </Link>
 
                   <DropdownMenuSeparator className="bg-white/5 my-2" />
                   
@@ -162,18 +150,11 @@ export function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <>
-                <Link href="/login">
-                  <Button variant="ghost" className="text-white hover:bg-white/5 font-bold tracking-wide rounded-full px-5 transition-all">
-                    Login
-                  </Button>
-                </Link>
-                <Link href="/signup">
-                  <Button className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold tracking-tight rounded-full px-6 shadow-[0_0_20px_rgba(52,211,153,0.3)] hover:shadow-[0_0_35px_rgba(52,211,153,0.5)] transition-all duration-300">
-                    Iniciar Contrato
-                  </Button>
-                </Link>
-              </>
+              <Link href="/login">
+                <Button className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold tracking-tight rounded-full px-6 shadow-[0_0_20px_rgba(52,211,153,0.3)] hover:shadow-[0_0_35px_rgba(52,211,153,0.5)] transition-all duration-300">
+                  Área do Cliente
+                </Button>
+              </Link>
             )}
           </div>
 
@@ -191,9 +172,7 @@ export function Header() {
       {mobileMenuOpen && (
         <div className="md:hidden absolute top-20 left-4 right-4 bg-slate-950/95 border border-white/10 backdrop-blur-xl shadow-2xl rounded-3xl overflow-hidden animate-in slide-in-from-top-5 duration-300">
           <nav className="flex flex-col p-6 space-y-4">
-            <Link onClick={() => setMobileMenuOpen(false)} href="/" className="text-slate-200 hover:text-white font-bold p-2 transition-colors">A Visão</Link>
-            <Link onClick={() => setMobileMenuOpen(false)} href="/partners" className="text-slate-200 hover:text-white font-bold p-2 transition-colors">Parcerias & SLA</Link>
-            <Link onClick={() => setMobileMenuOpen(false)} href="/#audit" className="text-slate-400 hover:text-white font-bold p-2 transition-colors">Auditar Domínio</Link>
+            <Link onClick={() => setMobileMenuOpen(false)} href="/partners" className="text-slate-200 hover:text-white font-bold p-2 transition-colors">Seja um Parceiro</Link>
             
             <div className="text-slate-500 font-black uppercase text-[9px] px-2 tracking-widest pt-4 border-t border-white/5">Setores de IA</div>
             <div className="grid grid-cols-2 gap-2 pl-2">
@@ -229,12 +208,7 @@ export function Header() {
                 <>
                   <Link onClick={() => setMobileMenuOpen(false)} href="/login" className="w-full">
                     <Button variant="outline" className="w-full border-white/10 text-white hover:bg-white/5 h-12 rounded-xl transition-all">
-                      Fazer Login
-                    </Button>
-                  </Link>
-                  <Link onClick={() => setMobileMenuOpen(false)} href="/signup" className="w-full">
-                    <Button className="w-full bg-white hover:bg-slate-200 text-slate-950 font-black h-12 rounded-xl transition-all">
-                      Contratar Inteligência
+                      Área do Cliente
                     </Button>
                   </Link>
                 </>

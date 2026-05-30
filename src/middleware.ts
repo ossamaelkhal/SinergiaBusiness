@@ -1,25 +1,26 @@
-
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   
-  // Rotas protegidas
-  const protectedRoutes = ['/dashboard', '/profile', '/settings', '/admin']
-  const authRoutes = ['/login', '/register', '/forgot-password']
+  // Rotas privadas protegidas pelo middleware (grupo dashboard)
+  const privateRoutes = ['/admin', '/hub', '/app', '/dashboard']
   
-  // Verificar se é uma rota protegida
-  const isProtectedRoute = protectedRoutes.some(route => 
-    pathname.startsWith(route)
+  const isPrivateRoute = privateRoutes.some(route => 
+    pathname === route || pathname.startsWith(`${route}/`)
   )
   
-  // Verificar se é uma rota de autenticação
-  const isAuthRoute = authRoutes.some(route => 
-    pathname.startsWith(route)
-  )
+  // Ler o cookie oficial HttpOnly do Firebase Session
+  const hasSession = request.cookies.has('sinergia_session')
 
-  // Headers para SEO e Performance
+  if (isPrivateRoute && !hasSession) {
+    // Redirecionamento server-side imediato no primeiro byte para evitar FCP piscando
+    const loginUrl = new URL('/login', request.url)
+    loginUrl.searchParams.set('redirectTo', pathname)
+    return NextResponse.redirect(loginUrl)
+  }
+
   const response = NextResponse.next()
   
   // Security headers
@@ -40,3 +41,4 @@ export const config = {
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 }
+
