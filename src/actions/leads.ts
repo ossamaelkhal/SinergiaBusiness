@@ -389,3 +389,27 @@ export async function deleteLead(id: string) {
         return { success: false, error: "Falha ao excluir lead" }
     }
 }
+
+export async function saveLeadPreferences(leadId: string, preferences: { niche: string, tone: string, objective: string }) {
+  try {
+    const dbAdmin = admin.firestore();
+    const leadRef = dbAdmin.collection('leads').doc(leadId);
+    
+    await leadRef.update({
+      preferences: {
+        niche: preferences.niche,
+        tone: preferences.tone,
+        objective: preferences.objective
+      },
+      niche: preferences.niche,
+      tone: preferences.tone,
+      objective: preferences.objective,
+      updatedAt: new Date().toISOString()
+    });
+    
+    return { success: true };
+  } catch (error: any) {
+    console.error("Erro ao salvar preferências do lead:", error);
+    return { success: false, error: error.message || "Falha ao atualizar preferências do lead" };
+  }
+}

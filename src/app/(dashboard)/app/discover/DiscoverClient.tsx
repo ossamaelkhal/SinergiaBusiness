@@ -470,7 +470,7 @@ export default function DiscoverClient({ lead }: DiscoverClientProps) {
         {/* STEP 3: SETUPWIZARD INTEGRATION */}
         {step === 3 && (
           <div className="animate-in fade-in duration-500">
-            <SetupWizard onComplete={() => setStep(4)} />
+            <SetupWizard leadId={lead.id} onComplete={() => setStep(4)} />
           </div>
         )}
 

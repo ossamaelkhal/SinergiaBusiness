@@ -4,12 +4,14 @@ import { useState } from 'react'
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Activity, Bot, Rocket, ShieldCheck, CheckCircle2, Factory } from "lucide-react"
+import { saveLeadPreferences } from '@/actions/leads'
 
 interface SetupWizardProps {
+  leadId?: string;
   onComplete: () => void;
 }
 
-export function SetupWizard({ onComplete }: SetupWizardProps) {
+export function SetupWizard({ leadId, onComplete }: SetupWizardProps) {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
 
@@ -20,11 +22,16 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
 
   const handleFinish = async () => {
     setLoading(true)
-    // Here we would trigger the actual n8n webhook
-    setTimeout(() => {
+    try {
+      if (leadId) {
+        await saveLeadPreferences(leadId, { niche, tone, objective });
+      }
+    } catch (error) {
+      console.error("Falha ao salvar preferências no SetupWizard:", error);
+    } finally {
       setLoading(false)
       onComplete()
-    }, 2000)
+    }
   }
 
   return (
