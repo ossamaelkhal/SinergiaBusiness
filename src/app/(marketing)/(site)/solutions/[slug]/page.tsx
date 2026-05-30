@@ -25,8 +25,34 @@ export function generateMetadata({ params }: { params: { slug: string } }) {
   };
 }
 
-export default function NicheSolutionPage({ params }: { params: { slug: string } }) {
+export default function NicheSolutionPage({ 
+  params, 
+  searchParams 
+}: { 
+  params: { slug: string };
+  searchParams?: { [key: string]: string | string[] | undefined };
+}) {
   const niche = getNicheBySlug(params.slug);
+
+  // Helper to preserve active query parameters on simulator redirection
+  const buildSimulatorUrl = () => {
+    const query = new URLSearchParams();
+    query.set('niche', params.slug);
+    
+    if (searchParams) {
+      Object.entries(searchParams).forEach(([key, val]) => {
+        if (val !== undefined && key !== 'niche') {
+          if (Array.isArray(val)) {
+            val.forEach(v => query.append(key, v));
+          } else {
+            query.set(key, val);
+          }
+        }
+      });
+    }
+    
+    return `/demo/flow-simulator?${query.toString()}`;
+  };
 
   if (!niche) {
     notFound();
@@ -159,7 +185,7 @@ export default function NicheSolutionPage({ params }: { params: { slug: string }
                     Diagnosticar Minha Operação
                   </Button>
                 </a>
-                <Link href="/demo/flow-simulator" className="w-full sm:w-auto">
+                <Link href={buildSimulatorUrl()} className="w-full sm:w-auto">
                   <Button variant="outline" className="h-16 px-8 w-full rounded-2xl bg-white/5 hover:bg-white/10 border-white/10 text-white font-bold tracking-wider">
                     <PlayCircle className="w-5 h-5 mr-2 shrink-0" /> Simular Fluxos
                   </Button>

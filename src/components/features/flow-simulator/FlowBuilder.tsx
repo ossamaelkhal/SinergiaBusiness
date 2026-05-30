@@ -179,44 +179,83 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({ connection, nodes }) =>
 }
 
 interface FlowBuilderProps {
-    onClose: () => void
+    onClose?: () => void
+    isInline?: boolean
+    nicheSlug?: string
+    onInteraction?: () => void
+    onCompilar?: () => void
 }
 
-const FlowBuilder: React.FC<FlowBuilderProps> = ({ onClose }) => {
-    const [nodes, setNodes] = useState<NodeData[]>([
-        {
-            id: 1,
-            title: "Novo Lead",
-            description: "Quando um novo lead se cadastra",
-            type: "trigger",
-            category: "Trigger",
-            x: 50,
-            y: 100
-        },
-        {
-            id: 2,
-            title: "Qualificar Lead",
-            description: "IA analisa perfil e pontua",
-            type: "bot",
-            category: "IA",
-            x: 300,
-            y: 100
-        },
-        {
-            id: 3,
-            title: "Enviar Email",
-            description: "Email personalizado baseado na pontuação",
-            type: "email",
-            category: "Comunicação",
-            x: 550,
-            y: 100
-        }
-    ])
+const getNicheInitialNodes = (nicheSlug?: string): NodeData[] => {
+    switch (nicheSlug) {
+        case 'faturamento-saude-bemestar':
+        case 'saude':
+            return [
+                { id: 1, title: "Consulta Solicitada", description: "Paciente entra em contato via direct/WhatsApp", type: "trigger", category: "Trigger", x: 50, y: 150 },
+                { id: 2, title: "IA Guardião da Agenda", description: "Propõe horários e qualifica de forma fluida", type: "bot", category: "IA", x: 300, y: 150 },
+                { id: 3, title: "Sincronizar Prontuário", description: "Grava no ERP médico ou Agenda digital", type: "database", category: "Dados", x: 550, y: 150 }
+            ]
+        case 'commerce-omnichannel-vendas':
+        case 'varejo':
+            return [
+                { id: 1, title: "Direct Instagram", description: "Comentário ou dúvida de produto no Direct", type: "trigger", category: "Trigger", x: 50, y: 150 },
+                { id: 2, title: "IA Vendedor de Pista", description: "Responde dúvidas de frete, estoque e tamanho", type: "bot", category: "IA", x: 300, y: 150 },
+                { id: 3, title: "Geração de Pix", description: "Gera link de pagamento e envia ao cliente", type: "database", category: "Dados", x: 550, y: 150 }
+            ]
+        case 'operacoes-urgencia-logistica':
+        case 'logistica':
+            return [
+                { id: 1, title: "Pedido no WhatsApp", description: "Cliente envia foto de pedido/lista manuscrita", type: "trigger", category: "Trigger", x: 50, y: 150 },
+                { id: 2, title: "IA OCR de Pedido", description: "Decodifica produtos, marcas e quantidades da foto", type: "bot", category: "IA", x: 300, y: 150 },
+                { id: 3, title: "Despacho ERP", description: "Grava a cotação no ERP e avisa equipe de entrega", type: "database", category: "Dados", x: 550, y: 150 }
+            ]
+        case 'bpo-financeiro-credito-tem':
+        case 'bpo':
+        case 'financas':
+            return [
+                { id: 1, title: "Entrada de Fatura", description: "Fatura de telecom, energia ou água recebida", type: "trigger", category: "Trigger", x: 50, y: 150 },
+                { id: 2, title: "IA Auditora de Contas", description: "Procura erros de tarifação e taxas ocultas", type: "bot", category: "IA", x: 300, y: 150 },
+                { id: 3, title: "Contestação Automática", description: "Abre contestação automática no portal do provedor", type: "database", category: "Dados", x: 550, y: 150 }
+            ]
+        case 'servicos-tecnicos-comerciais':
+        case 'servicos':
+            return [
+                { id: 1, title: "Pedido de Orçamento", description: "Cliente envia fotos e especificações técnicas", type: "trigger", category: "Trigger", x: 50, y: 150 },
+                { id: 2, title: "IA Orçamentista Técnico", description: "Qualifica projeto e estima custos de materiais", type: "bot", category: "IA", x: 300, y: 150 },
+                { id: 3, title: "Agendar Visita", description: "Reserva data na agenda do técnico", type: "calendar", category: "Agenda", x: 550, y: 150 }
+            ]
+        case 'reputacao-recuperacao-retencao':
+        case 'reputacao':
+        case 'cobranca':
+            return [
+                { id: 1, title: "Nova Reclamação", description: "Reclamação publicada no Reclame Aqui", type: "trigger", category: "Trigger", x: 50, y: 150 },
+                { id: 2, title: "IA Triagem e Resolução", description: "Localiza CPF no ERP e gera estorno autorizado", type: "bot", category: "IA", x: 300, y: 150 },
+                { id: 3, title: "Resposta Pública", description: "Publica resposta amigável e envia compensação", type: "message", category: "Comunicação", x: 550, y: 150 }
+            ]
+        default:
+            return [
+                { id: 1, title: "Novo Lead", description: "Quando um novo lead se cadastra", type: "trigger", category: "Trigger", x: 50, y: 100 },
+                { id: 2, title: "Qualificar Lead", description: "IA analisa perfil e pontua", type: "bot", category: "IA", x: 300, y: 100 },
+                { id: 3, title: "Enviar Email", description: "Email personalizado baseado na pontuação", type: "email", category: "Comunicação", x: 550, y: 100 }
+            ]
+    }
+}
+
+const FlowBuilder: React.FC<FlowBuilderProps> = ({ onClose, isInline = false, nicheSlug, onInteraction, onCompilar }) => {
+    const [nodes, setNodes] = useState<NodeData[]>(() => getNicheInitialNodes(nicheSlug))
 
     const [connections, setConnections] = useState<Connection[]>([
         { id: 1, from: 1, to: 2 },
         { id: 2, from: 2, to: 3 }
     ])
+
+    useEffect(() => {
+        setNodes(getNicheInitialNodes(nicheSlug))
+        setConnections([
+            { id: 1, from: 1, to: 2 },
+            { id: 2, from: 2, to: 3 }
+        ])
+    }, [nicheSlug])
 
     const [isPlaying, setIsPlaying] = useState(false)
     const [connectingFrom, setConnectingFrom] = useState<number | null>(null)
@@ -246,11 +285,13 @@ const FlowBuilder: React.FC<FlowBuilderProps> = ({ onClose }) => {
             y: Math.random() * 300 + 150
         }
         setNodes([...nodes, newNode])
+        if (onInteraction) onInteraction();
     }
 
     const deleteNode = (nodeId: number) => {
         setNodes(nodes.filter(n => n.id !== nodeId))
         setConnections(connections.filter(c => c.from !== nodeId && c.to !== nodeId))
+        if (onInteraction) onInteraction();
     }
 
     const handleConnect = (nodeId: number) => {
@@ -264,6 +305,7 @@ const FlowBuilder: React.FC<FlowBuilderProps> = ({ onClose }) => {
             }
             setConnections([...connections, newConnection])
             setConnectingFrom(null)
+            if (onInteraction) onInteraction();
         } else {
             setConnectingFrom(null)
         }
@@ -333,165 +375,180 @@ const FlowBuilder: React.FC<FlowBuilderProps> = ({ onClose }) => {
         URL.revokeObjectURL(url)
     }
 
+    const innerContent = (
+        <div className={`relative w-full bg-slate-900/40 backdrop-blur-2xl border border-white/10 rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(217,70,239,0.15)] flex flex-col ${isInline ? 'h-[75vh]' : 'max-w-7xl h-[90vh]'}`}>
+            <div className="flex items-center justify-between p-6 border-b border-white/10 bg-slate-900/40 backdrop-blur-xl z-20">
+                <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-fuchsia-500/20 border border-fuchsia-500/30 rounded-2xl flex items-center justify-center shadow-[0_0_15px_rgba(217,70,239,0.3)]">
+                        <Webhook className="w-6 h-6 text-fuchsia-400" />
+                    </div>
+                    <div>
+                        <h2 className="text-2xl font-extrabold tracking-tight text-white">Construtor de Automações</h2>
+                        <p className="text-fuchsia-200/60 text-sm">Arraste nós, conecte intenções e faça o deploy da sua IA</p>
+                    </div>
+                </div>
+                {!isInline && onClose && (
+                    <button onClick={onClose} className="w-10 h-10 bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 rounded-xl flex items-center justify-center transition-all text-slate-400 hover:text-white">
+                        <X className="w-5 h-5" />
+                    </button>
+                )}
+            </div>
+
+            <div className="flex flex-1 overflow-hidden">
+                {/* Sidebar com componentes */}
+                <div className="w-80 bg-slate-900/60 backdrop-blur-md border-r border-white/10 p-6 overflow-y-auto flex flex-col">
+                    <h3 className="text-slate-400 font-bold uppercase tracking-wider text-xs mb-4">Nodos Disponíveis</h3>
+
+                    <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                        {nodeTemplates.map((template, index) => {
+                            const Icon = template.type === 'trigger' ? Clock : template.type === 'bot' ? Bot : Zap;
+                            return (
+                                <div
+                                    key={index}
+                                    className="group bg-white/5 border border-white/10 rounded-xl p-4 cursor-pointer hover:bg-white/10 hover:border-fuchsia-500/50 hover:shadow-[0_0_20px_rgba(217,70,239,0.1)] transition-all"
+                                    onClick={() => addNode(template)}
+                                >
+                                    <div className="flex flex-col mb-2">
+                                        <div className="flex items-center mb-2">
+                                            <div className="w-8 h-8 bg-slate-800 rounded-lg flex items-center justify-center border border-slate-700 group-hover:border-fuchsia-500/50 group-hover:bg-fuchsia-500/10 transition-colors mr-3">
+                                                <Icon className="w-4 h-4 text-fuchsia-400 group-hover:text-fuchsia-300" />
+                                            </div>
+                                            <span className="text-white text-sm font-bold">{template.title}</span>
+                                        </div>
+                                        <p className="text-slate-400 text-xs leading-relaxed">{template.description}</p>
+                                    </div>
+                                    <Badge className="bg-slate-800 text-slate-300 border-slate-700 text-[10px] uppercase font-bold px-2 py-0 border group-hover:bg-fuchsia-500/20 group-hover:text-fuchsia-300 group-hover:border-fuchsia-500/30">
+                                        {template.category}
+                                    </Badge>
+                                </div>
+                            )
+                        })}
+                    </div>
+
+                    <div className="mt-6 pt-6 border-t border-white/10">
+                        <h4 className="text-slate-400 font-bold uppercase tracking-wider text-xs mb-3">Painel de Controle</h4>
+                        <div className="space-y-3">
+                            <button
+                                onClick={() => {
+                                    if (onCompilar) {
+                                        onCompilar()
+                                    } else {
+                                        simulateFlow()
+                                    }
+                                }}
+                                className={`w-full h-12 rounded-xl font-bold flex items-center justify-center transition-all ${isPlaying ? 'bg-amber-500 hover:bg-amber-400 text-amber-950 shadow-[0_0_20px_rgba(251,191,36,0.3)]' : 'bg-fuchsia-500 hover:bg-fuchsia-400 text-white shadow-[0_0_20px_rgba(217,70,239,0.3)]'}`}
+                            >
+                                {isPlaying ? <Pause className="w-5 h-5 mr-2" /> : <Play className="w-5 h-5 mr-2 -ml-1" />}
+                                {isPlaying ? 'Pausar Simulação' : 'Compilar e Testar Infraestrutura'}
+                            </button>
+
+                            <button
+                                onClick={exportFlow}
+                                className="w-full h-12 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-xl font-bold flex items-center justify-center transition-all"
+                            >
+                                <Download className="w-5 h-5 mr-2" />
+                                Exportar Schema
+                            </button>
+                        </div>
+                    </div>
+
+                    {connectingFrom && (
+                        <div className="mt-6 p-4 bg-fuchsia-500/10 border border-fuchsia-500/30 rounded-xl animate-pulse">
+                            <p className="text-fuchsia-300 text-sm font-medium flex items-center">
+                                <Webhook className="w-4 h-4 mr-2" />
+                                Conecte ao nodo destino...
+                            </p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Canvas principal */}
+                <div className="flex-1 relative overflow-hidden bg-slate-950/50">
+                    <div
+                        ref={canvasRef}
+                        className="w-full h-full relative"
+                        style={{
+                            backgroundImage: `
+                                radial-gradient(circle at 1px 1px, rgba(217,70,239,0.15) 1px, transparent 0),
+                                radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0)
+                            `,
+                            backgroundSize: '40px 40px, 10px 10px, 10px 10px',
+                            backgroundPosition: '0 0, 0 0'
+                        }}
+                    >
+                        {/* Render connections */}
+                        {connections.map(connection => (
+                            <ConnectionLine
+                                key={connection.id}
+                                connection={connection}
+                                nodes={nodes}
+                            />
+                        ))}
+
+                        {/* Render nodes */}
+                        {nodes.map(node => (
+                            <div
+                                key={node.id}
+                                onMouseDown={(e: any) => handleMouseDown(e, node)}
+                            >
+                                <FlowNode
+                                    node={node}
+                                    onDelete={deleteNode}
+                                    onConnect={handleConnect}
+                                    isConnecting={connectingFrom === node.id}
+                                    onNodeClick={() => { }}
+                                    connections={connections}
+                                />
+                            </div>
+                        ))}
+
+                        {/* Instruções */}
+                        {nodes.length === 0 && (
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <div className="text-center bg-slate-900/50 backdrop-blur-md border border-white/5 p-8 rounded-3xl">
+                                    <div className="w-20 h-20 bg-fuchsia-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-fuchsia-500/20">
+                                        <Webhook className="w-10 h-10 text-fuchsia-400" />
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-white mb-2">Canvas Operacional Vazio</h3>
+                                    <p className="text-slate-400 max-w-sm">Adicione os nodos da barra lateral esquerda e conecte as saídas para formar a sua automação inteligente.</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Status bar */}
+                    <div className="absolute bottom-6 inset-x-6 flex items-center justify-between text-sm">
+                        <div className="bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-xl px-4 py-2 flex items-center space-x-6 shadow-xl">
+                            <span className="text-slate-400">Nodos Instanciados: <strong className="text-white">{nodes.length}</strong></span>
+                            <span className="w-px h-4 bg-white/10"></span>
+                            <span className="text-slate-400">Pontes Ativas: <strong className="text-white">{connections.length}</strong></span>
+                            <span className="w-px h-4 bg-white/10"></span>
+                            <span className={`flex items-center font-bold ${isPlaying ? 'text-green-400' : 'text-slate-500'}`}>
+                                <div className={`w-2 h-2 rounded-full mr-2 ${isPlaying ? 'bg-green-400 animate-pulse shadow-[0_0_10px_rgba(74,222,128,0.5)]' : 'bg-slate-700'}`} />
+                                {isPlaying ? 'Telemetria Ligada' : 'Motores Desligados'}
+                            </span>
+                        </div>
+
+                        <div className="bg-fuchsia-500/10 text-fuchsia-300 border border-fuchsia-500/20 rounded-xl px-4 py-2 shadow-xl flex items-center">
+                            <Zap className="w-4 h-4 mr-2" />
+                            Arraste para mover, clique nos conectores para ligar
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+
+    if (isInline) {
+        return innerContent
+    }
+
     return (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-hidden">
             {/* Liquid Glass Background Accents */}
             <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-fuchsia-500/20 rounded-full mix-blend-screen filter blur-[120px] opacity-60 animate-pulse pointer-events-none"></div>
             <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-indigo-500/20 rounded-full mix-blend-screen filter blur-[100px] opacity-40 pointer-events-none"></div>
-
-            <div className="relative w-full max-w-7xl h-[90vh] bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(217,70,239,0.15)] flex flex-col">
-                <div className="flex items-center justify-between p-6 border-b border-white/10 bg-slate-900/40 backdrop-blur-xl z-20">
-                    <div className="flex items-center space-x-4">
-                        <div className="w-12 h-12 bg-fuchsia-500/20 border border-fuchsia-500/30 rounded-2xl flex items-center justify-center shadow-[0_0_15px_rgba(217,70,239,0.3)]">
-                            <Webhook className="w-6 h-6 text-fuchsia-400" />
-                        </div>
-                        <div>
-                            <h2 className="text-2xl font-extrabold tracking-tight text-white">Construtor de Automações</h2>
-                            <p className="text-fuchsia-200/60 text-sm">Arraste nós, conecte intenções e faça o deploy da sua IA</p>
-                        </div>
-                    </div>
-                    <button onClick={onClose} className="w-10 h-10 bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 rounded-xl flex items-center justify-center transition-all text-slate-400 hover:text-white">
-                        <X className="w-5 h-5" />
-                    </button>
-                </div>
-
-                <div className="flex flex-1 overflow-hidden">
-                    {/* Sidebar com componentes */}
-                    <div className="w-80 bg-slate-900/60 backdrop-blur-md border-r border-white/10 p-6 overflow-y-auto flex flex-col">
-                        <h3 className="text-slate-400 font-bold uppercase tracking-wider text-xs mb-4">Nodos Disponíveis</h3>
-
-                        <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
-                            {nodeTemplates.map((template, index) => {
-                                const Icon = template.type === 'trigger' ? Clock : template.type === 'bot' ? Bot : Zap;
-                                return (
-                                    <div
-                                        key={index}
-                                        className="group bg-white/5 border border-white/10 rounded-xl p-4 cursor-pointer hover:bg-white/10 hover:border-fuchsia-500/50 hover:shadow-[0_0_20px_rgba(217,70,239,0.1)] transition-all"
-                                        onClick={() => addNode(template)}
-                                    >
-                                        <div className="flex flex-col mb-2">
-                                            <div className="flex items-center mb-2">
-                                                <div className="w-8 h-8 bg-slate-800 rounded-lg flex items-center justify-center border border-slate-700 group-hover:border-fuchsia-500/50 group-hover:bg-fuchsia-500/10 transition-colors mr-3">
-                                                    <Icon className="w-4 h-4 text-fuchsia-400 group-hover:text-fuchsia-300" />
-                                                </div>
-                                                <span className="text-white text-sm font-bold">{template.title}</span>
-                                            </div>
-                                            <p className="text-slate-400 text-xs leading-relaxed">{template.description}</p>
-                                        </div>
-                                        <Badge className="bg-slate-800 text-slate-300 border-slate-700 text-[10px] uppercase font-bold px-2 py-0 border group-hover:bg-fuchsia-500/20 group-hover:text-fuchsia-300 group-hover:border-fuchsia-500/30">
-                                            {template.category}
-                                        </Badge>
-                                    </div>
-                                )
-                            })}
-                        </div>
-
-                        <div className="mt-6 pt-6 border-t border-white/10">
-                            <h4 className="text-slate-400 font-bold uppercase tracking-wider text-xs mb-3">Painel de Controle</h4>
-                            <div className="space-y-3">
-                                <button
-                                    onClick={simulateFlow}
-                                    className={`w-full h-12 rounded-xl font-bold flex items-center justify-center transition-all ${isPlaying ? 'bg-amber-500 hover:bg-amber-400 text-amber-950 shadow-[0_0_20px_rgba(251,191,36,0.3)]' : 'bg-fuchsia-500 hover:bg-fuchsia-400 text-white shadow-[0_0_20px_rgba(217,70,239,0.3)]'}`}
-                                >
-                                    {isPlaying ? <Pause className="w-5 h-5 mr-2" /> : <Play className="w-5 h-5 mr-2 -ml-1" />}
-                                    {isPlaying ? 'Pausar Simulação' : 'Testar Engine'}
-                                </button>
-
-                                <button
-                                    onClick={exportFlow}
-                                    className="w-full h-12 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-xl font-bold flex items-center justify-center transition-all"
-                                >
-                                    <Download className="w-5 h-5 mr-2" />
-                                    Exportar Schema
-                                </button>
-                            </div>
-                        </div>
-
-                        {connectingFrom && (
-                            <div className="mt-6 p-4 bg-fuchsia-500/10 border border-fuchsia-500/30 rounded-xl animate-pulse">
-                                <p className="text-fuchsia-300 text-sm font-medium flex items-center">
-                                    <Webhook className="w-4 h-4 mr-2" />
-                                    Conecte ao nodo destino...
-                                </p>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Canvas principal */}
-                    <div className="flex-1 relative overflow-hidden bg-slate-950/50">
-                        <div
-                            ref={canvasRef}
-                            className="w-full h-full relative"
-                            style={{
-                                backgroundImage: `
-                                    radial-gradient(circle at 1px 1px, rgba(217,70,239,0.15) 1px, transparent 0),
-                                    radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0)
-                                `,
-                                backgroundSize: '40px 40px, 10px 10px',
-                                backgroundPosition: '0 0, 0 0'
-                            }}
-                        >
-                            {/* Render connections */}
-                            {connections.map(connection => (
-                                <ConnectionLine
-                                    key={connection.id}
-                                    connection={connection}
-                                    nodes={nodes}
-                                />
-                            ))}
-
-                            {/* Render nodes */}
-                            {nodes.map(node => (
-                                <div
-                                    key={node.id}
-                                    onMouseDown={(e: any) => handleMouseDown(e, node)}
-                                >
-                                    <FlowNode
-                                        node={node}
-                                        onDelete={deleteNode}
-                                        onConnect={handleConnect}
-                                        isConnecting={connectingFrom === node.id}
-                                        onNodeClick={() => { }}
-                                        connections={connections}
-                                    />
-                                </div>
-                            ))}
-
-                            {/* Instruções */}
-                            {nodes.length === 0 && (
-                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                    <div className="text-center bg-slate-900/50 backdrop-blur-md border border-white/5 p-8 rounded-3xl">
-                                        <div className="w-20 h-20 bg-fuchsia-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-fuchsia-500/20">
-                                            <Webhook className="w-10 h-10 text-fuchsia-400" />
-                                        </div>
-                                        <h3 className="text-2xl font-bold text-white mb-2">Canvas Operacional Vazio</h3>
-                                        <p className="text-slate-400 max-w-sm">Adicione os nodos da barra lateral esquerda e conecte as saídas para formar a sua automação inteligente.</p>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Status bar */}
-                        <div className="absolute bottom-6 inset-x-6 flex items-center justify-between text-sm">
-                            <div className="bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-xl px-4 py-2 flex items-center space-x-6 shadow-xl">
-                                <span className="text-slate-400">Nodos Instanciados: <strong className="text-white">{nodes.length}</strong></span>
-                                <span className="w-px h-4 bg-white/10"></span>
-                                <span className="text-slate-400">Pontes Ativas: <strong className="text-white">{connections.length}</strong></span>
-                                <span className="w-px h-4 bg-white/10"></span>
-                                <span className={`flex items-center font-bold ${isPlaying ? 'text-green-400' : 'text-slate-500'}`}>
-                                    <div className={`w-2 h-2 rounded-full mr-2 ${isPlaying ? 'bg-green-400 animate-pulse shadow-[0_0_10px_rgba(74,222,128,0.5)]' : 'bg-slate-700'}`} />
-                                    {isPlaying ? 'Telemetria Ligada' : 'Motores Desligados'}
-                                </span>
-                            </div>
-
-                            <div className="bg-fuchsia-500/10 text-fuchsia-300 border border-fuchsia-500/20 rounded-xl px-4 py-2 shadow-xl flex items-center">
-                                <Zap className="w-4 h-4 mr-2" />
-                                Arraste para mover, clique nos conectores para ligar
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {innerContent}
         </div>
     )
 }
