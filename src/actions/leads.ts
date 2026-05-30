@@ -111,8 +111,74 @@ export async function submitApplication(payload: SubmitApplicationPayload) {
     const cleanFbc = trackingData.fbc || cookies().get('_fbc')?.value || '';
     const cleanFbp = trackingData.fbp || cookies().get('_fbp')?.value || '';
 
+    // 3. FLUXO DE AUTENTICAÇÃO SILENCIOSA & AUTO-LOGIN (Firebase Auth Admin)
+    const adminAuth = admin.auth();
+    let uid = '';
+
+    try {
+      const userRecord = await adminAuth.getUserByEmail(email);
+      uid = userRecord.uid;
+    } catch (error: any) {
+      if (error.code === 'auth/user-not-found') {
+        // Criar usuário silenciosamente
+        const tempPassword = hashSHA256(document || email).slice(0, 15);
+        const newUser = await adminAuth.createUser({
+          email: email,
+          displayName: name,
+          password: tempPassword,
+        });
+        uid = newUser.uid;
+      } else {
+        console.error("Erro ao buscar ou criar usuário no Firebase Auth:", error);
+        throw error;
+      }
+    }
+
+    // Gerar Custom Token e trocar por ID Token via REST API para criar o Session Cookie
+    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY || process.env.VITE_FIREBASE_API_KEY;
+    if (!apiKey) {
+      console.warn("Aviso: NEXT_PUBLIC_FIREBASE_API_KEY ausente. Cookie de autenticação silenciosa não gerado.");
+    } else {
+      try {
+        const customToken = await adminAuth.createCustomToken(uid);
+        
+        // Troca do Custom Token por ID Token usando o endpoint oficial do Google Identity Toolkit
+        const tokenResponse = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            token: customToken,
+            returnSecureToken: true
+          })
+        });
+
+        if (!tokenResponse.ok) {
+          const errData = await tokenResponse.json();
+          console.error("Erro na API do Identity Toolkit ao autenticar silenciosamente:", errData);
+        } else {
+          const { idToken } = await tokenResponse.json();
+          const expiresIn = 1000 * 60 * 60 * 24 * 5; // 5 dias
+          const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
+          
+          // Injeção direta nos cabeçalhos de resposta HTTP
+          cookies().set('sinergia_session', sessionCookie, {
+            maxAge: 5 * 24 * 60 * 60, // 5 dias em segundos
+            httpOnly: true,
+            secure: true,
+            sameSite: 'lax',
+            path: '/'
+          });
+        }
+      } catch (authError) {
+        console.error("Falha ao gerar o session cookie na Server Action:", authError);
+      }
+    }
+
+    // 4. ESTRUTURAÇÃO DO LEAD COM ATRIBUIÇÃO DE IDENTITY
     const leadData = {
       id: eventId,
+      companyId: eventId, // ID padrão de empresa associado ao lead
+      uid: uid,           // UID unificado de autenticação silenciosa
       name,
       email,
       document: document || '',
@@ -149,7 +215,7 @@ export async function submitApplication(payload: SubmitApplicationPayload) {
       return 'poc';
     })();
 
-    // 3. CONVERSIONS API META (CAPI)
+    // 5. CONVERSIONS API META (CAPI)
     const pixelId = process.env.META_PIXEL_ID || process.env.NEXT_PUBLIC_FB_PIXEL_ID || process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
     const accessToken = process.env.META_ACCESS_TOKEN;
 
@@ -203,7 +269,7 @@ export async function submitApplication(payload: SubmitApplicationPayload) {
       }
     };
 
-    // 4. GOOGLE ANALYTICS 4 MEASUREMENT PROTOCOL
+    // 6. GOOGLE ANALYTICS 4 MEASUREMENT PROTOCOL
     const ga4ApiSecret = process.env.GA4_API_SECRET;
     const ga4MeasurementId = process.env.GA4_MEASUREMENT_ID;
 
@@ -242,7 +308,7 @@ export async function submitApplication(payload: SubmitApplicationPayload) {
       }
     };
 
-    // 5. WEBHOOK TELEMETRIA N8N
+    // 7. WEBHOOK TELEMETRIA N8N
     const n8nWebhookUrl = process.env.N8N_APPLY_WEBHOOK_URL;
     
     const n8nPromise = async () => {
@@ -268,7 +334,7 @@ export async function submitApplication(payload: SubmitApplicationPayload) {
       }
     };
 
-    // 6. PARALELISMO SEGURO: PROMISE.ALL PARA EVITAR CONGELAMENTO EM AMBIENTE SERVERLESS
+    // 8. PARALELISMO SEGURO: PROMISE.ALL PARA EVITAR CONGELAMENTO EM AMBIENTE SERVERLESS
     await Promise.all([
       leadRef.set(leadData),
       capiPromise(),
