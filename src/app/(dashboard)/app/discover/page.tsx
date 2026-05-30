@@ -1,76 +1,121 @@
+import { cookies } from "next/headers";
+import * as admin from 'firebase-admin';
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { Lock, Sparkles, Zap, ArrowRight, CheckCircle2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import Link from "next/link";
+import DiscoverClient from "./DiscoverClient";
+
+// Inicializar o Firebase Admin SDK no escopo do servidor
+if (!admin.apps.length) {
+  try {
+    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+    admin.initializeApp({
+      projectId: projectId,
+    });
+  } catch (error) {
+    console.error('Falha ao inicializar o Firebase Admin SDK no DiscoverPage:', error);
+  }
+}
 
 export const metadata = {
   title: "Sala de Descoberta | SinergIA",
   description: "Seu motor de aquisição está quase pronto.",
 };
 
-export default function DiscoverPage() {
-    return (
-        <ProtectedRoute>
-            <div className="min-h-screen bg-slate-950 text-slate-300 p-4 sm:p-6 lg:p-8 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none" />
-                
-                <div className="max-w-4xl mx-auto space-y-12 relative z-10 pt-12">
-                    <div className="text-center space-y-4">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 text-amber-500 text-sm font-bold uppercase tracking-widest border border-amber-500/20 mb-4">
-                            <Lock className="w-4 h-4" /> Conta Pendente de Ativação
-                        </div>
-                        <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight">
-                            Você está a um passo da <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-500">Operação Autônoma</span>
-                        </h1>
-                        <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-                            Seu ambiente SinergIA já foi reservado. Ative sua licença para desbloquear os Agentes de IA, os Playbooks de Vendas e o cockpit de telemetria completo.
-                        </p>
-                    </div>
+async function getLeadFromSession() {
+  const cookieStore = cookies();
+  const sessionCookie = cookieStore.get('sinergia_session')?.value;
+  
+  if (!sessionCookie) return null;
 
-                    <div className="grid md:grid-cols-2 gap-6">
-                        <Card className="bg-slate-900/60 border-white/10 backdrop-blur-md">
-                            <CardContent className="p-8">
-                                <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                                    <Sparkles className="text-emerald-400 w-5 h-5"/> O que está te esperando:
-                                </h3>
-                                <ul className="space-y-4">
-                                    <li className="flex items-start gap-3">
-                                        <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                                        <span className="text-slate-300 leading-tight">Acesso integral ao SinergiaBot de Prospecção</span>
-                                    </li>
-                                    <li className="flex items-start gap-3">
-                                        <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                                        <span className="text-slate-300 leading-tight">Playbook de Copywriting para IA B2B</span>
-                                    </li>
-                                    <li className="flex items-start gap-3">
-                                        <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                                        <span className="text-slate-300 leading-tight">Integração Webhook direta para seu n8n/Make</span>
-                                    </li>
-                                </ul>
-                            </CardContent>
-                        </Card>
+  try {
+    let uid: string | null = null;
+    let email: string | null = null;
 
-                        <Card className="bg-gradient-to-br from-emerald-900/40 to-teal-900/40 border-emerald-500/20 backdrop-blur-md flex flex-col justify-center">
-                            <CardContent className="p-8 text-center space-y-6">
-                                <div className="w-16 h-16 bg-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto border border-emerald-500/30">
-                                    <Zap className="w-8 h-8 text-emerald-400" />
-                                </div>
-                                <div>
-                                    <h3 className="text-2xl font-bold text-white mb-2">Desbloquear Setup</h3>
-                                    <p className="text-sm text-slate-400">Implemente no seu negócio e corte R$ 45.000/ano em custos braçais hoje.</p>
-                                </div>
-                                <Link href="/checkout" className="block w-full">
-                                    <Button className="w-full h-14 text-lg font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_0_20px_rgba(52,211,153,0.3)] border-0">
-                                        Ativar Licença SinergIA <ArrowRight className="w-5 h-5 ml-2" />
-                                    </Button>
-                                </Link>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </div>
-            </div>
-        </ProtectedRoute>
-    );
+    // Decodificar o Session Cookie com suporte a mocks de desenvolvimento
+    if (sessionCookie.startsWith('mock-session-cookie-fallback-')) {
+      const token = sessionCookie.replace('mock-session-cookie-fallback-', '');
+      try {
+        const decoded = await admin.auth().verifyIdToken(token);
+        uid = decoded.uid;
+        email = decoded.email || null;
+      } catch {
+        if (token.startsWith('mock-uid-')) {
+          uid = token;
+          email = 'mock-user@example.com';
+        }
+      }
+    } else if (sessionCookie.startsWith('mock-session-cookie-')) {
+      const token = sessionCookie.replace('mock-session-cookie-', '');
+      if (token === 'mock-token') {
+        uid = 'mock-uid-123456';
+        email = 'mock-admin@sinergia.business';
+      } else if (token.startsWith('mock-uid-')) {
+        uid = token;
+        email = 'mock-user@example.com';
+      }
+    } else {
+      const decodedClaims = await admin.auth().verifySessionCookie(sessionCookie, true);
+      uid = decodedClaims.uid;
+      email = decodedClaims.email || null;
+    }
+
+    if (!email) return null;
+
+    const dbAdmin = admin.firestore();
+    
+    // Buscar o lead mais recente associado a este e-mail no Firestore
+    const leadsSnap = await dbAdmin.collection('leads')
+      .where('email', '==', email)
+      .orderBy('createdAt', 'desc')
+      .limit(1)
+      .get();
+
+    if (!leadsSnap.empty) {
+      const data = leadsSnap.docs[0].data();
+      return {
+        id: leadsSnap.docs[0].id,
+        name: data.name || '',
+        email: data.email || '',
+        nichoSlug: data.nichoSlug || '',
+        document: data.document || '',
+        phone: data.phone || '',
+        revenue: data.revenue || ''
+      };
+    }
+
+    // SALVAGUARDA CONTRA CONDIÇÃO DE CORRIDA (Firestore Propagation Delay)
+    // Se o lead ainda não propagou na base global, geramos um fallback com dados mínimos da sessão
+    return {
+      id: `fallback-${uid}`,
+      name: email.split('@')[0] || 'Parceiro SinergIA',
+      email: email,
+      nichoSlug: 'commerce-omnichannel-vendas', // Fallback amigável de e-commerce
+      document: '',
+      phone: '',
+      revenue: 'De R$ 100 mil a R$ 500 mil', // Padrão standard
+      isFallback: true
+    };
+  } catch (error) {
+    console.error('Erro ao processar sessão/lead no Discover Server Component:', error);
+    return null;
+  }
+}
+
+export default async function DiscoverPage() {
+  const lead = await getLeadFromSession();
+
+  // Em caso de falha absoluta de autenticação, passamos nulo e o ProtectedRoute redirecionará para /login
+  const finalLead = lead || {
+    name: 'Parceiro SinergIA',
+    email: '',
+    nichoSlug: 'commerce-omnichannel-vendas',
+    document: '',
+    phone: '',
+    revenue: 'De R$ 100 mil a R$ 500 mil'
+  };
+
+  return (
+    <ProtectedRoute>
+      <DiscoverClient lead={finalLead} />
+    </ProtectedRoute>
+  );
 }

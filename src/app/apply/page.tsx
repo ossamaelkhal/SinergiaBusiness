@@ -8,6 +8,26 @@ import { Button } from '@/components/ui/button';
 import { submitApplication } from '@/actions/leads';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
+function getCookie(name: string): string {
+  if (typeof document === 'undefined') return '';
+  const match = document.cookie.match(new RegExp('(?:^|;)\\s*' + name + '=([^;]+)'));
+  return match ? decodeURIComponent(match[1]) : '';
+}
+
+function getGaClientId(): string {
+  if (typeof document === 'undefined') return '';
+  const match = document.cookie.match(/(?:^|;)\s*_ga=([^;]+)/);
+  if (!match) return '';
+  
+  const value = decodeURIComponent(match[1]);
+  const parts = value.split('.');
+  if (parts.length >= 4) {
+    // Ex: GA1.1.123456789.1717000000 -> partes finais: 123456789.1717000000
+    return `${parts[parts.length - 2]}.${parts[parts.length - 1]}`;
+  }
+  return value;
+}
+
 function ApplyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -32,22 +52,44 @@ function ApplyContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    const referrerId = typeof window !== 'undefined' ? localStorage.getItem('sinergia_affiliate_id') || '' : '';
     
     const utm_source = searchParams.get('utm_source') || '';
     const utm_medium = searchParams.get('utm_medium') || '';
     const utm_campaign = searchParams.get('utm_campaign') || '';
     const utm_content = searchParams.get('utm_content') || '';
+    const gclid = searchParams.get('gclid') || '';
+    const nichoSlug = searchParams.get('nicho') || '';
     
+    const fbc = getCookie('_fbc');
+    const fbp = getCookie('_fbp');
+    const ga_client_id = getGaClientId();
+
+    const userData = {
+      name: formData.name,
+      email: formData.email,
+      document: formData.document,
+      phone: formData.phone,
+      revenue: formData.revenue,
+      teamSize: formData.teamSize,
+      bottleneck: formData.bottleneck,
+      nichoSlug
+    };
+
+    const trackingData = {
+      utm_source,
+      utm_medium,
+      utm_campaign,
+      utm_content,
+      fbc,
+      fbp,
+      ga_client_id,
+      gclid
+    };
+
     try {
       const res = await submitApplication({ 
-        ...formData, 
-        referrerId,
-        utm_source,
-        utm_medium,
-        utm_campaign,
-        utm_content,
-        nichoSlug: searchParams.get('nicho') || ''
+        userData,
+        trackingData
       });
       
       if (res.success) {

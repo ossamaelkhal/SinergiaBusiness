@@ -19,25 +19,27 @@ if (!admin.apps.length) {
   }
 }
 
-export interface SubmitApplicationInput {
-  name: string;
-  email: string;
-  document: string; // CNPJ/CPF
-  phone: string;    // WhatsApp
-  revenue?: string;
-  teamSize?: string;
-  bottleneck?: string;
-  nichoSlug?: string;
-  referrerId?: string;
-  domain?: string;
-  utm_source?: string;
-  utm_medium?: string;
-  utm_campaign?: string;
-  utm_content?: string;
-  fbc?: string;
-  fbp?: string;
-  client_user_agent?: string;
-  client_ip_address?: string;
+export interface SubmitApplicationPayload {
+  userData: {
+    name: string;
+    email: string;
+    document: string; // CNPJ/CPF
+    phone: string;    // WhatsApp
+    revenue?: string;
+    teamSize?: string;
+    bottleneck?: string;
+    nichoSlug?: string;
+  };
+  trackingData: {
+    utm_source?: string;
+    utm_medium?: string;
+    utm_campaign?: string;
+    utm_content?: string;
+    fbc?: string;
+    fbp?: string;
+    ga_client_id?: string;
+    gclid?: string;
+  };
 }
 
 function hashSHA256(val: string | undefined | null): string {
@@ -49,35 +51,47 @@ function hashSHA256(val: string | undefined | null): string {
 }
 
 function getPhoneHashes(rawPhone: string): string[] {
-  let clean = rawPhone.replace(/\D/g, '');
+  let clean = rawPhone.replace(/\D/g, ''); // Apenas dígitos
   if (!clean) return [];
 
-  // Adiciona o DDI 55 do Brasil se não estiver explícito
-  if (!clean.startsWith('55') && clean.length <= 11) {
+  // Se o telefone foi enviado com DDD mas sem o DDI (ex: 11988887777 - 11 dígitos)
+  // Ou qualquer formato brasileiro sem DDI, adicionamos 55
+  if (!clean.startsWith('55') && (clean.length === 10 || clean.length === 11)) {
     clean = '55' + clean;
   }
 
-  const hashes: string[] = [hashSHA256(clean)];
+  const hashes: string[] = [];
 
-  // Se for celular brasileiro com 13 dígitos iniciados em 55 e possuir o 9 no quinto caractere (ex: 5531998765432)
+  // Caso 1: Se tem 13 dígitos e começa com 55 e tem o 9 na posição correta (55 + DDD + 9 + 8 dígitos)
   if (clean.startsWith('55') && clean.length === 13 && clean[4] === '9') {
-    // Remove o 9º dígito (caractere no índice 4) para gerar o hash alternativo (ex: 553198765432)
+    // Hash do número completo (com o 9º dígito)
+    hashes.push(hashSHA256(clean));
+    // Hash do número sem o 9º dígito (remove o caractere no índice 4)
     const withoutNinth = clean.slice(0, 4) + clean.slice(5);
     hashes.push(hashSHA256(withoutNinth));
+  } else if (clean.startsWith('55') && clean.length === 12) {
+    // Se tem 12 dígitos, supõe-se que já está sem o 9º dígito (55 + DDD + 8 dígitos)
+    hashes.push(hashSHA256(clean));
+    // Adiciona o 9º dígito (insere '9' no índice 4)
+    const withNinth = clean.slice(0, 4) + '9' + clean.slice(4);
+    hashes.push(hashSHA256(withNinth));
+  } else {
+    // Caso padrão
+    hashes.push(hashSHA256(clean));
   }
 
-  return hashes;
+  // Garantir hashes únicos
+  return Array.from(new Set(hashes));
 }
 
-export async function submitApplication(data: SubmitApplicationInput) {
+export async function submitApplication(payload: SubmitApplicationPayload) {
   try {
-    const { 
-      name, email, document, phone, 
-      revenue, teamSize, bottleneck, nichoSlug, 
-      referrerId, domain,
-      utm_source, utm_medium, utm_campaign, utm_content,
-      fbc, fbp, client_user_agent, client_ip_address 
-    } = data;
+    if (!payload || !payload.userData) {
+      return { success: false, error: 'Dados do usuário são obrigatórios.' };
+    }
+
+    const { userData, trackingData = {} } = payload;
+    const { name, email, document, phone, revenue, teamSize, bottleneck, nichoSlug } = userData;
 
     if (!email || !name) {
       return { success: false, error: 'Nome e E-mail são obrigatórios.' };
@@ -91,11 +105,11 @@ export async function submitApplication(data: SubmitApplicationInput) {
 
     // 2. PARSING DE METADADOS DE REDE E IP (Limpando proxies)
     const ipHeader = headers().get('x-forwarded-for') || '';
-    const cleanClientIp = client_ip_address || ipHeader.split(',')[0].trim() || headers().get('x-real-ip') || '';
-    const cleanUserAgent = client_user_agent || headers().get('user-agent') || '';
+    const cleanClientIp = ipHeader.split(',')[0].trim() || headers().get('x-real-ip') || '';
+    const cleanUserAgent = headers().get('user-agent') || '';
     
-    const cleanFbc = fbc || cookies().get('_fbc')?.value || '';
-    const cleanFbp = fbp || cookies().get('_fbp')?.value || '';
+    const cleanFbc = trackingData.fbc || cookies().get('_fbc')?.value || '';
+    const cleanFbp = trackingData.fbp || cookies().get('_fbp')?.value || '';
 
     const leadData = {
       id: eventId,
@@ -107,24 +121,36 @@ export async function submitApplication(data: SubmitApplicationInput) {
       teamSize: teamSize || '',
       bottleneck: bottleneck || '',
       nichoSlug: nichoSlug || '',
-      domain: domain || '',
-      referrerId: referrerId || '',
       status: 'prospect_vip',
       createdAt: new Date().toISOString(),
       tracking: {
-        utm_source: utm_source || '',
-        utm_medium: utm_medium || '',
-        utm_campaign: utm_campaign || '',
-        utm_content: utm_content || '',
+        utm_source: trackingData.utm_source || '',
+        utm_medium: trackingData.utm_medium || '',
+        utm_campaign: trackingData.utm_campaign || '',
+        utm_content: trackingData.utm_content || '',
         fbc: cleanFbc,
         fbp: cleanFbp,
+        ga_client_id: trackingData.ga_client_id || '',
+        gclid: trackingData.gclid || '',
         client_user_agent: cleanUserAgent,
         client_ip_address: cleanClientIp
       }
     };
 
+    const revenueKey = (() => {
+      if (!revenue) return 'poc';
+      const rev = revenue.toLowerCase();
+      if (rev === 'enterprise' || rev.includes('acima') || rev.includes('2 milhões') || rev.includes('2m')) {
+        return 'enterprise';
+      }
+      if (rev === 'standard' || rev.includes('500 mil') || rev.includes('100 mil a')) {
+        return 'standard';
+      }
+      return 'poc';
+    })();
+
     // 3. CONVERSIONS API META (CAPI)
-    const pixelId = process.env.META_PIXEL_ID || process.env.NEXT_PUBLIC_FB_PIXEL_ID;
+    const pixelId = process.env.META_PIXEL_ID || process.env.NEXT_PUBLIC_FB_PIXEL_ID || process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
     const accessToken = process.env.META_ACCESS_TOKEN;
 
     const capiPromise = async () => {
@@ -154,7 +180,7 @@ export async function submitApplication(data: SubmitApplicationInput) {
             },
             custom_data: {
               currency: 'BRL',
-              value: 15000.00
+              value: revenueKey === 'enterprise' ? 50000.00 : revenueKey === 'standard' ? 15000.00 : 997.00
             }
           }
         ]
@@ -177,7 +203,46 @@ export async function submitApplication(data: SubmitApplicationInput) {
       }
     };
 
-    // 4. WEBHOOK TELEMETRIA N8N
+    // 4. GOOGLE ANALYTICS 4 MEASUREMENT PROTOCOL
+    const ga4ApiSecret = process.env.GA4_API_SECRET;
+    const ga4MeasurementId = process.env.GA4_MEASUREMENT_ID;
+
+    const ga4Promise = async () => {
+      if (!ga4ApiSecret || !ga4MeasurementId) {
+        console.warn("Aviso: GA4 Measurement Protocol não executado. API Secret ou Measurement ID ausentes.");
+        return { status: 'skipped' };
+      }
+
+      const gaClientId = trackingData.ga_client_id || 'ga_fallback_' + eventId;
+      const value = revenueKey === 'enterprise' ? 50000 : revenueKey === 'standard' ? 15000 : 997;
+
+      const ga4Payload = {
+        client_id: gaClientId,
+        events: [{
+          name: "generate_lead",
+          params: {
+            currency: "BRL",
+            value: value,
+            transaction_id: eventId,
+            nicho: nichoSlug || ''
+          }
+        }]
+      };
+
+      try {
+        const response = await fetch(`https://www.google-analytics.com/mp/collect?api_secret=${ga4ApiSecret}&measurement_id=${ga4MeasurementId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(ga4Payload)
+        });
+        return { status: 'success', ok: response.ok };
+      } catch (err) {
+        console.error("Falha ao enviar evento GA4:", err);
+        return { status: 'error', error: err };
+      }
+    };
+
+    // 5. WEBHOOK TELEMETRIA N8N
     const n8nWebhookUrl = process.env.N8N_APPLY_WEBHOOK_URL;
     
     const n8nPromise = async () => {
@@ -203,16 +268,17 @@ export async function submitApplication(data: SubmitApplicationInput) {
       }
     };
 
-    // 5. PARALELISMO SEGURO: PROMISE.ALL PARA EVITAR CONGELAMENTO EM AMBIENTE SERVERLESS
+    // 6. PARALELISMO SEGURO: PROMISE.ALL PARA EVITAR CONGELAMENTO EM AMBIENTE SERVERLESS
     await Promise.all([
       leadRef.set(leadData),
       capiPromise(),
+      ga4Promise(),
       n8nPromise()
     ]);
 
     revalidatePath('/admin/leads');
 
-    return { success: true, docId: eventId };
+    return { success: true, eventId, docId: eventId };
   } catch (error) {
     console.error("Erro interno na Server Action submitApplication:", error);
     return { success: false, error: 'Erro interno do servidor ao processar aplicação.' };

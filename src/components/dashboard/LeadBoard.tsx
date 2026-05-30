@@ -83,9 +83,11 @@ export function LeadBoard({ leads, onUpdateStatus }: LeadBoardProps) {
                                             </div>
                                         )}
                                         <div className="text-[10px] text-gray-400 mt-2 text-right">
-                                            {lead.createdAt?.seconds
-                                                ? new Date(lead.createdAt.seconds * 1000).toLocaleDateString()
-                                                : 'Recent'}
+                                            {lead.createdAt && (lead.createdAt as any).seconds
+                                                ? new Date((lead.createdAt as any).seconds * 1000).toLocaleDateString()
+                                                : (typeof lead.createdAt === 'string'
+                                                    ? new Date(lead.createdAt).toLocaleDateString()
+                                                    : 'Recent')}
                                         </div>
                                     </div>
                                 </CardContent>

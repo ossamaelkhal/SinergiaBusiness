@@ -8,6 +8,9 @@ import {
   CheckCircle, Lock, ArrowUp, Calendar, DollarSign, Clock,
   BarChart3, Lightbulb, Flame, Users, Award, Gift, Sparkles, LucideIcon
 } from 'lucide-react'
+import { useAuth } from '@/providers/AuthProvider'
+import { addWithdrawalRequest } from '@/services/firestoreService'
+import { toast } from 'sonner'
 
 interface BadgeItem {
   id: number
@@ -91,6 +94,41 @@ const SalesGamification: React.FC<SalesGamificationProps> = ({ onClose }) => {
       { id: 7, name: "Lenda das Vendas", icon: Gem, earned: false }
     ]
   })
+
+  const { user } = useAuth()
+  const [pixKey, setPixKey] = useState('')
+  const [amount, setAmount] = useState('2450.00')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleRequestWithdrawal = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!pixKey.trim()) {
+      toast.error('Por favor, insira a sua chave PIX.')
+      return
+    }
+    const parsedAmount = parseFloat(amount)
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      toast.error('Valor solicitado inválido.')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      await addWithdrawalRequest({
+        partnerId: user?.uid || 'mock-uid-123456',
+        partnerName: user?.displayName || user?.email?.split('@')[0] || 'João Silva',
+        amount: parsedAmount,
+        pixKey: pixKey
+      })
+      toast.success('Solicitação de saque registrada no Firestore!')
+      setPixKey('')
+    } catch (error) {
+      console.error('Erro ao enviar saque:', error)
+      toast.error('Falha ao registrar saque no Firestore.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   const [selectedTab, setSelectedTab] = useState<'overview' | 'missions' | 'leaderboard' | 'badges' | 'rewards'>('overview')
 
@@ -577,19 +615,48 @@ const SalesGamification: React.FC<SalesGamificationProps> = ({ onClose }) => {
 
               <div className="max-w-md mx-auto relative group">
                  <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-cyan-400 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-                 <div className="relative bg-slate-900 border border-white/10 p-8 rounded-3xl flex flex-col items-center">
-                    <div className="w-16 h-16 bg-white/5 border border-white/10 rounded-full flex items-center justify-center mb-6">
+                 <form onSubmit={handleRequestWithdrawal} className="relative bg-slate-900 border border-white/10 p-8 rounded-3xl flex flex-col w-full space-y-4">
+                    <div className="w-16 h-16 bg-white/5 border border-white/10 rounded-full flex items-center justify-center mx-auto mb-2">
                        <DollarSign className="w-8 h-8 text-white" />
                     </div>
-                    <div className="text-center mb-6">
+                    <div className="text-center mb-4">
                        <h4 className="text-xl font-bold text-white mb-2">Pix Direto Mercado Pago</h4>
-                       <p className="text-slate-400 text-sm">Transferência instantânea para a chave padrão cadastrada. Livre de taxas da plataforma.</p>
+                       <p className="text-slate-400 text-sm">Transferência instantânea para a chave cadastrada. Livre de taxas.</p>
+                    </div>
+
+                    <div className="space-y-2">
+                       <label className="text-xs font-bold uppercase tracking-wider text-slate-400 block text-left">Chave PIX</label>
+                       <input 
+                         type="text"
+                         required
+                         value={pixKey}
+                         onChange={(e) => setPixKey(e.target.value)}
+                         placeholder="CPF, E-mail, Celular ou Chave Aleatória"
+                         className="w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 text-white outline-none focus:border-emerald-500/50 transition-colors"
+                       />
+                    </div>
+
+                    <div className="space-y-2">
+                       <label className="text-xs font-bold uppercase tracking-wider text-slate-400 block text-left">Valor do Saque (R$)</label>
+                       <input 
+                         type="number"
+                         step="0.01"
+                         required
+                         value={amount}
+                         onChange={(e) => setAmount(e.target.value)}
+                         placeholder="2450.00"
+                         className="w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 text-white outline-none focus:border-emerald-500/50 transition-colors"
+                       />
                     </div>
                     
-                    <button className="w-full h-14 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-black text-lg rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all flex items-center justify-center">
-                       Solicitar Transferência
-                    </button>
-                 </div>
+                    <Button 
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full h-14 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-black text-lg rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all flex items-center justify-center"
+                    >
+                      {isSubmitting ? 'Processando...' : 'Solicitar Transferência'}
+                    </Button>
+                 </form>
               </div>
             </div>
           )}

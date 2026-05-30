@@ -4,31 +4,61 @@ service cloud.firestore {
 
     // Regras para a coleção 'companies'
     match /companies/{companyId} {
-      // Leitura, atualização e deleção: Permitido apenas se o ID do usuário for o mesmo que o 'ownerId' do documento.
-      allow read, update, delete: if request.auth != null && resource.data.ownerId == request.auth.uid;
+      allow read, update, delete: if request.auth != null && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+        resource.data.ownerId == request.auth.uid
+      );
       
-      // Criação: Permitido para qualquer usuário autenticado, desde que o 'ownerId' do novo documento seja o ID do próprio usuário.
-      allow create: if request.auth != null && request.resource.data.ownerId == request.auth.uid;
+      allow create: if request.auth != null && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+        request.resource.data.ownerId == request.auth.uid
+      );
     }
 
     // Regras para a coleção 'leads'
     match /leads/{leadId} {
-      // Leitura, atualização e deleção: Permitido se o usuário for o dono da empresa à qual o lead pertence.
-      allow read, update, delete: if request.auth != null && get(/databases/$(database)/documents/companies/$(resource.data.companyId)).data.ownerId == request.auth.uid;
+      // Leitura, atualização e deleção: Permitido para o administrador ou se o usuário for o dono da empresa.
+      allow read, update, delete: if request.auth != null && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+        ('companyId' in resource.data && resource.data.companyId != null && get(/databases/$(database)/documents/companies/$(resource.data.companyId)).data.ownerId == request.auth.uid)
+      );
       
-      // Criação: Permitido se o usuário for o dono da empresa à qual o lead está sendo associado.
-      allow create: if request.auth != null && get(/databases/$(database)/documents/companies/$(request.resource.data.companyId)).data.ownerId == request.auth.uid;
+      // Criação: Permitido para o administrador ou se o usuário for o dono da empresa à qual o lead está associado.
+      allow create: if request.auth != null && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+        ('companyId' in request.resource.data && request.resource.data.companyId != null && get(/databases/$(database)/documents/companies/$(request.resource.data.companyId)).data.ownerId == request.auth.uid)
+      );
     }
 
     // Regras para a coleção 'users' (papeis de acesso)
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if request.auth != null && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+        request.auth.uid == userId
+      );
     }
 
-    // Regras para a coleção 'applications' (leads B2B high-ticket)
+    // Regras para a coleção 'applications' (legado - leads B2B)
     match /applications/{applicationId} {
       allow create: if true; // Público (leads do funil)
       allow read, update, delete: if request.auth != null; // Administradores autenticados
+    }
+
+    // Regras para a coleção 'withdrawals' (saques de comissão Pix)
+    match /withdrawals/{withdrawalId} {
+      // Criação: Permitido para usuários autenticados, desde que o parceiro seja ele mesmo e o status inicial seja 'pending'.
+      allow create: if request.auth != null && 
+                    request.resource.data.partnerId == request.auth.uid && 
+                    request.resource.data.status == 'pending';
+      
+      // Leitura: Permitido apenas para o próprio afiliado dono do saque ou para administradores.
+      allow read: if request.auth != null && (
+        resource.data.partnerId == request.auth.uid || 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+      
+      // Atualizações e Exclusões: Proibido no cliente. Deve ser processado exclusivamente no servidor.
+      allow update, delete: if false;
     }
 
   }
