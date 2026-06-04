@@ -2,6 +2,7 @@
 
 import * as admin from 'firebase-admin'
 import { revalidatePath } from 'next/cache'
+import { getNicheBySlug } from '@/data/niches'
 
 // Inicializar o Firebase Admin SDK com segurança no escopo do servidor
 if (!admin.apps.length) {
@@ -27,12 +28,14 @@ export interface PaymentSessionResponse {
   };
   plan?: string;
   price?: number;
+  setupPrice?: number;
+  monthlyLoss?: number;
 }
 
-export async function generatePaymentSession(leadId: string, planId: string): Promise<PaymentSessionResponse> {
+export async function generatePaymentSession(leadId: string): Promise<PaymentSessionResponse> {
   try {
-    if (!leadId || !planId) {
-      return { success: false, error: 'Lead ID e Plan ID são obrigatórios.' };
+    if (!leadId) {
+      return { success: false, error: 'Lead ID é obrigatório.' };
     }
 
     const dbAdmin = admin.firestore();
@@ -43,14 +46,55 @@ export async function generatePaymentSession(leadId: string, planId: string): Pr
       return { success: false, error: 'Lead não encontrado.' };
     }
 
-    if (planId === 'playbooks') {
-      // Plano PoC R$ 997: Gerar PIX Imediato simulado
+    const leadData = leadSnap.data();
+    if (!leadData) {
+      return { success: false, error: 'Dados do lead inválidos.' };
+    }
+
+    const auditedLoss = Number(leadData.auditedLoss) || 0;
+    const nichoSlug = leadData.nichoSlug || '';
+    const revenue = leadData.revenue || '';
+
+    // 1. Resolução do Vazamento Mensal
+    const monthlyLoss = (() => {
+      if (auditedLoss > 0) {
+        return auditedLoss;
+      }
+      const baselines: Record<string, number> = {
+        'faturamento-saude-bemestar': 12400,
+        'commerce-omnichannel-vendas': 18900,
+        'operacoes-urgencia-logistica': 22500,
+        'bpo-financeiro-credito-tem': 28200,
+        'servicos-tecnicos-comerciais': 14700,
+      };
+      const base = baselines[nichoSlug] || 16500;
+
+      // Multiplicador por Receita
+      const rev = revenue.toLowerCase();
+      if (rev === 'enterprise' || rev.includes('enterprise') || rev.includes('acima') || rev.includes('2m') || rev.includes('2 milhões')) {
+        return base * 2.5;
+      }
+      if (rev === 'poc' || rev.includes('poc') || rev.includes('até 100k') || rev.includes('inicial')) {
+        return base * 0.5;
+      }
+      return base;
+    })();
+
+    // 2. Cálculo do Setup (10% do anual com piso de R$ 1.500)
+    const setupPrice = Math.max(1500, (monthlyLoss * 12) * 0.10);
+
+    if (setupPrice <= 5000) {
+      // Gerar PIX Imediato simulado
       const transactionId = `MP-${Math.floor(Math.random() * 1000000000)}`;
       const pixKey = "financeiro@sinergia.ai";
-      const pixString = `00020126580014br.gov.bcb.pix0136${pixKey}5204000053039865406997.005802BR5911SinergIA OS6009Sao Paulo62070503***6304E5D4`;
-      
+      const priceStr = setupPrice.toFixed(2);
+      const priceLenStr = String(priceStr.length).padStart(2, '0');
+      // Pix EMV string formatada
+      const pixString = `00020126580014br.gov.bcb.pix0136${pixKey}52040000530398654${priceLenStr}${priceStr}5802BR5911SinergIA OS6009Sao Paulo62070503***6304E5D4`;
+
       await leadRef.update({
-        planId: 'playbooks',
+        planId: 'dynamic_pix',
+        contractValue: setupPrice,
         billing_status: 'pending',
         transactionId: transactionId,
         updatedAt: new Date().toISOString()
@@ -63,16 +107,16 @@ export async function generatePaymentSession(leadId: string, planId: string): Pr
           qr_code: pixString,
           qr_code_base64: "iVBORw0KGgoAAAANSUhEUgAAAJYAAACWAQMAAAAGz+h2AAAABlBMVEX///8AAABVwtN+AAABkklEQVRIjWNgQAL/IQZ/IP7/AwoQ7oAQ/Bf8j3/A/wQG2EA/hEEA2EEB/wH/EwzQQD+EAQYAA2AAgA==",
           id: transactionId,
-          price: 997.00
-        }
+          price: setupPrice
+        },
+        setupPrice,
+        monthlyLoss
       };
     } else {
-      // Plano Standard (R$ 15k) ou Enterprise (R$ 50k)
-      const labelPlan = planId === 'enterprise' ? 'Enterprise' : 'Standard';
-      const price = planId === 'enterprise' ? 50000.00 : 15000.00;
-
+      // Booking Concierge para setups corporativos
       await leadRef.update({
-        planId: planId,
+        planId: 'dynamic_booking',
+        contractValue: setupPrice,
         billing_status: 'waiting_call',
         status: 'waiting_onboarding_call',
         updatedAt: new Date().toISOString()
@@ -81,8 +125,10 @@ export async function generatePaymentSession(leadId: string, planId: string): Pr
       return {
         success: true,
         type: 'booking',
-        plan: labelPlan,
-        price: price
+        plan: 'Dynamic Value Setup',
+        price: setupPrice,
+        setupPrice,
+        monthlyLoss
       };
     }
   } catch (error: any) {

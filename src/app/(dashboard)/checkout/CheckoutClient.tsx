@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Check, Shield, Lock, QrCode, Calendar, Clock, ArrowRight, CheckCircle2, Loader2, Copy } from 'lucide-react'
+import { Check, Shield, Lock, Calendar, Clock, ArrowRight, CheckCircle2, Loader2, Copy, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import { generatePaymentSession, bookOnboardingCall, PaymentSessionResponse } from '@/actions/billing'
@@ -18,52 +18,15 @@ interface LeadData {
   phone?: string
   revenue?: string
   status: string
+  auditedLoss?: number
 }
 
 interface CheckoutClientProps {
   lead: LeadData
-  planId: 'playbooks' | 'setup' | 'enterprise'
 }
 
-const PLAN_DETAILS = {
-  playbooks: {
-    name: 'SinergIA Playbooks (PoC)',
-    price: 997.00,
-    desc: 'Mão na Massa. Acesso imediato ao repositório de playbooks de IA.',
-    features: [
-      'Acesso a 15 automações n8n prontas',
-      'Treinamento completo Aura Academy',
-      'Suporte via comunidade do Discord',
-      'Updates de segurança e novos nós mensais'
-    ]
-  },
-  setup: {
-    name: 'Máquina Autônoma (Standard)',
-    price: 15000.00,
-    desc: 'Feito por nós. Setup e integração completa na sua infraestrutura regional.',
-    features: [
-      'Especialista dedicado de implantação',
-      'Chatbots WhatsApp treinados no seu BANT',
-      'Integração e logs de consumo no seu CRM',
-      'Homologação de chaves em 10 dias úteis'
-    ]
-  },
-  enterprise: {
-    name: 'Esquadrão Private (Enterprise)',
-    price: 50000.00,
-    desc: 'Consultoria bespoke sob medida do C-Level para grandes corporações.',
-    features: [
-      'Squad dedicado (Engenheiro de IA + Arquiteto de Negócios)',
-      'Modelos locais LLM customizados e privados',
-      'Auditoria completa de TISS/TUSS ou fluxos complexos',
-      'SLA de suporte prioritário 24/7 e NDAs estritos'
-    ]
-  }
-}
-
-export default function CheckoutClient({ lead, planId }: CheckoutClientProps) {
+export default function CheckoutClient({ lead }: CheckoutClientProps) {
   const router = useRouter()
-  const plan = PLAN_DETAILS[planId]
 
   const [loading, setLoading] = useState(true)
   const [sessionData, setSessionData] = useState<PaymentSessionResponse | null>(null)
@@ -82,11 +45,43 @@ export default function CheckoutClient({ lead, planId }: CheckoutClientProps) {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
   }
 
-  // 1. Inicializar sessão de pagamento / booking no servidor
+  // Lógica de cálculo síncrona no front-end para exibição imediata
+  const auditedLoss = Number(lead.auditedLoss) || 0
+  const nichoSlug = lead.nichoSlug || ''
+  const revenue = lead.revenue || ''
+
+  const clientMonthlyLoss = (() => {
+    if (auditedLoss > 0) {
+      return auditedLoss
+    }
+    const baselines: Record<string, number> = {
+      'faturamento-saude-bemestar': 12400,
+      'commerce-omnichannel-vendas': 18900,
+      'operacoes-urgencia-logistica': 22500,
+      'bpo-financeiro-credito-tem': 28200,
+      'servicos-tecnicos-comerciais': 14700,
+    }
+    const base = baselines[nichoSlug] || 16500
+
+    // Multiplicador por Receita
+    const rev = revenue.toLowerCase()
+    if (rev === 'enterprise' || rev.includes('enterprise') || rev.includes('acima') || rev.includes('2m') || rev.includes('2 milhões')) {
+      return base * 2.5
+    }
+    if (rev === 'poc' || rev.includes('poc') || rev.includes('até 100k') || rev.includes('inicial')) {
+      return base * 0.5
+    }
+    return base
+  })()
+
+  const clientSetupPrice = Math.max(1500, (clientMonthlyLoss * 12) * 0.10)
+  const isPixFlow = clientSetupPrice <= 5000
+
+  // 1. Inicializar sessão de pagamento / booking no servidor (Cálculo Dinâmico Blindado)
   useEffect(() => {
     async function initSession() {
       try {
-        const res = await generatePaymentSession(lead.id, planId)
+        const res = await generatePaymentSession(lead.id)
         setSessionData(res)
       } catch (err) {
         console.error("Falha ao iniciar faturamento do lead:", err)
@@ -95,11 +90,11 @@ export default function CheckoutClient({ lead, planId }: CheckoutClientProps) {
       }
     }
     initSession()
-  }, [lead.id, planId])
+  }, [lead.id])
 
-  // 2. Polling Reativo do Firestore para o fluxo PoC (Pix)
+  // 2. Polling Reativo do Firestore para o fluxo de Pix
   useEffect(() => {
-    if (planId !== 'playbooks' || loading) return
+    if (!isPixFlow || loading) return
 
     const unsubscribe = onSnapshot(doc(db, 'leads', lead.id), (snapshot) => {
       const data = snapshot.data()
@@ -110,16 +105,16 @@ export default function CheckoutClient({ lead, planId }: CheckoutClientProps) {
     })
 
     return () => unsubscribe()
-  }, [lead.id, planId, loading, router])
+  }, [lead.id, isPixFlow, loading, router])
 
   // 3. Contagem regressiva do Pix
   useEffect(() => {
-    if (planId !== 'playbooks' || timeLeft <= 0) return
+    if (!isPixFlow || timeLeft <= 0) return
     const timer = setInterval(() => {
       setTimeLeft(prev => prev - 1)
     }, 1000)
     return () => clearInterval(timer)
-  }, [planId, timeLeft])
+  }, [isPixFlow, timeLeft])
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -202,10 +197,10 @@ export default function CheckoutClient({ lead, planId }: CheckoutClientProps) {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-12 md:py-16 w-full flex-1 flex flex-col lg:flex-row gap-12 relative z-10 items-center justify-center">
+      <main className="max-w-6xl mx-auto px-6 py-12 md:py-16 w-full flex-1 flex flex-col lg:flex-row gap-12 relative z-10 items-start justify-center">
         
-        {/* Lado Esquerdo: Formulário / Informações do Plano */}
-        <div className="flex-1 space-y-8 w-full">
+        {/* Lado Esquerdo: Diagnóstico e Auditoria */}
+        <div className="flex-1 space-y-6 w-full">
           <div>
             <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">Ativação da Licença</span>
             <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight mt-1 mb-3">
@@ -216,78 +211,154 @@ export default function CheckoutClient({ lead, planId }: CheckoutClientProps) {
             </p>
           </div>
 
-          {/* VISUAL BIFURCADO */}
+          {/* Painel de Auditoria */}
+          <div className="bg-slate-900/60 border border-white/10 rounded-[32px] p-6 space-y-6 backdrop-blur-md">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <Shield className="w-5 h-5 text-emerald-400" />
+              Auditoria de Gargalos Operacionais
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div className="bg-slate-950/60 border border-white/5 p-4 rounded-xl space-y-1">
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Faturamento Declarado</span>
+                <p className="text-white font-extrabold text-sm capitalize">
+                  {lead.revenue === 'poc' ? 'Piloto PoC (Até R$ 100k/mês)' : 
+                   lead.revenue === 'standard' ? 'SinergIA Standard (R$ 100k a R$ 500k/mês)' : 
+                   lead.revenue === 'enterprise' ? 'SinergIA Enterprise (Acima de R$ 500k/mês)' : 
+                   lead.revenue || 'Não Declarado'}
+                </p>
+              </div>
 
-          {/* CENÁRIO A: PLANO POC (PAGAMENTO PIX DIRETO) */}
-          {planId === 'playbooks' && sessionData?.pixPayload && (
-            <div className="bg-slate-900/60 border border-white/10 rounded-[32px] p-8 md:p-12 shadow-2xl relative overflow-hidden backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <div className="bg-slate-950/60 border border-white/5 p-4 rounded-xl space-y-1">
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Vazamento Mensal Oculto</span>
+                <p className="text-red-400 font-extrabold text-sm">
+                  {formatCurrency(clientMonthlyLoss)}
+                </p>
+              </div>
+
+              <div className="bg-slate-950/60 border border-white/5 p-4 rounded-xl md:col-span-2 space-y-1">
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Prejuízo Anualized Estimado</span>
+                <p className="text-red-500 font-black text-lg">
+                  {formatCurrency(clientMonthlyLoss * 12)}
+                </p>
+              </div>
+
+              <div className="bg-emerald-950/20 border border-emerald-500/10 p-4 rounded-xl md:col-span-2 space-y-1">
+                <span className="text-[10px] text-emerald-400 uppercase tracking-wider font-bold">Retorno Projetado de Caixa</span>
+                <p className="text-emerald-400 font-black text-xs leading-relaxed">
+                  Recuperação de até {formatCurrency(clientMonthlyLoss * 12)} ao ano eliminando a inércia humana de follow-up e delay de resposta.
+                </p>
+              </div>
+            </div>
+
+            <div className="border-t border-white/5 pt-4 space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Setup de Engenharia (10%)</span>
+                <span className="text-2xl font-black text-white">{formatCurrency(clientSetupPrice)}</span>
+              </div>
+              <div className="flex items-center justify-between bg-slate-950/80 border border-white/5 rounded-xl px-4 py-2.5">
+                <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Esteira Alocada</span>
+                <span className="text-[10px] text-emerald-400 font-bold tracking-wider uppercase">
+                  {clientSetupPrice <= 3000 ? "Esteira Piloto (Até 1.500 conversas/mês)" : 
+                   clientSetupPrice <= 10000 ? "Esteira Regional (Até 10.000 conversas/mês)" : 
+                   "Esteira Enterprise (Volume Concorrente)"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Apólice de Segurança com Garantia Dan Kennedy */}
+          <div className="relative bg-gradient-to-br from-amber-500/10 via-emerald-500/5 to-slate-950 border border-amber-500/30 rounded-[32px] p-6 shadow-[0_0_30px_rgba(245,158,11,0.05)] overflow-hidden animate-pulse duration-[3000ms]">
+            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-amber-500 to-emerald-500"></div>
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl shrink-0 text-amber-400">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <div className="space-y-2">
+                <h4 className="text-xs font-black text-amber-400 uppercase tracking-widest">
+                  Garantia de Estancamento &amp; Inversão de Risco
+                </h4>
+                <p className="text-[10px] text-slate-300 leading-relaxed font-light">
+                  <strong>CERTIFICADO DE GARANTIA E INVERSÃO DE RISCO:</strong> Nós não aceitamos o seu dinheiro se nossa tecnologia não gerar lucro real na mesa da sua empresa. Se em até 30 dias após o deploy os seus Agentes de Pista não pagarem o próprio custo eliminando os gaps operacionais mapeados, a holding devolve 100% do valor do seu setup imediatamente. O risco é nosso, o lucro é seu.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Lado Direito: Visual Bifurcado de Pagamento */}
+        <div className="w-full lg:w-[450px] shrink-0 space-y-6">
+          
+          {/* Cenário A: Setup <= R$ 5.000,00 (Pix Direto) */}
+          {isPixFlow && sessionData?.pixPayload && (
+            <div className="bg-slate-900/60 border border-white/10 rounded-[32px] p-6 md:p-8 shadow-2xl relative overflow-hidden backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 duration-700">
               <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-emerald-500 to-teal-400"></div>
               
-              <div className="space-y-6 text-center md:text-left">
-                <div className="flex flex-col md:flex-row items-center gap-6 pb-6 border-b border-white/5">
+              <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-white/5">
                   <div className="p-4 bg-white rounded-2xl shrink-0 shadow-lg">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img 
                       src={`data:image/png;base64,${sessionData.pixPayload.qr_code_base64}`} 
                       alt="QR Code PIX" 
-                      className="w-36 h-36 mx-auto"
+                      className="w-28 h-28 mx-auto"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold">
-                      Aguardando Pagamento
+                  <div className="space-y-2 text-center sm:text-left">
+                    <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] font-bold uppercase tracking-wider">
+                      Terminal de Instanciação Instantânea
                     </Badge>
-                    <h3 className="text-2xl font-black text-white">PIX Copia e Cola</h3>
-                    <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
-                      Escaneie o código com o aplicativo do seu banco ou copie a linha digitável abaixo. A ativação da sua conta é instantânea.
+                    <h3 className="text-lg font-black text-white">PIX Copia e Cola</h3>
+                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                      Escaneie o código ou copie a linha digitável abaixo. A ativação da sua infraestrutura é instantânea.
                     </p>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-widest block text-left">Código Copia e Cola</label>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block text-left">Código Copia e Cola</label>
                   <div className="flex">
                     <input 
                       readOnly 
                       value={sessionData.pixPayload.qr_code} 
-                      className="flex-1 h-14 bg-slate-950 border border-white/10 rounded-l-2xl px-4 text-xs font-mono text-slate-400 outline-none focus:border-emerald-500/30" 
+                      className="flex-1 h-12 bg-slate-950 border border-white/10 rounded-l-xl px-4 text-xs font-mono text-slate-400 outline-none focus:border-emerald-500/30" 
                     />
                     <Button 
                       onClick={handleCopyPix} 
-                      className="h-14 px-6 bg-emerald-850 hover:bg-emerald-700 border border-l-0 border-white/10 rounded-r-2xl text-white font-black text-xs uppercase tracking-widest transition-all"
+                      className="h-12 px-5 bg-emerald-800 hover:bg-emerald-700 border border-l-0 border-white/10 rounded-r-xl text-white font-black text-xs uppercase tracking-widest transition-all"
                     >
                       {copied ? 'Copiado!' : <Copy className="w-4 h-4" />}
                     </Button>
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-white/5 text-xs text-slate-500">
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-white/5 text-[10px] text-slate-500">
                   <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
                     Expirando em: <span className="font-mono text-white font-bold">{formatTime(timeLeft)}</span>
                   </div>
-                  <div className="text-emerald-400 flex items-center gap-1.5">
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" /> Verificando compensação automática...
+                  <div className="text-emerald-400 flex items-center gap-1.5 font-bold">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" /> Verificando compensação...
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* CENÁRIO B: PLANO STANDARD/ENTERPRISE (BOOKING CONCIERGE) */}
-          {(planId === 'setup' || planId === 'enterprise') && (
-            <div className="bg-slate-900/60 border border-white/10 rounded-[32px] p-8 md:p-12 shadow-2xl relative overflow-hidden backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 duration-700">
+          {/* Cenário B: Setup > R$ 5.000,00 (Booking Concierge) */}
+          {!isPixFlow && (
+            <div className="bg-slate-900/60 border border-white/10 rounded-[32px] p-6 md:p-8 shadow-2xl relative overflow-hidden backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 duration-700">
               <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-cyan-500 to-indigo-500"></div>
 
               {!bookingFinished ? (
                 <div className="space-y-6">
                   <div>
-                    <Badge className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-xs font-bold uppercase tracking-wider mb-2">
+                    <Badge className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-[9px] font-bold uppercase tracking-wider mb-2">
                       Booking Concierge
                     </Badge>
-                    <h3 className="text-2xl font-black text-white">Agendamento de Setup Dedicado</h3>
-                    <p className="text-xs text-slate-400 leading-relaxed mt-1">
-                      Contratos corporativos exigem validação e deploy assistido. Escolha o melhor slot para a nossa reunião técnica de provisionamento comercial.
+                    <h3 className="text-xl font-black text-white">Agendamento de Setup</h3>
+                    <p className="text-[10px] text-slate-400 leading-relaxed mt-1">
+                      Projetos corporativos exigem deploy assistido. Escolha o melhor slot para a nossa reunião técnica de provisionamento e homologação de SLA.
                     </p>
                   </div>
 
@@ -296,16 +367,16 @@ export default function CheckoutClient({ lead, planId }: CheckoutClientProps) {
                     <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block flex items-center gap-1">
                       <Calendar className="w-3 h-3 text-cyan-400" /> 1. Escolha a Data
                     </label>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       {getNextBusinessDays().map((day) => (
                         <button
                           key={day.iso}
                           type="button"
                           onClick={() => { setSelectedDate(day.iso); setSelectedTime(''); }}
-                          className={`px-3 py-3 rounded-xl border text-center text-xs font-bold transition-all capitalize ${selectedDate === day.iso ? 'bg-cyan-500/10 border-cyan-500 text-white shadow-lg' : 'bg-slate-950/40 border-white/5 text-slate-400 hover:border-white/10 hover:text-white'}`}
+                          className={`px-2 py-2 rounded-xl border text-center text-xs font-bold transition-all capitalize ${selectedDate === day.iso ? 'bg-cyan-500/10 border-cyan-500 text-white shadow-lg' : 'bg-slate-950/40 border-white/5 text-slate-400 hover:border-white/10 hover:text-white'}`}
                         >
                           {day.formatted.split(',')[0]}
-                          <span className="block font-mono text-[10px] text-slate-500 mt-0.5">{day.formatted.split(',')[1]}</span>
+                          <span className="block font-mono text-[9px] text-slate-500 mt-0.5">{day.formatted.split(',')[1]}</span>
                         </button>
                       ))}
                     </div>
@@ -323,7 +394,7 @@ export default function CheckoutClient({ lead, planId }: CheckoutClientProps) {
                             key={time}
                             type="button"
                             onClick={() => setSelectedTime(time)}
-                            className={`py-3 rounded-xl border text-center text-xs font-mono font-bold transition-all ${selectedTime === time ? 'bg-cyan-500/10 border-cyan-500 text-white shadow-lg' : 'bg-slate-950/40 border-white/5 text-slate-400 hover:border-white/10 hover:text-white'}`}
+                            className={`py-2 rounded-xl border text-center text-xs font-mono font-bold transition-all ${selectedTime === time ? 'bg-cyan-500/10 border-cyan-500 text-white shadow-lg' : 'bg-slate-950/40 border-white/5 text-slate-400 hover:border-white/10 hover:text-white'}`}
                           >
                             {time}
                           </button>
@@ -337,7 +408,7 @@ export default function CheckoutClient({ lead, planId }: CheckoutClientProps) {
                     <Button
                       disabled={bookingLoading}
                       onClick={handleConfirmBooking}
-                      className="w-full h-14 bg-cyan-600 hover:bg-cyan-500 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.2)] flex items-center justify-center gap-2"
+                      className="w-full h-12 bg-cyan-600 hover:bg-cyan-500 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.2)] flex items-center justify-center gap-2"
                     >
                       {bookingLoading ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -355,7 +426,7 @@ export default function CheckoutClient({ lead, planId }: CheckoutClientProps) {
                     <CheckCircle2 className="w-8 h-8 text-cyan-400" />
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-black text-white">Setup Agendado com Sucesso!</h3>
+                    <h3 className="text-xl font-black text-white">Setup Agendado com Sucesso!</h3>
                     <p className="text-xs text-slate-400 leading-relaxed max-w-sm mx-auto">
                       Sua mesa comercial de deploy foi provisionada para o dia <span className="text-cyan-400 font-bold">{new Date(selectedDate).toLocaleDateString('pt-BR')} às {selectedTime}</span>.
                     </p>
@@ -376,7 +447,7 @@ export default function CheckoutClient({ lead, planId }: CheckoutClientProps) {
                   <Button
                     onClick={() => router.push('/')}
                     variant="outline"
-                    className="border-white/10 text-slate-300 hover:bg-white/5"
+                    className="border-white/10 text-slate-300 hover:bg-white/5 text-xs h-10 rounded-xl"
                   >
                     Voltar à Página Inicial
                   </Button>
@@ -384,52 +455,18 @@ export default function CheckoutClient({ lead, planId }: CheckoutClientProps) {
               )}
             </div>
           )}
-        </div>
 
-        {/* Lado Direito: Resumo do Pedido */}
-        <div className="w-full lg:w-[400px] shrink-0">
-          <div className="bg-slate-900/40 border border-white/10 rounded-[32px] p-8 space-y-6 sticky top-6 backdrop-blur-md">
-            <div>
-              <h3 className="text-lg font-bold text-white mb-2">Resumo da Licença</h3>
-              <p className="text-xs text-slate-500">Módulo de contratação selecionado no diagnóstico</p>
+          {/* Secure Icons */}
+          <div className="flex justify-center items-center gap-4 opacity-50 pt-2 text-[9px] font-bold text-slate-400">
+            <div className="flex items-center gap-1">
+              <Shield className="w-3.5 h-3.5 text-emerald-500" /> SSL SECURE
             </div>
-            
-            <div className="bg-slate-950/60 border border-white/5 rounded-2xl p-5 space-y-2">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest font-mono">Produto</span>
-              <h4 className="text-lg font-bold text-white leading-tight">{plan.name}</h4>
-              <p className="text-xs text-slate-400 leading-relaxed">{plan.desc}</p>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="text-xs font-bold text-white uppercase tracking-widest">Incluso no Swarm AI</h4>
-              <ul className="space-y-3">
-                {plan.features.map((feature, idx) => (
-                  <li key={idx} className="flex gap-3 text-xs text-slate-300 items-start">
-                    <Check className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="border-t border-white/5 pt-6 space-y-4">
-              <div className="flex justify-between items-end">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Custo do Setup Anual</span>
-                <span className="text-3xl font-black text-white tracking-tight">{formatCurrency(plan.price)}</span>
-              </div>
-            </div>
-
-            <div className="flex justify-center items-center gap-4 opacity-50 border-t border-white/5 pt-6 text-[10px] font-bold text-slate-400">
-              <div className="flex items-center gap-1">
-                <Shield className="w-3.5 h-3.5 text-emerald-400" /> SSL SECURE
-              </div>
-              <div className="flex items-center gap-1">
-                <Lock className="w-3.5 h-3.5 text-emerald-400" /> COMPRA CRIPTOGRAFADA
-              </div>
+            <div className="flex items-center gap-1">
+              <Lock className="w-3.5 h-3.5 text-emerald-500" /> COMPRA CRIPTOGRAFADA
             </div>
           </div>
-        </div>
 
+        </div>
       </main>
 
       {/* Footer */}

@@ -336,8 +336,11 @@ const FlowBuilder: React.FC<FlowBuilderProps> = ({ onClose, isInline = false, ni
     }, [draggedNode, dragOffset])
 
     const handleMouseUp = useCallback(() => {
+        if (draggedNode !== null) {
+            if (onInteraction) onInteraction();
+        }
         setDraggedNode(null)
-    }, [])
+    }, [draggedNode, onInteraction])
 
     useEffect(() => {
         if (draggedNode) {

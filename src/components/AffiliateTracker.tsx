@@ -8,7 +8,7 @@ export function AffiliateTracker() {
 
   useEffect(() => {
     // We check for both ?ref= and ?partner= as valid affiliate parameters
-    const ref = searchParams.get('ref') || searchParams.get('partner')
+    const ref = searchParams.get('aff') || searchParams.get('ref') || searchParams.get('partner')
 
     if (ref) {
       // Store the affiliate ID in localStorage

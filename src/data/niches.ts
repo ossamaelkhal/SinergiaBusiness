@@ -45,26 +45,26 @@ export interface NicheSolution {
 export const nichesData: Record<string, NicheSolution> = {
   "faturamento-saude-bemestar": {
     slug: "faturamento-saude-bemestar",
-    title: "SinergIA para Saúde, Estética e Bem-Estar",
+    title: "SinergIA para Saúde, Estética de Alto Padrão e Clínicas",
     shortTitle: "Saúde & Bem-Estar",
-    subtitle: "Elimine cadeiras vazias, reengaje pacientes inativos e automatize a validação de guias médicos.",
-    description: "Clínicas e profissionais de saúde sofrem um sangramento financeiro silencioso com agendas ociosas e pacientes antigos que não concluem tratamentos. A SinergIA cria um fluxo automático de atendimento e confirmação ultra-humanizada.",
+    subtitle: "Lote sua agenda com procedimentos de alto ticket, reduza o no-show a quase zero e acabe com o desperdício de leads na recepção.",
+    description: "O faturamento da sua clínica está refém de duas variáveis caóticas: o esquecimento dos pacientes e a lentidão humana na recepção. Enquanto você opera ou atende, leads quentes esfriam no WhatsApp e tratamentos antigos são abandonados por falta de acompanhamento. Instalamos uma Clonagem Cognitiva da sua melhor secretária para blindar seu caixa.",
     icon: Stethoscope,
     color: "emerald",
     painPoints: [
       {
-        title: "Cadeira Vazia e Ociosidade",
-        description: "Agendas com buracos e faltas de última hora que destroem o faturamento diário.",
+        title: "Cadeira Vazia e No-Show",
+        description: "Horas ociosas e faltas de última hora que destroem o faturamento diário e jogam o seu custo de tráfego pago no lixo.",
         icon: Activity,
       },
       {
-        title: "Abandono de Tratamento",
-        description: "Pacientes iniciam um procedimento, mas não são acompanhados e acabam não retornando.",
+        title: "O Cemitério de Leads no WhatsApp",
+        description: "Pacientes prontos para agendar que desistem e vão para o concorrente porque sua recepção demorou mais de 5 minutos para responder.",
         icon: Activity,
       },
       {
-        title: "Glosas e Burocracia de Convênios",
-        description: "Erros de digitação e regras complexas de planos de saúde que retêm o caixa da clínica.",
+        title: "Asfixia por Glosas de Convênios",
+        description: "Erros manuais e burocracias de planos de saúde que retêm e sangram o fluxo de caixa legítimo da sua clínica.",
         icon: Activity,
       }
     ],
@@ -90,41 +90,41 @@ export const nichesData: Record<string, NicheSolution> = {
     hooks: {
       pilotoAutomatico: {
         title: "O Guardião da Agenda",
-        description: "Inteligência de agendamento ativo fluido (conversacional, não numérico) que qualifica leads do Instagram/WhatsApp 24/7, gerencia as reposições e executa réguas de confirmação de consultas de forma natural e empática."
+        description: "Agente conversacional ultra-humanizado que qualifica leads do Instagram e WhatsApp 24/7, gerencia reposições de faltas e executa réguas de confirmação empáticas sem usar menus numéricos frios."
       },
       resgateAtivo: {
         title: "O Reengajador de Pacientes",
-        description: "Agente autônomo que monitora o tempo médio de tratamento e reengaja pacientes sumidos antes que eles entrem em abandono, estimulando novas consultas e retornos programados."
+        description: "Monitor inteligente que rastreia o tempo médio de tratamento e aciona pacientes sumidos de forma personalizada, estimulando o retorno e novos fechamentos de pacotes."
       },
       backoffice: {
-        title: "O Auditor de Guias Médico",
-        description: "Auditoria médica digital de guias e prontuários para zerar glosas de convênios, validando códigos TISS/TUSS em tempo real antes do envio."
+        title: "O Auditor de Guias TISS/TUSS",
+        description: "Inteligência de retaguarda que valida prontuários e códigos em tempo real antes do envio, eliminando glosas e liberando o dinheiro retido pelos convênios."
       }
     }
   },
 
   "commerce-omnichannel-vendas": {
     slug: "commerce-omnichannel-vendas",
-    title: "SinergIA para Comércio, Varejo & Marketplaces",
+    title: "SinergIA para Comércio, Varejo de Escala & Marketplaces",
     shortTitle: "Varejo & E-commerce",
-    subtitle: "Feche vendas no Direct em segundos, audite taxas de frete e automatize mesas de cotação de atacadistas.",
-    description: "Lojas físicas e e-commerces perdem vendas quando o cliente demora mais de 10 minutos para ser atendido. Nossa IA assume o balcão digital de ponta a ponta e audita todas as tarifas invisíveis do varejo moderno.",
+    subtitle: "Capture o dinheiro do seu cliente no exato segundo da intenção de compra. Elimine a demora no WhatsApp e recupere margem confiscada.",
+    description: "No varejo moderno, velocidade não é diferencial: é faturamento líquido. Se sua operação demora para passar o valor do frete, confirmar estoque ou enviar um link de pagamento, o cliente compra de outra loja. Nossa IA assume o balcão digital 24/7 e faz auditoria cruzada centavo por centavo de taxas ocultas.",
     icon: ShoppingBag,
     color: "fuchsia",
     painPoints: [
       {
-        title: "Fricção e Demora no Atendimento",
-        description: "Clientes desistem de comprar no Direct ou WhatsApp se a resposta sobre frete ou tamanho não for instantânea.",
+        title: "A Fricção que Mata Vendas",
+        description: "Carrinhos e directs abandonados porque o cliente não recebeu resposta sobre tamanho, cor ou frete em menos de 60 segundos.",
         icon: Activity,
       },
       {
-        title: "Vazamento de Margem nos Marketplaces",
-        description: "Cobranças indevidas de frete em devoluções e discrepâncias de repasse que comem o lucro líquido.",
+        title: "O Confisco de Margem Oculto",
+        description: "Taxas abusivas de marketplaces, cobranças indevidas de frete indevido em devoluções e erros de repasse que engolem seu lucro sem você perceber.",
         icon: Activity,
       },
       {
-        title: "Digitação Manual de Orçamentos",
-        description: "Vendedores de atacadistas perdendo horas digitando listas de compras rabiscadas no papel.",
+        title: "Desperdício Humano em Orçamentos",
+        description: "Seu time comercial perdendo horas valiosas digitando e decifrando listas de compras rabiscadas em papel ou áudios longos.",
         icon: Activity,
       }
     ],
@@ -147,42 +147,42 @@ export const nichesData: Record<string, NicheSolution> = {
     },
     hooks: {
       pilotoAutomatico: {
-        title: "O Vendedor de Pista",
-        description: "Monitoramento contínuo de directs e comentários com fechamento automático de carrinho, cálculo de frete (CEP) integrado e emissão de Pix copia-e-cola de forma 100% autônoma."
+        title: "O Vendedor de Pista Digital",
+        description: "Atendimento instantâneo de Directs e WhatsApp com fechamento de carrinho automático, cálculo de CEP integrado por API e disparo de Pix copia-e-cola em 10 segundos."
       },
       resgateAtivo: {
-        title: "O Auditor Algorítmico",
-        description: "Conciliação centavo por centavo de taxas de marketplaces e auditoria cruzada de royalties ocultos para franqueadores (cruzando vendas fiscais NFC-e com compras de fornecedores homologados)."
+        title: "O Conciliador Algorítmico",
+        description: "Robô de auditoria que cruza vendas fiscais (NFC-e) com repasses de gateways e marketplaces, caçando cobranças indevidas para recuperar seu lucro confiscado."
       },
       backoffice: {
-        title: "A Mesa de Cotação Ativa",
-        description: "Processamento por visão computacional (OCR) de listas de compras enviadas por áudio, texto ou foto de papel por clientes de distribuidoras, gerando o carrinho no ERP em 1 minuto."
+        title: "A Mesa de Cotação Autônoma",
+        description: "Processamento por visão computacional (OCR) de listas de compras enviadas por foto ou áudio, gerando o pedido pronto no ERP em menos de um minuto."
       }
     }
   },
 
   "operacoes-urgencia-logistica": {
     slug: "operacoes-urgencia-logistica",
-    title: "SinergIA para Operações de Urgência, Logística & Infraestrutura",
+    title: "SinergIA para Operações de Urgência, Logística & Distribuição",
     shortTitle: "Logística & Urgência",
-    subtitle: "Despache pedidos em segundos, controle frotas e previna multas aduaneiras sem intervenção manual.",
-    description: "Em operações logísticas e de urgência, a velocidade de despacho decide quem fecha a venda. Nossa IA elimina o telefone e o papel, automatizando da roteirização de urgência até a validação aduaneira.",
+    subtitle: "Despache ordens de serviço em segundos, elimine a ociosidade da frota e blinde sua operação contra gargalos humanos.",
+    description: "Em operações de urgência e logística, o tempo de resposta decide quem fica com o contrato. Centralizar o recebimento em telefones ou planilhas cria um gargalo perigoso que limita sua escala. Nossa infraestrutura assume a triagem de rotas, controle preditivo de ativos e auditoria documental sem intervenção manual.",
     icon: Factory,
     color: "rose",
     painPoints: [
       {
-        title: "Gargalo no Fechamento de Urgência",
-        description: "Negócios de entrega e disk-serviços perdem vendas por demora na triagem do endereço e do entregador.",
+        title: "O Gargalo do Despacho Humano",
+        description: "Perda de ordens de serviço urgentes e cancelamentos de fretes devido à demora na triagem de endereços e alocação de motoristas.",
         icon: Activity,
       },
       {
-        title: "Inatividade de Equipamentos e Frotas",
-        description: "Máquinas paradas sem aviso de revisão e devoluções em atraso causam ociosidade financeira.",
+        title: "A Asfixia da Frota Parada",
+        description: "Maquinários e veículos ociosos, prazos de locação estourados sem aviso e falhas de manutenção que paralisam a receita.",
         icon: Activity,
       },
       {
-        title: "Canal Vermelho Alfandegário",
-        description: "Atrasos caríssimos na liberação de importações por erros simples de Packing List e Invoices.",
+        title: "A Retenção no Canal Vermelho",
+        description: "Atrasos fiscais e multas pesadas causadas por erros simples de digitação em Packing Lists e faturas de comércio exterior.",
         icon: Activity,
       }
     ],
@@ -207,41 +207,41 @@ export const nichesData: Record<string, NicheSolution> = {
     hooks: {
       pilotoAutomatico: {
         title: "O Despachante Expresso",
-        description: "Triagem e fechamento de pedidos de urgência sem menu numérico, integrando dados de endereço históricos do cliente para despachar entregadores em menos de 30 segundos."
+        description: "Triagem conversacional instantânea de chamados e coletas por geolocalização, cruzando históricos e acionando o operador ideal em menos de 30 segundos."
       },
       resgateAtivo: {
-        title: "O Monitor Preditivo de Ativos",
-        description: "Gestão preditiva de prazos de locação de caçambas/maquinários e agendamento de manutenção de frotas por telemetria (IoT) antes que gerem inatividade financeira."
+        title: "O Monitor Preditivo de Frotas",
+        description: "Agente conectado via telemetria e contratos que previne a ociosidade de ativos, cobrando devoluções e agendando revisões antes que causem prejuízo."
       },
       backoffice: {
-        title: "O Validador Documental Aduaneiro",
-        description: "OCR avançado de Commercial Invoices e Packing Lists cruzando com regras da Receita Federal para eliminar canais vermelhos alfandegários."
+        title: "O Guardião Documental Aduaneiro",
+        description: "Leitura algorítmica e cruzamento de Invoices com as regras fiscais vigentes para detectar inconsistências e aprovar documentações em massa para evitar travas aduaneiras."
       }
     }
   },
 
   "bpo-financeiro-credito-tem": {
     slug: "bpo-financeiro-credito-tem",
-    title: "SinergIA para BPO Estratégico, Crédito & Finanças",
+    title: "SinergIA para BPO Estratégico, Crédito & Auditoria de Finanças",
     shortTitle: "BPO & Finanças",
-    subtitle: "Zere cobranças indevidas de contas de consumo, audite LMC diário e libere crédito em 5 minutos.",
-    description: "Setores financeiros tradicionais são lentos e propensos a fraudes. A SinergIA implementa agentes cognitivos no backoffice para auditar faturas corporativas de utilities e validar duplicatas na SEFAZ.",
+    subtitle: "Zere fraudes em antecipações de crédito, conteste a extorsão em faturas de consumo e blinde sua margem de lucro.",
+    description: "O backoffice financeiro tradicional é lento, caro e vulnerável a falhas. A SinergIA insere agentes cognitivos de alta performance na retaguarda da sua empresa para auditar contas de utilities (energia, telecom), validar notas fiscais diretamente na SEFAZ e liberar crédito de forma segura.",
     icon: Landmark,
     color: "amber",
     painPoints: [
       {
-        title: "Fraudes e Duplicatas Frias",
-        description: "Risco na antecipação de recebíveis sem garantia fiscal real de entrega física do produto.",
+        title: "A Armadilha das Duplicatas Frias",
+        description: "Alto risco e prejuízos com antecipação de recebíveis baseados em notas fiscais sem garantia real de entrega física.",
         icon: Activity,
       },
       {
-        title: "Contas de Consumo Inchadas",
-        description: "Telecom, energia e água cobrando taxas de serviços não contratados sem auditoria corporativa.",
+        title: "A Extorsão das Faturas de Consumo",
+        description: "Cobranças abusivas de energia, água e telecomunicações contendo taxas de serviços não contratados que passam sem auditoria.",
         icon: Activity,
       },
       {
-        title: "Multas Fiscais de Postos",
-        description: "Preenchimento manual diário de Livros de Movimentação de Combustível (LMC) com erros de estoque.",
+        title: "O Pesadelo Fiscal do LMC",
+        description: "Erros manuais diários no preenchimento do Livro de Movimentação de Combustível em postos, gerando multas brutais da ANP.",
         icon: Activity,
       }
     ],
@@ -263,42 +263,42 @@ export const nichesData: Record<string, NicheSolution> = {
     },
     hooks: {
       pilotoAutomatico: {
-        title: "O Auditor de Utilities",
-        description: "Leitura em lote de faturas complexas de telecomunicações, energia e água, abrindo contestações automáticas nos portais das operadoras ao detectar tarifas indevidas."
+        title: "O Predador de Tarifas Abusivas",
+        description: "Leitura em lote de faturas de concessionárias, identificação de desvios contratuais e abertura automática de contestações jurídicas nos portais de utilities."
       },
       resgateAtivo: {
-        title: "O Conciliador de Pista",
-        description: "Conciliação diária de pista de postos de combustível (LMC) cruzando tanques, encerrantes e notas fiscais para zerar multas da ANP."
+        title: "O Conciliador de Pista ANP",
+        description: "Automação fiscal diária para postos de combustíveis, cruzando tanques, encerrantes e notas de entrada para gerar o LMC com zero erro e risco zero de multa."
       },
       backoffice: {
-        title: "A Mesa de Crédito Digital",
-        description: "Análise de conformidade e mesa de crédito digital para Factoring em 5 minutos, validando NF-e direto na SEFAZ e checando assinaturas em canhotos de entrega."
+        title: "A Mesa de Crédito Expresso",
+        description: "Análise inteligente para Factoring e FIDCs que valida a NF-e na SEFAZ, audita assinaturas em canhotos de entrega por visão computacional e aprova crédito em 5 minutos."
       }
     }
   },
 
   "servicos-tecnicos-comerciais": {
     slug: "servicos-tecnicos-comerciais",
-    title: "SinergIA para Serviços Residenciais, Técnicos e Comerciais",
+    title: "SinergIA para Empresas de Serviços Técnicos, Engenharia e Facilities",
     shortTitle: "Serviços Técnicos",
-    subtitle: "Orce projetos pelo WhatsApp com fotos, acelere trocas de carros e coordene escalas de facilities.",
-    description: "Profissionais técnicos de alto valor perdem o dia no trabalho operacional e deixam o comercial abandonado. A SinergIA automatiza a triagem, cotação prévia e gestão de mão de obra de ponta a ponta.",
+    subtitle: "Gere orçamentos automáticos pelo WhatsApp por foto, multiplique sua capacidade comercial e coordene equipes sem caos.",
+    description: "Empresas de serviços de alto ticket sofrem com a divisão do fundador: ou ele está no campo executando e coordenando a equipe, ou está no escritório vendendo. A SinergIA resolve o abandono comercial assumindo a triagem técnica, cálculo de propostas por tabelas e coordenação de escalas descentralizadas.",
     icon: Briefcase,
     color: "cyan",
     painPoints: [
       {
-        title: "Abandono da Mesa Comercial",
-        description: "Profissionais de alto ticket que passam o dia no campo e perdem orçamentos de novos clientes.",
+        title: "O Abandono da Mesa Comercial",
+        description: "Orçamentos ricos e contratos de alto valor que evaporam porque o técnico sênior está em campo e não consegue responder os leads.",
         icon: Activity,
       },
       {
-        title: "Mesa de Troca Lenta",
-        description: "Avaliação demorada de veículos usados na troca de seminovos, atrasando vendas de carros.",
+        title: "A Lentidão na Mesa de Troca",
+        description: "Avaliações demoradas de veículos e imóveis usados que travam o fechamento de vendas de concessionárias e imobiliárias.",
         icon: Activity,
       },
       {
-        title: "Controle Caótico de Escalas",
-        description: "Facilities lidando com faltas de última hora e atestados em postos terceirizados de portaria e limpeza.",
+        title: "O Caos em Escalas de Facilities",
+        description: "Faltas de última hora, atestados falsificados e postos de serviço descobertos destruindo a reputação e gerando multas contratuais.",
         icon: Activity,
       }
     ],
@@ -321,42 +321,42 @@ export const nichesData: Record<string, NicheSolution> = {
     },
     hooks: {
       pilotoAutomatico: {
-        title: "O Orçamentista Técnico de Pista",
-        description: "Coleta de fotos/medidas do cliente via WhatsApp, qualificação do projeto, cálculo instantâneo baseado em tabelas de materiais e agendamento da visita do técnico apenas para fechamento do contrato."
+        title: "O Engenheiro Orçamentista",
+        description: "Captura fotos, escopos e medidas enviados pelo cliente no WhatsApp, calcula insumos com base na tabela de preços da empresa e agenda a visita apenas para fechamento."
       },
       resgateAtivo: {
         title: "O Avaliador de Veículos",
-        description: "Birô de dados integrado para concessionárias, fazendo consultas automáticas de placas, sinistros, leilões e tabela FIPE em segundos para acelerar a mesa de troca de seminovos."
+        description: "Mecanismo de consulta automotiva e imobiliária que puxa restrições, leilões, sinistros e médias de mercado em 60 segundos para acelerar negociações comerciais."
       },
       backoffice: {
-        title: "O Coordenador de Escalas",
-        description: "Controle automático de escalas, faltas e validação de atestados (OCR) via WhatsApp para trabalhadores terceirizados descentralizados."
+        title: "O Coordenador de Escalas Ativo",
+        description: "Monitoramento de presença e validação por OCR de atestados via WhatsApp para equipes descentralizadas, acionando substitutos automaticamente ao detectar furos."
       }
     }
   },
 
   "reputacao-recuperacao-retencao": {
     slug: "reputacao-recuperacao-retencao",
-    title: "SinergIA para Reputação, Recuperação & CS de Alta Conversão",
+    title: "SinergIA para Reputação de Marca, Retenção & Recuperação de Caixa",
     shortTitle: "Reputação & Cobrança",
-    subtitle: "Proteja sua marca no Reclame Aqui, recupere inadimplentes e audite chargebacks automaticamente.",
-    description: "Resolva queixas antes que vire crise e resgate receitas de clientes inadimplentes. A SinergIA une análise de sentimentos e automação bancária para reter fluxo de caixa e blindar a imagem pública.",
+    subtitle: "Reverta crises no Reclame Aqui antes que virem prejuízo, zere a inadimplência crônica de forma amigável e blinde sua receita.",
+    description: "A imagem pública e o caixa de uma empresa são seus ativos mais sensíveis. Responder reclamações tarde demais destrói suas vendas futuras, e cobrar clientes atrasados desgasta seu time. Nossa IA une análise de sentimentos e automação bancária para reter clientes e resgatar receitas perdidas.",
     icon: Scale,
     color: "indigo",
     painPoints: [
       {
-        title: "Danos à Reputação Pública",
-        description: "Reclamações públicas em fóruns como Reclame Aqui sem resposta imediata do time de CS.",
+        title: "O Sangramento da Imagem Pública",
+        description: "Queixas expostas no Reclame Aqui ou redes sociais sem resposta imediata, afastando novos clientes que pesquisam sobre sua marca.",
         icon: Activity,
       },
       {
-        title: "Inadimplência Crônica",
-        description: "Atrasos recorrentes de pagamentos em escolas livres que exigem cobrança desconfortável e demorada.",
+        title: "A Inadimplência Asfixiante",
+        description: "Mensalidades e contratos atrasados em escolas e serviços recorrentes que exigem cobranças desconfortáveis, lentas e ineficientes.",
         icon: Activity,
       },
       {
-        title: "Fraudes e Chargebacks",
-        description: "Contestações indevidas de compras em portais de eventos que sugam a receita pós-show.",
+        title: "A Fraude dos Chargebacks",
+        description: "Contestações maliciosas de compras e disputas de cartões em plataformas de eventos e e-commerces que sugam o lucro pós-entrega.",
         icon: Activity,
       }
     ],
@@ -379,16 +379,16 @@ export const nichesData: Record<string, NicheSolution> = {
     },
     hooks: {
       pilotoAutomatico: {
-        title: "O Agente de Reputação e Resolução",
-        description: "Monitoramento em tempo real do Reclame Aqui e Redes Sociais, cruzando o CPF do reclamante com o ERP interno por API, executando a solução (ex: liberar estorno) e redigindo respostas públicas humanizadas em minutos."
+        title: "O Escudo de Reputação Ativo",
+        description: "Varredura contínua de plataformas de queixas, cruzando o CPF do reclamante com o banco de dados via API, propondo soluções imediatas e redigindo respostas públicas humanizadas."
       },
       resgateAtivo: {
-        title: "O Cobrador de Linha",
-        description: "Réguas ativas de cobrança de inadimplentes para escolas e assinaturas locais, negociando descontos permitidos e emitindo a chave Pix atualizada de forma amigável e profissional."
+        title: "O Negociador de Linha Amigável",
+        description: "Régua ativa de cobrança humanizada via WhatsApp que executa conciliações financeiras, aplica descontos autorizados e emite Pix atualizados sem gerar atrito."
       },
       backoffice: {
-        title: "O Defensor de Bilheteria",
-        description: "Triagem algorítmica de chargebacks e fraudes em plataformas de bilheteria, coletando provas de entrega do serviço para travar disputas bancárias automaticamente."
+        title: "O Defensor de Receita Automático",
+        description: "Defesa automatizada de chargebacks que reúne logs de acesso, termos assinados e comprovantes de entrega de forma algorítmica para vencer disputas bancárias."
       }
     }
   }

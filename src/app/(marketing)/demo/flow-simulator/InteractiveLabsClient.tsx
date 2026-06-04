@@ -92,10 +92,22 @@ export default function InteractiveLabsClient() {
 
   const currentColors = accentColors[activeNiche.color] || accentColors.fuchsia;
 
+  const NICHE_BASELINES: Record<string, number> = {
+    'faturamento-saude-bemestar': 12400,
+    'commerce-omnichannel-vendas': 18900,
+    'operacoes-urgencia-logistica': 22500,
+    'bpo-financeiro-credito-tem': 28200,
+    'servicos-tecnicos-comerciais': 14700,
+    'reputacao-recuperacao-retencao': 16500,
+  };
+
   // Estados de captura de lead
   const [interactionCount, setInteractionCount] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasConverted, setHasConverted] = useState(false);
+
+  const baseline = NICHE_BASELINES[activeSlug] || 18900;
+  const prejuizoAcumulado = baseline + (interactionCount * 1250);
 
   // Estados do formulário
   const [formData, setFormData] = useState({
@@ -151,7 +163,8 @@ export default function InteractiveLabsClient() {
           document: formData.document,
           phone: formData.phone,
           revenue: formData.revenue,
-          nichoSlug: activeSlug
+          nichoSlug: activeSlug,
+          auditedLoss: prejuizoAcumulado
         },
         trackingData: {
           utm_source: searchParams.get('utm_source') || '',
@@ -159,7 +172,8 @@ export default function InteractiveLabsClient() {
           utm_campaign: searchParams.get('utm_campaign') || '',
           utm_content: searchParams.get('utm_content') || '',
           gclid: searchParams.get('gclid') || '',
-          ga_client_id: searchParams.get('ga_client_id') || ''
+          ga_client_id: searchParams.get('ga_client_id') || '',
+          sinergia_affiliate_id: searchParams.get('aff') || searchParams.get('ref') || searchParams.get('partner') || (typeof window !== 'undefined' ? localStorage.getItem('sinergia_affiliate_id') : '') || ''
         }
       };
 
@@ -271,24 +285,116 @@ export default function InteractiveLabsClient() {
               </TabsList>
             </div>
 
-            {/* Abas com os componentes embutidos */}
-            <TabsContent value="construtor" className="mt-0 flex-1 outline-none">
-              <FlowBuilder
-                isInline={true}
-                nicheSlug={activeSlug}
-                onInteraction={handleInteraction}
-                onCompilar={handleCompilar}
-              />
-            </TabsContent>
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start w-full">
+              <div className="lg:col-span-3 flex flex-col w-full">
+                {/* Abas com os componentes embutidos */}
+                <TabsContent value="construtor" className="mt-0 outline-none">
+                  <FlowBuilder
+                    isInline={true}
+                    nicheSlug={activeSlug}
+                    onInteraction={handleInteraction}
+                    onCompilar={handleCompilar}
+                  />
+                </TabsContent>
 
-            <TabsContent value="simulador" className="mt-0 flex-1 outline-none">
-              <FlowDemo
-                isInline={true}
-                nicheSlug={activeSlug}
-                onInteraction={handleInteraction}
-                onCompilar={handleCompilar}
-              />
-            </TabsContent>
+                <TabsContent value="simulador" className="mt-0 outline-none">
+                  <FlowDemo
+                    isInline={true}
+                    nicheSlug={activeSlug}
+                    onInteraction={handleInteraction}
+                    onCompilar={handleCompilar}
+                  />
+                </TabsContent>
+              </div>
+
+              {/* Coluna Tática Lateral (1/4): Floating HUD de Auditoria Cognitiva */}
+              <div className="lg:col-span-1 bg-slate-900/80 border border-white/10 p-5 rounded-2xl backdrop-blur-md sticky top-6 space-y-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
+                <div className="flex items-center gap-2 pb-3 border-b border-white/10">
+                  <ShieldAlert className="w-5 h-5 text-red-500 animate-pulse" />
+                  <h3 className="font-bold text-xs uppercase tracking-widest text-slate-400">Auditoria Cognitiva</h3>
+                </div>
+
+                {/* Contador Dinâmico A - Vermelho Neon */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Vazamento Mensal Oculto</span>
+                    <span className="flex h-2 w-2 relative">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                    </span>
+                  </div>
+                  <div 
+                    key={interactionCount}
+                    className="text-2xl md:text-3xl font-black text-red-500 tracking-tight drop-shadow-[0_0_10px_rgba(239,68,68,0.6)] animate-pulse"
+                  >
+                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(prejuizoAcumulado)}
+                    <span className="text-[10px] text-red-400/70 font-medium block mt-0.5">estimado em perdas invisíveis</span>
+                  </div>
+                </div>
+
+                {/* Contador Dinâmico B - Verde Esmeralda Translúcido */}
+                <div className="space-y-3 bg-emerald-950/20 border border-emerald-500/10 rounded-xl p-4">
+                  <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                    <Sparkles className="w-4 h-4 animate-pulse" />
+                    Eficiência SinergIA
+                  </div>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex justify-between text-slate-300">
+                      <span>Tempo de Resposta:</span>
+                      <span className="font-bold text-emerald-400">3 segundos</span>
+                    </div>
+                    <div className="w-full bg-slate-950 rounded-full h-1">
+                      <div className="bg-emerald-500 h-1 rounded-full w-[98%] animate-pulse" />
+                    </div>
+                    <div className="flex justify-between text-slate-300">
+                      <span>Capacidade de Follow-up:</span>
+                      <span className="font-bold text-emerald-400">Infinito</span>
+                    </div>
+                    <div className="w-full bg-slate-950 rounded-full h-1">
+                      <div className="bg-emerald-500 h-1 rounded-full w-full" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Métricas de Credibilidade e Resposta Direta */}
+                <div className="space-y-4 pt-3 border-t border-white/10">
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Métricas de Resposta Direta</h4>
+
+                  {/* 1. Inércia de Follow-up */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between items-center text-xs font-bold">
+                      <span className="text-slate-300">Inércia de Follow-up</span>
+                      <span className="text-red-400">-44% Conversão</span>
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-relaxed font-light">
+                      44% dos leads esfriam porque humanos desistem no primeiro &quot;não&quot;. A SinergIA executa réguas persistentes imunes à rejeição até fechar.
+                    </p>
+                  </div>
+
+                  {/* 2. Chaveamento Cognitivo */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between items-center text-xs font-bold">
+                      <span className="text-slate-300">Chaveamento Cognitivo</span>
+                      <span className="text-red-400">23 min Perdidos</span>
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-relaxed font-light">
+                      Tempo perdido por sua equipe para recuperar o foco a cada interrupção de WhatsApp. Isolamos sua retaguarda em massa.
+                    </p>
+                  </div>
+
+                  {/* 3. Janela das Horas Escuras */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between items-center text-xs font-bold">
+                      <span className="text-slate-300">Janela das Horas Escuras</span>
+                      <span className="text-red-400">35% de Perda</span>
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-relaxed font-light">
+                      Oportunidades de alto ticket que chegam à noite e fins de semana. Sua empresa aberta 24/7 com tempo de resposta de 3 segundos.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </Tabs>
         </div>
       </main>
@@ -301,10 +407,10 @@ export default function InteractiveLabsClient() {
               <Sparkles className="w-6 h-6 text-indigo-400 animate-pulse" />
             </div>
             <DialogTitle className="text-2xl font-black tracking-tight text-white text-center">
-              Arquitetura Forjada com Sucesso!
+              Mapeamento Estrutural Concluído.
             </DialogTitle>
             <DialogDescription className="text-slate-300 text-sm font-light text-center leading-relaxed">
-              Para onde devemos enviar o blueprint técnico e liberar o seu onboarding fiscal simulado no WhatsApp?
+              Sua empresa possui um vazamento estimado de <strong className="text-red-400 font-black">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(prejuizoAcumulado)}</strong> mensais em oportunidades invisíveis causadas por delay humano e falhas de follow-up. Nossa infraestrutura se auto-configura instantaneamente para o seu negócio. Se em 30 dias os agentes não pagarem o próprio setup, devolvemos 100% do seu investimento. O risco é nosso, o lucro é seu.
             </DialogDescription>
           </DialogHeader>
 
@@ -394,7 +500,7 @@ export default function InteractiveLabsClient() {
               disabled={isSubmitting}
               className="w-full h-12 mt-2 bg-indigo-500 hover:bg-indigo-400 text-white font-black rounded-xl uppercase tracking-wider shadow-lg shadow-indigo-500/20"
             >
-              {isSubmitting ? 'Gerando Acesso...' : 'Ativar Acesso & Obter Blueprint'}
+              {isSubmitting ? 'Gerando Acesso...' : '[ Ativar Configuração e Liberar Blueprint Técnico ]'}
             </Button>
 
             <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-500 pt-2 border-t border-white/5">

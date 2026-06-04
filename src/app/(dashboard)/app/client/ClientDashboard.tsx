@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import Link from 'next/link'
 import { 
   Bot, 
   Activity, 
@@ -250,9 +251,11 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
               SinergIA OS rodando com infraestrutura privada para a sua empresa <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
             </p>
           </div>
-          <Button variant="outline" className="border-white/10 text-slate-300 hover:bg-white/5 gap-2">
-            <Settings className="w-4 h-4" /> Configurações de Deploy
-          </Button>
+          <Link href="/app/client/settings">
+            <Button variant="outline" className="border-white/10 text-slate-300 hover:bg-white/5 gap-2">
+              <Settings className="w-4 h-4" /> Configurações de Deploy
+            </Button>
+          </Link>
         </header>
 
         {/* SEÇÃO 1: STATUS DOS AGENTES POR NICHO */}
@@ -498,7 +501,9 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
               <div className="space-y-1">
                 <h4 className="font-bold text-white">Treinamento & Playbooks</h4>
                 <p className="text-xs text-slate-400 leading-relaxed">Injete PDFs de contexto sobre seu negócio para o robô aprender as regras de prospecção e BANT da empresa.</p>
-                <Button variant="link" className="text-indigo-400 hover:text-indigo-300 p-0 h-auto text-xs font-bold pt-2">Acessar Base de Conhecimento &rarr;</Button>
+                <Link href="/app/client/settings">
+                  <Button variant="link" className="text-indigo-400 hover:text-indigo-300 p-0 h-auto text-xs font-bold pt-2">Acessar Base de Conhecimento &rarr;</Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
@@ -512,7 +517,9 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
               <div className="space-y-1">
                 <h4 className="font-bold text-white">Console Webhook do CRM</h4>
                 <p className="text-xs text-slate-400 leading-relaxed">Conecte o seu CRM (Pipedrive, Hubspot, Kommo) para receber as qualificações e agendamentos instantaneamente.</p>
-                <Button variant="link" className="text-emerald-400 hover:text-emerald-300 p-0 h-auto text-xs font-bold pt-2">Ver Token de API &rarr;</Button>
+                <Link href="/app/client/settings">
+                  <Button variant="link" className="text-emerald-400 hover:text-emerald-300 p-0 h-auto text-xs font-bold pt-2">Ver Token de API &rarr;</Button>
+                </Link>
               </div>
             </CardContent>
           </Card>

@@ -77,6 +77,10 @@ export async function GET(req: Request) {
     const objective = data.preferences?.objective || data.objective || 'BANT';
     const niche = data.preferences?.niche || data.niche || 'Outro';
 
+    const integration_keys = data.integration_keys || {};
+    const knowledge_base = data.knowledge_base || [];
+    const raw_text_context = data.raw_text_context || '';
+
     // 3. Obter dados base do nicho
     const nicheInfo = nichesData[nichoSlug];
 
@@ -105,7 +109,7 @@ export async function GET(req: Request) {
     }
 
     // 6. Construir prompt compilado mestre
-    const compiled_system_prompt = `Você é o agente inteligente oficial da empresa "${data.name || 'SinergIA Client'}".
+    let compiled_system_prompt = `Você é o agente inteligente oficial da empresa "${data.name || 'SinergIA Client'}".
 Setor de Atuação: ${nicheInfo?.title || niche || 'Geral'}.
 Descrição do Negócio: ${nicheInfo?.description || ''}
 
@@ -115,6 +119,10 @@ ${objectiveRules}
 
 Diretrizes Adicionais do Agente:
 ${nicheInfo?.hooks?.pilotoAutomatico?.description || ''}`;
+
+    if (raw_text_context) {
+      compiled_system_prompt += `\n\nBase de Conhecimento Específica da Empresa (Use com prioridade máxima para responder dúvidas): ${raw_text_context}`;
+    }
 
     // 7. Retornar JSON formatado
     return NextResponse.json({
@@ -140,6 +148,12 @@ ${nicheInfo?.hooks?.pilotoAutomatico?.description || ''}`;
         objectiveRules,
         activeAgent: nicheInfo?.hooks?.pilotoAutomatico || null
       },
+      credentials: {
+        whatsapp_api_url: integration_keys.whatsapp_api_url || '',
+        whatsapp_access_token: integration_keys.whatsapp_access_token || '',
+        crm_api_token: integration_keys.crm_api_token || ''
+      },
+      files: knowledge_base,
       compiled_system_prompt
     });
 

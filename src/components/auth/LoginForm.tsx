@@ -1,158 +1,225 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import Link from 'next/link'
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react'
-import { useAuth } from '@/providers/AuthProvider'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
-
-const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, 'E-mail é obrigatório')
-    .email('E-mail inválido'),
-  password: z
-    .string()
-    .min(6, 'Senha deve ter pelo menos 6 caracteres'),
-})
-
-type LoginFormData = z.infer<typeof loginSchema>
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { Mail, ShieldCheck, Key, ArrowRight, ArrowLeft, Loader2, Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
+import { requestMagicCodeAction, verifyMagicCodeAction } from '@/actions/auth';
 
 export function LoginForm() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const { signIn } = useAuth()
+  const router = useRouter();
+  const [step, setStep] = useState<'email' | 'code'>('email');
+  const [email, setEmail] = useState('');
+  const [code, setCode] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [feedback, setFeedback] = useState<{ message: string; isError: boolean } | null>(null);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-  })
+  // Enviar código para o E-mail / WhatsApp
+  const handleRequestCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFeedback(null);
 
-  const onSubmit = async (data: LoginFormData) => {
-    try {
-      setIsLoading(true)
-      await signIn(data.email, data.password)
-      
-      // Tracking de conversão para Google Ads
-      if (typeof window !== 'undefined' && window.gtag) {
-        window.gtag('event', 'login', {
-          method: 'email',
-          event_category: 'engagement',
-          event_label: 'successful_login'
-        })
-      }
-    } catch (error) {
-      console.error('Erro no login:', error)
-    } finally {
-      setIsLoading(false)
+    const cleanEmail = email.trim();
+    if (!cleanEmail || !cleanEmail.includes('@')) {
+      setFeedback({ message: 'Por favor, insira um e-mail válido.', isError: true });
+      return;
     }
-  }
+
+    setIsLoading(true);
+    try {
+      const result = await requestMagicCodeAction(cleanEmail);
+      if (result.success) {
+        setStep('code');
+        setFeedback({ 
+          message: 'Se o seu e-mail estiver cadastrado, você receberá um código de acesso seguro no WhatsApp ou E-mail em instantes.', 
+          isError: false 
+        });
+        toast.success("Código de segurança enviado!");
+      } else {
+        setFeedback({ message: result.error || 'Erro ao solicitar código de acesso.', isError: true });
+      }
+    } catch (err) {
+      console.error(err);
+      setFeedback({ message: 'Erro de conexão com o servidor. Tente novamente.', isError: true });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Validar código inserido pelo usuário
+  const handleVerifyCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFeedback(null);
+
+    const cleanCode = code.trim();
+    if (!cleanCode || cleanCode.length !== 6 || isNaN(Number(cleanCode))) {
+      setFeedback({ message: 'Por favor, insira o código numérico de 6 dígitos.', isError: true });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const result = await verifyMagicCodeAction(email.trim(), cleanCode);
+      if (result.success) {
+        toast.success("Autenticação autorizada com sucesso!");
+        
+        // Redirecionamento dinâmico retornado pela Server Action
+        const destination = result.redirectUrl || '/app/discover';
+        
+        // Tracking opcional
+        if (typeof window !== 'undefined' && (window as any).gtag) {
+          (window as any).gtag('event', 'login', {
+            method: 'magic_code',
+            event_category: 'engagement',
+            event_label: 'successful_login'
+          });
+        }
+
+        router.push(destination);
+      } else {
+        setFeedback({ message: result.error || 'Código incorreto ou expirado.', isError: true });
+        toast.error(result.error || 'Falha ao autenticar.');
+      }
+    } catch (err) {
+      console.error(err);
+      setFeedback({ message: 'Erro de conexão ao validar o código.', isError: true });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div className="bg-transparent border-0">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Campo E-mail */}
-        <div className="space-y-2">
-          <Label htmlFor="email" className="text-sm font-medium text-slate-300">
-            E-mail
-          </Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-5 h-5" />
-            <Input
-              id="email"
-              type="email"
-              placeholder="seu@email.com"
-              className="pl-10 bg-slate-900 border-slate-800 text-white placeholder:text-slate-600 focus-visible:ring-emerald-500"
-              {...register('email')}
-              aria-invalid={errors.email ? 'true' : 'false'}
-            />
-          </div>
-          {errors.email && (
-            <p className="text-sm text-rose-500" role="alert">
-              {errors.email.message}
-            </p>
-          )}
-        </div>
-
-        {/* Campo Senha */}
-        <div className="space-y-2">
-          <Label htmlFor="password" className="text-sm font-medium text-slate-300">
-            Senha
-          </Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-5 h-5" />
-            <Input
-              id="password"
-              type={showPassword ? 'text' : 'password'}
-              placeholder="••••••••"
-              className="pl-10 pr-10 bg-slate-900 border-slate-800 text-white placeholder:text-slate-600 focus-visible:ring-emerald-500"
-              {...register('password')}
-              aria-invalid={errors.password ? 'true' : 'false'}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
-              aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-            >
-              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-            </button>
-          </div>
-          {errors.password && (
-            <p className="text-sm text-rose-500" role="alert">
-              {errors.password.message}
-            </p>
-          )}
-        </div>
-
-        {/* Link Esqueci a Senha */}
-        <div className="flex justify-end">
-          <Link
-            href="/forgot-password"
-            className="text-sm text-emerald-400 hover:text-emerald-300 font-medium"
-          >
-            Esqueci minha senha
-          </Link>
-        </div>
-
-        {/* Botão de Login */}
-        <Button
-          type="submit"
-          className="w-full h-12 text-base font-bold tracking-tight bg-emerald-600 hover:bg-emerald-500 text-white border-0 shadow-[0_0_20px_rgba(52,211,153,0.3)] transition-all"
-          disabled={isLoading}
+    <div className="space-y-6">
+      {feedback && (
+        <div 
+          className={`p-4 rounded-2xl text-xs font-medium border leading-relaxed ${
+            feedback.isError 
+              ? 'bg-rose-500/10 border-rose-500/20 text-rose-400' 
+              : 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400'
+          }`}
         >
-          {isLoading ? (
-            <>
-              <LoadingSpinner size="sm" className="mr-2" />
-              Entrando...
-            </>
-          ) : (
-            'Entrar no Cockpit'
-          )}
-        </Button>
-
-        {/* Link para Cadastro */}
-        <div className="text-center pt-4 border-t border-white/10 mt-6">
-          <p className="text-sm text-slate-400">
-            Ainda não tem uma conta?{' '}
-            <Link
-              href="/signup"
-              className="text-emerald-400 hover:text-emerald-300 font-bold transition-colors"
-            >
-              Criar conta
-            </Link>
-          </p>
+          {feedback.message}
         </div>
-      </form>
+      )}
+
+      {step === 'email' ? (
+        <form onSubmit={handleRequestCode} className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="login-email" className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              E-mail Corporativo
+            </Label>
+            <div className="relative">
+              <Mail className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+              <Input
+                id="login-email"
+                type="email"
+                placeholder="nome@empresa.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="pl-10 h-12 bg-slate-950 border-white/10 text-white placeholder:text-slate-600 focus-visible:ring-emerald-500 rounded-xl"
+                required
+              />
+            </div>
+          </div>
+
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="w-full h-12 text-sm font-bold uppercase tracking-wider bg-emerald-600 hover:bg-emerald-500 text-white border-0 shadow-[0_0_20px_rgba(52,211,153,0.3)] transition-all rounded-xl"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Gerando Chave...
+              </>
+            ) : (
+              <>
+                Solicitar Chave de Acesso
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </>
+            )}
+          </Button>
+        </form>
+      ) : (
+        <form onSubmit={handleVerifyCode} className="space-y-6">
+          <div className="space-y-2">
+            <Label className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+              <span>E-mail</span>
+              <button 
+                type="button" 
+                onClick={() => { setStep('email'); setFeedback(null); }}
+                className="text-[10px] text-emerald-400 hover:text-emerald-300 font-bold uppercase flex items-center gap-1 normal-case"
+              >
+                <ArrowLeft className="w-3 h-3" /> Alterar e-mail
+              </button>
+            </Label>
+            <Input
+              type="email"
+              value={email}
+              disabled
+              className="h-12 bg-slate-950/60 border-white/5 text-slate-500 rounded-xl cursor-not-allowed font-medium"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="login-code" className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              Código de Acesso (6 dígitos)
+            </Label>
+            <div className="relative">
+              <Key className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+              <Input
+                id="login-code"
+                placeholder="482015"
+                maxLength={6}
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+                className="pl-10 h-12 bg-slate-950 border-white/10 text-white placeholder:text-slate-600 focus-visible:ring-indigo-500 font-mono tracking-widest text-center text-lg font-black rounded-xl"
+                required
+              />
+            </div>
+          </div>
+
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="w-full h-12 text-sm font-bold uppercase tracking-wider bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white border-0 shadow-lg shadow-indigo-500/20 transition-all rounded-xl"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Autenticando...
+              </>
+            ) : (
+              <>
+                Confirmar Autenticação
+                <Sparkles className="ml-2 h-4 w-4" />
+              </>
+            )}
+          </Button>
+        </form>
+      )}
+
+      {/* Link para Cadastro */}
+      <div className="text-center pt-4 border-t border-white/5 mt-6">
+        <p className="text-xs text-slate-500">
+          Ainda não tem uma conta?{' '}
+          <Link
+            href="/signup"
+            className="text-emerald-400 hover:text-emerald-300 font-bold transition-colors"
+          >
+            Criar conta
+          </Link>
+        </p>
+      </div>
+
+      <div className="flex items-center justify-center gap-1 text-[10px] text-slate-600 pt-2">
+        <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+        Acesso criptografado sem senha por OTP
+      </div>
     </div>
-  )
+  );
 }
