@@ -1,4 +1,4 @@
-import { Stethoscope, ShoppingBag, Scale, Landmark, Factory, Briefcase, Activity } from 'lucide-react'
+import { Stethoscope, ShoppingBag, Scale, Landmark, Factory, Briefcase, Activity, Home } from 'lucide-react'
 
 export interface AutomaçãoHook {
   title: string
@@ -8,6 +8,14 @@ export interface AutomaçãoHook {
 export interface SubNicheGroup {
   pequenosAlvos: string[]
   grandesAlvos: string[]
+}
+
+export interface NicheMetrics {
+  avgTicket: number;         // Ticket médio em R$
+  currentCAC: number;        // CAC atual antes da SinergIA em R$
+  projectedCAC: number;      // CAC projetado com automação autônoma em R$
+  estimatedLatency: number;  // Tempo de resposta original da equipe humana (segundos)
+  optimizedLatency: number;  // Tempo de resposta da IA da SinergIA (segundos)
 }
 
 export interface NicheSolution {
@@ -40,6 +48,10 @@ export interface NicheSolution {
     resgateAtivo: AutomaçãoHook
     backoffice: AutomaçãoHook
   }
+  headline?: string;
+  recommendedPlan?: 'Starter' | 'Scale' | 'Enterprise';
+  featuresFreePlaybook?: string[];
+  financialMetrics: NicheMetrics;
 }
 
 export const nichesData: Record<string, NicheSolution> = {
@@ -51,6 +63,20 @@ export const nichesData: Record<string, NicheSolution> = {
     description: "O faturamento da sua clínica está refém de duas variáveis caóticas: o esquecimento dos pacientes e a lentidão humana na recepção. Enquanto você opera ou atende, leads quentes esfriam no WhatsApp e tratamentos antigos são abandonados por falta de acompanhamento. Instalamos uma Clonagem Cognitiva da sua melhor secretária para blindar seu caixa.",
     icon: Stethoscope,
     color: "emerald",
+    headline: "Transforme Leads de Clínicas em Procedimentos Agendados em Segundos",
+    recommendedPlan: "Scale",
+    featuresFreePlaybook: [
+      "Confirmação automatizada de consultas via WhatsApp",
+      "Resgate de pacientes inativos com IA",
+      "Auditoria de guias TISS/TUSS"
+    ],
+    financialMetrics: {
+      avgTicket: 1500,
+      currentCAC: 250,
+      projectedCAC: 70,
+      estimatedLatency: 7200, // 2 horas humanas
+      optimizedLatency: 30,   // 30 segundos da IA
+    },
     painPoints: [
       {
         title: "Cadeira Vazia e No-Show",
@@ -111,6 +137,20 @@ export const nichesData: Record<string, NicheSolution> = {
     description: "No varejo moderno, velocidade não é diferencial: é faturamento líquido. Se sua operação demora para passar o valor do frete, confirmar estoque ou enviar um link de pagamento, o cliente compra de outra loja. Nossa IA assume o balcão digital 24/7 e faz auditoria cruzada centavo por centavo de taxas ocultas.",
     icon: ShoppingBag,
     color: "fuchsia",
+    headline: "Recupere Margem Confiscada e Resgate Vendas no Segundo Zero",
+    recommendedPlan: "Scale",
+    featuresFreePlaybook: [
+      "Resgate de carrinho abandonado com cupom dinâmico",
+      "Atendimento de Direct do Instagram integrado com ERP",
+      "Cotação de listas de compras por foto"
+    ],
+    financialMetrics: {
+      avgTicket: 350,
+      currentCAC: 80,
+      projectedCAC: 22,
+      estimatedLatency: 2400, // 40 mins
+      optimizedLatency: 10,   // 10 segundos da IA
+    },
     painPoints: [
       {
         title: "A Fricção que Mata Vendas",
@@ -169,6 +209,20 @@ export const nichesData: Record<string, NicheSolution> = {
     description: "Em operações de urgência e logística, o tempo de resposta decide quem fica com o contrato. Centralizar o recebimento em telefones ou planilhas cria um gargalo perigoso que limita sua escala. Nossa infraestrutura assume a triagem de rotas, controle preditivo de ativos e auditoria documental sem intervenção manual.",
     icon: Factory,
     color: "rose",
+    headline: "Logística Inteligente: Despacho de Ordens de Serviço em 20 Segundos",
+    recommendedPlan: "Enterprise",
+    featuresFreePlaybook: [
+      "Triagem e roteirização autônoma de entregas",
+      "Monitor preditivo de devolução de frotas",
+      "Validador automático de faturas e invoices aduaneiras"
+    ],
+    financialMetrics: {
+      avgTicket: 4500,
+      currentCAC: 850,
+      projectedCAC: 250,
+      estimatedLatency: 3600, // 1 hora
+      optimizedLatency: 20,   // 20 segundos da IA
+    },
     painPoints: [
       {
         title: "O Gargalo do Despacho Humano",
@@ -228,6 +282,20 @@ export const nichesData: Record<string, NicheSolution> = {
     description: "O backoffice financeiro tradicional é lento, caro e vulnerável a falhas. A SinergIA insere agentes cognitivos de alta performance na retaguarda da sua empresa para auditar contas de utilities (energia, telecom), validar notas fiscais diretamente na SEFAZ e liberar crédito de forma segura.",
     icon: Landmark,
     color: "amber",
+    headline: "Mesa de Crédito Autônoma e Auditoria de Contas Sem Erro Humano",
+    recommendedPlan: "Enterprise",
+    featuresFreePlaybook: [
+      "Leitor automático de faturas de utilities",
+      "Auditoria de canhotos de entrega por OCR",
+      "Análise cadastral para liberação de crédito rápido"
+    ],
+    financialMetrics: {
+      avgTicket: 8500,
+      currentCAC: 1500,
+      projectedCAC: 400,
+      estimatedLatency: 10800, // 3 horas
+      optimizedLatency: 60,    // 60 segundos da IA
+    },
     painPoints: [
       {
         title: "A Armadilha das Duplicatas Frias",
@@ -285,6 +353,20 @@ export const nichesData: Record<string, NicheSolution> = {
     description: "Empresas de serviços de alto ticket sofrem com a divisão do fundador: ou ele está no campo executando e coordenando a equipe, ou está no escritório vendendo. A SinergIA resolve o abandono comercial assumindo a triagem técnica, cálculo de propostas por tabelas e coordenação de escalas descentralizadas.",
     icon: Briefcase,
     color: "cyan",
+    headline: "Cotações e Orçamentos Técnicos no WhatsApp em Tempo Real",
+    recommendedPlan: "Scale",
+    featuresFreePlaybook: [
+      "Orçamentista autônomo por WhatsApp",
+      "Validador e consulta de laudos automotivos",
+      "Escalonador inteligente de facilities e atestados"
+    ],
+    financialMetrics: {
+      avgTicket: 12000,
+      currentCAC: 2000,
+      projectedCAC: 550,
+      estimatedLatency: 14400, // 4 horas
+      optimizedLatency: 45,    // 45 segundos da IA
+    },
     painPoints: [
       {
         title: "O Abandono da Mesa Comercial",
@@ -340,9 +422,23 @@ export const nichesData: Record<string, NicheSolution> = {
     title: "SinergIA para Reputação de Marca, Retenção & Recuperação de Caixa",
     shortTitle: "Reputação & Cobrança",
     subtitle: "Reverta crises no Reclame Aqui antes que virem prejuízo, zere a inadimplência crônica de forma amigável e blinde sua receita.",
-    description: "A imagem pública e o caixa de uma empresa são seus ativos mais sensíveis. Responder reclamações tarde demais destrói suas vendas futuras, e cobrar clientes atrasados desgasta seu time. Nossa IA une análise de sentimentos e automação bancária para reter clientes e resgatar receitas perdidas.",
+    description: "A imagem pública e o caixa de uma empresa são seus ativos mais sensíveis. Responder reclamações tarde demais destrói suas vendas futures, e cobrar clientes atrasados desgasta seu time. Nossa IA une análise de sentimentos e automação bancária para reter clientes e resgatar receitas perdidas.",
     icon: Scale,
     color: "indigo",
+    headline: "Recuperação Ativa de Inadimplência e Blindagem de Reputação",
+    recommendedPlan: "Scale",
+    featuresFreePlaybook: [
+      "Varredor de queixas no Reclame Aqui com resposta por IA",
+      "Régua amigável de cobrança de inadimplentes via WhatsApp",
+      "Gerador automático de defesas contra chargebacks"
+    ],
+    financialMetrics: {
+      avgTicket: 950,
+      currentCAC: 180,
+      projectedCAC: 45,
+      estimatedLatency: 18000, // 5 horas
+      optimizedLatency: 90,    // 90 segundos da IA
+    },
     painPoints: [
       {
         title: "O Sangramento da Imagem Pública",
@@ -389,6 +485,152 @@ export const nichesData: Record<string, NicheSolution> = {
       backoffice: {
         title: "O Defensor de Receita Automático",
         description: "Defesa automatizada de chargebacks que reúne logs de acesso, termos assinados e comprovantes de entrega de forma algorítmica para vencer disputas bancárias."
+      }
+    }
+  },
+
+  "imobiliario": {
+    slug: "imobiliario",
+    title: "SinergIA para Mercado Imobiliário e Construtoras",
+    shortTitle: "Mercado Imobiliário",
+    subtitle: "Transforme Leads de Alto Padrão em Visitas Agendadas em 42 Segundos.",
+    description: "O Mercado Imobiliário de alto padrão perde milhões todos os meses porque leads qualificados levam horas para receber um contato humano. Nossa inteligência artificial qualifica o lead, valida o score de crédito e agenda a visita na roleta de corretores em tempo real.",
+    icon: Home,
+    color: "indigo",
+    headline: "Transforme Leads de Alto Padrão em Visitas Agendadas em 42 Segundos",
+    recommendedPlan: "Scale",
+    featuresFreePlaybook: [
+      "Fluxo de triagem autônoma para portais (Zap/VivaReal)",
+      "Qualificação por score de crédito automatizada",
+      "Distribuição inteligente via Roleta de Corretores"
+    ],
+    financialMetrics: {
+      avgTicket: 750000,
+      currentCAC: 1200,
+      projectedCAC: 350,
+      estimatedLatency: 14400, // 4 horas humanas
+      optimizedLatency: 42,    // 42 segundos da IA
+    },
+    painPoints: [
+      {
+        title: "Demora no Atendimento",
+        description: "Leads de portais como Zap e VivaReal esfriam ou vão para a concorrência após 5 minutos sem resposta.",
+        icon: Activity,
+      },
+      {
+        title: "Perda de Tempo com Curiosos",
+        description: "Corretores seniores perdendo tempo qualificando contatos sem real capacidade de compra ou perfil de crédito.",
+        icon: Activity,
+      },
+      {
+        title: "Distribuição Injusta de Leads",
+        description: "Falta de transparência e lentidão na roleta de distribuição de leads entre a equipe comercial.",
+        icon: Activity,
+      }
+    ],
+    metrics: [
+      { value: "Sub-45s", label: "Tempo de Contato" },
+      { value: "-70%", label: "Redução de CAC" },
+      { value: "+45%", label: "Visitas Agendadas" },
+    ],
+    demoType: "scheduling",
+    subNicheGroup: {
+      pequenosAlvos: [
+        "Corretores Autônomos de Alto Padrão",
+        "Imobiliárias Locais e de Bairro",
+        "Administradoras de Aluguel de Temporada"
+      ],
+      grandesAlvos: [
+        "Grandes Construtoras e Incorporadoras",
+        "Redes de Franquias Imobiliárias",
+        "Loteadoras e Desenvolvedoras Urbanas"
+      ]
+    },
+    hooks: {
+      pilotoAutomatico: {
+        title: "O Triador de Portais",
+        description: "Agente inteligente integrado com Zap Imóveis, VivaReal e Imovelweb que responde e qualifica leads in menos de 1 minuto."
+      },
+      resgateAtivo: {
+        title: "O Qualificador de Crédito",
+        description: "Agente conversacional que realiza pré-análise de capacidade financeira de forma amigável no WhatsApp antes de passar ao corretor."
+      },
+      backoffice: {
+        title: "A Roleta de Distribuição",
+        description: "Distribuição instantânea e rotativa de leads quentes e agendamentos confirmados direto no CRM da equipe comercial."
+      }
+    }
+  },
+
+  "ecommerce": {
+    slug: "ecommerce",
+    title: "SinergIA para E-commerce & Lançamentos Digitais",
+    shortTitle: "E-commerce & Lançamentos",
+    subtitle: "Recuperação de Carrinhos e Upsell Inteligente com Margem Exponencial.",
+    description: "Automatize a recuperação de faturamento perdido em carrinhos abandonados, PIX pendentes e boletos gerados sem interação humana lenta. Aumente o ticket médio da sua operação no WhatsApp de forma 100% autônoma.",
+    icon: ShoppingBag,
+    color: "emerald",
+    headline: "Recuperação de Carrinhos e Upsell Inteligente com Margem Exponencial",
+    recommendedPlan: "Starter",
+    featuresFreePlaybook: [
+      "Régua de conversão transacional via Webhook",
+      "Oferta personalizada de Upsell com Inteligência de Margem",
+      "Agente de pesquisa de churn pós-abandono"
+    ],
+    financialMetrics: {
+      avgTicket: 280,
+      currentCAC: 65,
+      projectedCAC: 18,
+      estimatedLatency: 1800,  // 30 minutos humanos
+      optimizedLatency: 15,    // 15 segundos da IA
+    },
+    painPoints: [
+      {
+        title: "Carrinhos Abandonados",
+        description: "Mais de 70% dos clientes iniciam o checkout mas não finalizam a compra por falta de incentivo imediato.",
+        icon: Activity,
+      },
+      {
+        title: "PIX e Boletos Pendentes",
+        description: "Vendas perdidas porque o cliente gerou o PIX ou boleto e esqueceu de pagar por falta de lembrete dinâmico.",
+        icon: Activity,
+      },
+      {
+        title: "Falta de Upsell Pós-Venda",
+        description: "Deixar dinheiro na mesa ao não oferecer ofertas complementares personalizadas no momento em que o cliente está mais propenso a comprar.",
+        icon: Activity,
+      }
+    ],
+    metrics: [
+      { value: "+28%", label: "Recuperação de Vendas" },
+      { value: "-72%", label: "CAC Projetado" },
+      { value: "+15%", label: "Aumento de AOV/LTV" },
+    ],
+    demoType: "sales",
+    subNicheGroup: {
+      pequenosAlvos: [
+        "Lojas Shopify e WooCommerce de Nicho",
+        "Produtores e Afiliados Digitais de Pequeno Porte",
+        "Marcas Próprias Locais (D2C)"
+      ],
+      grandesAlvos: [
+        "Grandes Operações de Droppshipping com Escala",
+        "Grandes Infoprodutores e Coprodutores com Lançamentos de 7 dígitos",
+        "E-commerces Consolidados com ERP Próprio"
+      ]
+    },
+    hooks: {
+      pilotoAutomatico: {
+        title: "O Recuperador Transacional",
+        description: "Régua conversacional via webhook acionada no exato segundo de abandono, tirando dúvidas e facilitando o pagamento."
+      },
+      resgateAtivo: {
+        title: "O Agente de Inteligência de Margem",
+        description: "Oferece descontos inteligentes ou upsells personalizados no WhatsApp para garantir a conversão sem queimar margem desnecessária."
+      },
+      backoffice: {
+        title: "O Auditor de Churn",
+        description: "Pesquisa automatizada pós-abandono para entender razões de desistência e alimentar a equipe de produto."
       }
     }
   }

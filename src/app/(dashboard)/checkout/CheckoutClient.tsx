@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react'
 import { Check, Shield, Lock, Calendar, Clock, ArrowRight, CheckCircle2, Loader2, Copy, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
+import { formatBRL } from '@/lib/utils'
+
 import { generatePaymentSession, bookOnboardingCall, PaymentSessionResponse } from '@/actions/billing'
 import { db } from '@/lib/firebase'
 import { doc, onSnapshot } from 'firebase/firestore'
@@ -41,9 +43,7 @@ export default function CheckoutClient({ lead }: CheckoutClientProps) {
   const [bookingFinished, setBookingFinished] = useState(false)
   const [bookingLoading, setBookingLoading] = useState(false)
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
-  }
+  const formatCurrency = formatBRL
 
   // Lógica de cálculo síncrona no front-end para exibição imediata
   const auditedLoss = Number(lead.auditedLoss) || 0

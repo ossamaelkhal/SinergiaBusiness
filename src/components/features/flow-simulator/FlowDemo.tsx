@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { X, Workflow, Play, Pause, RotateCcw, CheckCircle, Clock, ArrowRight, Zap, Users, MessageSquare, BarChart3, LucideIcon } from 'lucide-react'
+import { getNicheBySlug } from '@/data/niches'
+import { formatBRL, formatSeconds } from '@/lib/utils'
 
 interface FlowStep {
     id: number
@@ -40,6 +42,18 @@ interface FlowDemoProps {
 
 const FlowDemo: React.FC<FlowDemoProps> = ({ isOpen = true, onClose, isInline = false, nicheSlug, onInteraction, onCompilar }) => {
     const [selectedFlow, setSelectedFlow] = useState<FlowTemplate | null>(null)
+
+    const getStepDuration = (step: FlowStep, steps: FlowStep[]) => {
+        const nicheData = nicheSlug ? getNicheBySlug(nicheSlug) : null
+        const financialMetrics = nicheData?.financialMetrics
+        if (!financialMetrics) return step.duration
+
+        const totalDefaultDuration = steps.reduce((acc, s) => acc + s.duration, 0)
+        if (totalDefaultDuration === 0) return step.duration
+
+        const ratio = financialMetrics.optimizedLatency / totalDefaultDuration
+        return Math.max(1, Math.round(step.duration * ratio))
+    }
     const [isSimulating, setIsSimulating] = useState(false)
     const [currentStep, setCurrentStep] = useState(0)
     const [simulationResults, setSimulationResults] = useState<SimulationResults | null>(null)
@@ -483,10 +497,15 @@ const FlowDemo: React.FC<FlowDemoProps> = ({ isOpen = true, onClose, isInline = 
             case 'reputacao':
             case 'cobranca':
                 return flowTemplates.find(f => f.id === 'margin-alert') || null;
+            case 'imobiliario':
+                return flowTemplates.find(f => f.id === 'lead-qualification') || null;
+            case 'ecommerce':
+                return flowTemplates.find(f => f.id === 'order-quoting') || null;
             default:
                 return null;
         }
     }
+
 
     useEffect(() => {
         if (nicheSlug) {
@@ -525,20 +544,40 @@ const FlowDemo: React.FC<FlowDemoProps> = ({ isOpen = true, onClose, isInline = 
     const calculateResults = React.useCallback(() => {
         if (!selectedFlow) return
 
-        const totalTime = selectedFlow.steps.reduce((acc, step) => acc + step.duration, 0)
-        const manualTime = totalTime * 8 // Tempo manual seria 8x maior
-        const timeSaved = manualTime - totalTime
-        const costSaving = (timeSaved / 60) * 75 // R$ 75/hora
+        const nicheData = nicheSlug ? getNicheBySlug(nicheSlug) : null
+        const financialMetrics = nicheData?.financialMetrics
 
-        setSimulationResults({
-            totalTime,
-            manualTime,
-            timeSaved,
-            costSaving,
-            efficiency: selectedFlow.efficiency,
-            stepsCompleted: selectedFlow.steps.length
-        })
-    }, [selectedFlow])
+        if (financialMetrics) {
+            const totalTime = financialMetrics.optimizedLatency
+            const manualTime = financialMetrics.estimatedLatency
+            const timeSaved = manualTime - totalTime
+            const costSaving = financialMetrics.currentCAC - financialMetrics.projectedCAC
+
+            setSimulationResults({
+                totalTime,
+                manualTime,
+                timeSaved,
+                costSaving,
+                efficiency: selectedFlow.efficiency,
+                stepsCompleted: selectedFlow.steps.length
+            })
+        } else {
+            const totalTime = selectedFlow.steps.reduce((acc, step) => acc + step.duration, 0)
+            const manualTime = totalTime * 8 // Tempo manual seria 8x maior
+            const timeSaved = manualTime - totalTime
+            const costSaving = (timeSaved / 60) * 75 // R$ 75/hora
+
+            setSimulationResults({
+                totalTime,
+                manualTime,
+                timeSaved,
+                costSaving,
+                efficiency: selectedFlow.efficiency,
+                stepsCompleted: selectedFlow.steps.length
+            })
+        }
+    }, [selectedFlow, nicheSlug])
+
 
     useEffect(() => {
         let interval: NodeJS.Timeout
@@ -734,8 +773,9 @@ const FlowDemo: React.FC<FlowDemoProps> = ({ isOpen = true, onClose, isInline = 
                                                     </h4>
                                                     <div className={`flex items-center text-xs font-mono px-2 py-1 rounded bg-black/30 border ${isActive ? 'text-indigo-300 border-indigo-500/30' : isCompleted ? 'text-emerald-300 border-emerald-500/30' : 'text-slate-600 border-slate-800'}`}>
                                                         <Clock className="w-3 h-3 mr-1" />
-                                                        {step.duration}s
+                                                        {formatSeconds(getStepDuration(step, selectedFlow.steps))}
                                                     </div>
+
                                                 </div>
                                                 <p className={`text-sm mb-3 leading-relaxed ${isActive ? 'text-indigo-100' : isCompleted ? 'text-slate-300' : 'text-slate-400'}`}>
                                                     {step.description}
@@ -778,21 +818,21 @@ const FlowDemo: React.FC<FlowDemoProps> = ({ isOpen = true, onClose, isInline = 
                                                 <div>
                                                     <p className="text-slate-500 text-sm font-bold uppercase tracking-wider mb-2">Latência SinergIA vs Humano</p>
                                                     <div className="flex items-end gap-3">
-                                                        <div className="text-3xl font-black text-emerald-400">{simulationResults.totalTime}s</div>
-                                                        <div className="text-xl font-bold text-slate-600 line-through pb-1">{simulationResults.manualTime}s</div>
+                                                        <div className="text-3xl font-black text-emerald-400">{formatSeconds(simulationResults.totalTime)}</div>
+                                                        <div className="text-xl font-bold text-slate-600 line-through pb-1">{formatSeconds(simulationResults.manualTime)}</div>
                                                     </div>
                                                 </div>
 
                                                 <div>
                                                     <p className="text-slate-500 text-sm font-bold uppercase tracking-wider mb-2">Poder Computacional</p>
-                                                    <div className="text-3xl font-black text-indigo-400">+{simulationResults.timeSaved}s <span className="text-sm text-indigo-300/60 font-medium">limpos p/ o time</span></div>
+                                                    <div className="text-3xl font-black text-indigo-400">+{formatSeconds(simulationResults.timeSaved)} <span className="text-sm text-indigo-300/60 font-medium">limpos p/ o time</span></div>
                                                 </div>
 
                                                 <div className="pt-6 border-t border-white/5">
                                                     <div className="bg-white/5 rounded-2xl p-5 border border-white/5 relative overflow-hidden flex flex-col items-center">
                                                         <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-2xl rounded-full pointer-events-none"></div>
                                                         <p className="text-slate-400 text-sm font-bold uppercase tracking-wider mb-2 relative z-10">Desperdício Estancado (Mensal) *</p>
-                                                        <div className="text-4xl font-black text-amber-400 relative z-10 w-full text-center">R$ {(simulationResults.costSaving * 500).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                                        <div className="text-4xl font-black text-amber-400 relative z-10 w-full text-center">{formatBRL(simulationResults.costSaving * 500)}</div>
                                                         <p className="text-slate-500 text-xs mt-3 relative z-10">*Projeção para 500 instâncias/mês.</p>
                                                     </div>
                                                 </div>

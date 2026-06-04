@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Card, CardContent } from "@/components/ui/card";
 import { 
@@ -20,6 +20,8 @@ import {
   Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getNicheBySlug } from '@/data/niches';
+import { formatBRL } from '@/lib/utils';
 
 const respostaOptions = [
   { label: 'Menos de 5 minutos', value: 'under5', lossFactor: 0.0, desc: 'Ideal. Quase 100% de aproveitamento de leads.' },
@@ -29,7 +31,8 @@ const respostaOptions = [
   { label: 'Mais de 4 horas', value: 'over4h', lossFactor: 0.78, desc: 'Vazamento grave. 78% de desperdício em aquisição.' }
 ];
 
-export function ROICalculator() {
+export function ROICalculator({ nicheSlug }: { nicheSlug?: string } = {}) {
+
   // 1. Inputs Gerais
   const [leadsPorMes, setLeadsPorMes] = useState(300);
   const [ticketMedio, setTicketMedio] = useState(2000);
@@ -50,6 +53,60 @@ export function ROICalculator() {
   // 5. Clientes / Contatos inativos (Base)
   const [baseLeadsFrios, setBaseLeadsFrios] = useState(2000); // Base estagnada no CRM
 
+  // Buscar dados do nicho para preenchimento dinâmico
+  const nicheData = nicheSlug ? getNicheBySlug(nicheSlug) : null;
+  const financialMetrics = nicheData?.financialMetrics;
+
+  const currentCAC = financialMetrics?.currentCAC ?? 300;
+  const projectedCAC = financialMetrics?.projectedCAC ?? 100;
+
+  // Sincronizar estados com os dados do nicho
+  useEffect(() => {
+    if (financialMetrics) {
+      if (financialMetrics.avgTicket) {
+        setTicketMedio(financialMetrics.avgTicket);
+      }
+      if (financialMetrics.estimatedLatency) {
+        const latency = financialMetrics.estimatedLatency;
+        if (latency <= 300) setTempoResposta('under5');
+        else if (latency <= 900) setTempoResposta('5-15min');
+        else if (latency <= 3600) setTempoResposta('15-60min');
+        else if (latency <= 14400) setTempoResposta('1-4h');
+        else setTempoResposta('over4h');
+      }
+      // Ajustar volumes e baselines de forma inteligente por tipo de nicho
+      if (nicheSlug === 'imobiliario') {
+        setLeadsPorMes(150); // Menos leads porém ticket astronômico
+        setTamanhoEquipe(8);
+        setCustoVendedor(6000);
+        setFaturamentoFaturado(2500000); // Vendas imobiliárias de alto padrão
+        setTaxaInadimplencia(2.0);
+        setBaseLeadsFrios(1200);
+      } else if (nicheSlug === 'ecommerce') {
+        setLeadsPorMes(1200); // Alto volume de e-commerce
+        setTamanhoEquipe(2);
+        setCustoVendedor(3500);
+        setFaturamentoFaturado(150000);
+        setTaxaInadimplencia(5.0);
+        setBaseLeadsFrios(5000);
+      } else if (nicheSlug === 'faturamento-saude-bemestar') {
+        setLeadsPorMes(400);
+        setTamanhoEquipe(3);
+        setCustoVendedor(4000);
+        setFaturamentoFaturado(100000);
+        setTaxaInadimplencia(5.0);
+        setBaseLeadsFrios(2500);
+      } else if (nicheSlug === 'commerce-omnichannel-vendas') {
+        setLeadsPorMes(800);
+        setTamanhoEquipe(3);
+        setCustoVendedor(4000);
+        setFaturamentoFaturado(120000);
+        setTaxaInadimplencia(4.0);
+        setBaseLeadsFrios(3500);
+      }
+    }
+  }, [nicheSlug, financialMetrics]);
+
   // --- CÁLCULOS DETALHADOS DE PERDAS (Dinheiro deixado na mesa) ---
 
   // A. Perda por Latência de Leads
@@ -69,8 +126,11 @@ export function ROICalculator() {
   // Conversão de 0.3% ao mês de contatos inativos se houvesse régua ativa automática
   const receitaEsquecidaBase = Math.round((baseLeadsFrios * 0.003) * ticketMedio);
 
+  // E. Desperdício por CAC Elevado (antes da SinergIA)
+  const desperdicioCAC = Math.round(currentCAC * leadsPorMes);
+
   // Soma de todas as perdas
-  const totalDesperdicio = receitaPerdidaLatencia + desperdicioOperacional + perdaInadimplencia + receitaEsquecidaBase;
+  const totalDesperdicio = receitaPerdidaLatencia + desperdicioOperacional + perdaInadimplencia + receitaEsquecidaBase + desperdicioCAC;
 
   // --- CÁLCULOS DE RECUPERAÇÃO COM SINERGIA ---
   // Taxas de mitigação realistas após implantação da plataforma
@@ -78,11 +138,13 @@ export function ROICalculator() {
   const recuperadoOverhead = Math.round(desperdicioOperacional * 0.75); // Automações eliminam 75% da digitação
   const recuperadoInadimplencia = Math.round(perdaInadimplencia * 0.45); // Régua de cobrança reduz 45% do atraso
   const recuperadoBase = Math.round(receitaEsquecidaBase * 0.70); // Nutrição automatizada recupera 70% do potencial
+  const recuperadoCAC = Math.round((currentCAC - projectedCAC) * leadsPorMes);
 
-  const totalRecuperado = recuperadoLatencia + recuperadoOverhead + recuperadoInadimplencia + recuperadoBase;
+  const totalRecuperado = recuperadoLatencia + recuperadoOverhead + recuperadoInadimplencia + recuperadoBase + recuperadoCAC;
 
   // Porcentagem das perdas totais que conseguimos recuperar
   const percentualRecuperado = totalDesperdicio > 0 ? Math.round((totalRecuperado / totalDesperdicio) * 100) : 0;
+
 
   return (
     <section id="roi-calculator" className="py-24 bg-slate-950 relative overflow-hidden border-t border-white/5">
@@ -344,7 +406,7 @@ export function ROICalculator() {
                 <div className="text-center pb-6 border-b border-white/5 mb-6">
                   <span className="text-slate-500 text-xs font-black uppercase tracking-widest">Desperdício Mensal Estimado</span>
                   <div className="text-4xl md:text-5xl font-black text-rose-500 mt-2 tracking-tight">
-                    R$ {totalDesperdicio.toLocaleString('pt-BR')}
+                    {formatBRL(totalDesperdicio)}
                   </div>
                   <p className="text-slate-400 text-xs mt-2">Dinheiro que a sua operação atual está deixando na mesa</p>
                 </div>
@@ -357,7 +419,7 @@ export function ROICalculator() {
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs font-medium text-slate-300">
                       <span>Perda por Latência (Comercial)</span>
-                      <span className="font-bold text-rose-400">R$ {receitaPerdidaLatencia.toLocaleString('pt-BR')}</span>
+                      <span className="font-bold text-rose-400">{formatBRL(receitaPerdidaLatencia)}</span>
                     </div>
                     <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden">
                       <div 
@@ -371,7 +433,7 @@ export function ROICalculator() {
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs font-medium text-slate-300">
                       <span>Overhead Burocrático (Mão de obra)</span>
-                      <span className="font-bold text-rose-400">R$ {desperdicioOperacional.toLocaleString('pt-BR')}</span>
+                      <span className="font-bold text-rose-400">{formatBRL(desperdicioOperacional)}</span>
                     </div>
                     <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden">
                       <div 
@@ -385,7 +447,7 @@ export function ROICalculator() {
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs font-medium text-slate-300">
                       <span>Inadimplência e Contas Atrasadas</span>
-                      <span className="font-bold text-rose-400">R$ {perdaInadimplencia.toLocaleString('pt-BR')}</span>
+                      <span className="font-bold text-rose-400">{formatBRL(perdaInadimplencia)}</span>
                     </div>
                     <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden">
                       <div 
@@ -399,7 +461,7 @@ export function ROICalculator() {
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs font-medium text-slate-300">
                       <span>Oportunidades Inativas (Base CRM)</span>
-                      <span className="font-bold text-rose-400">R$ {receitaEsquecidaBase.toLocaleString('pt-BR')}</span>
+                      <span className="font-bold text-rose-400">{formatBRL(receitaEsquecidaBase)}</span>
                     </div>
                     <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden">
                       <div 
@@ -408,6 +470,22 @@ export function ROICalculator() {
                       ></div>
                     </div>
                   </div>
+
+                  {/* CAC Leak */}
+                  {desperdicioCAC > 0 && (
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs font-medium text-slate-300">
+                        <span>Desperdício por CAC Elevado</span>
+                        <span className="font-bold text-rose-400">{formatBRL(desperdicioCAC)}</span>
+                      </div>
+                      <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-cyan-500 rounded-full" 
+                          style={{ width: `${totalDesperdicio > 0 ? (desperdicioCAC / totalDesperdicio) * 100 : 0}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* SinergIA Optimization Box */}
@@ -419,7 +497,7 @@ export function ROICalculator() {
                   </div>
 
                   <div className="text-3xl font-black text-white tracking-tight">
-                    + R$ {totalRecuperado.toLocaleString('pt-BR')} <span className="text-xs text-slate-400 font-normal">/mês</span>
+                    + {formatBRL(totalRecuperado)} <span className="text-xs text-slate-400 font-normal">/mês</span>
                   </div>
                   <p className="text-slate-300 text-xs mt-2 leading-relaxed">
                     Você pode recuperar até <strong className="text-emerald-400">{percentualRecuperado}%</strong> do seu desperdício financeiro mensal aplicando automações integradas nas áreas mapeadas.
@@ -450,7 +528,7 @@ export function ROICalculator() {
                     Perda Comercial (Tempo de Resposta)
                   </div>
                   <p>
-                    Com tempo de contato em <strong className="text-white">{selectedResposta.label}</strong>, você perde aproximadamente <strong className="text-rose-400">R$ {receitaPerdidaLatencia.toLocaleString('pt-BR')}</strong> mensais de receita por leads que esfriam ou fecham com concorrentes mais rápidos.
+                    Com tempo de contato em <strong className="text-white">{selectedResposta.label}</strong>, você perde aproximadamente <strong className="text-rose-400">{formatBRL(receitaPerdidaLatencia)}</strong> mensais de receita por leads que esfriam ou fecham com concorrentes mais rápidos.
                   </p>
                 </div>
               )}
@@ -463,7 +541,7 @@ export function ROICalculator() {
                     Desperdício de Salário (Burocracia)
                   </div>
                   <p>
-                    Seus {tamanhoEquipe} vendedores passam {tempoAdmin}% do tempo copiando dados, organizando planilhas ou fazendo follow-ups manuais. Isso joga <strong className="text-rose-400">R$ {desperdicioOperacional.toLocaleString('pt-BR')}</strong> no ralo em salários improdutivos.
+                    Seus {tamanhoEquipe} vendedores passam {tempoAdmin}% do tempo copiando dados, organizando planilhas ou fazendo follow-ups manuais. Isso joga <strong className="text-rose-400">{formatBRL(desperdicioOperacional)}</strong> no ralo em salários improdutivos.
                   </p>
                 </div>
               )}
@@ -476,7 +554,7 @@ export function ROICalculator() {
                     Caixa Retido por Atrasos
                   </div>
                   <p>
-                    A taxa de inadimplência de {taxaInadimplencia}% faz com que <strong className="text-rose-400">R$ {perdaInadimplencia.toLocaleString('pt-BR')}</strong> de faturamento legítimo fiquem presos ou perdidos. Cobranças automáticas amigáveis via WhatsApp recuperam esse caixa de forma automática.
+                    A taxa de inadimplência de {taxaInadimplencia}% faz com que <strong className="text-rose-400">{formatBRL(perdaInadimplencia)}</strong> de faturamento legítimo fiquem presos ou perdidos. Cobranças automáticas amigáveis via WhatsApp recuperam esse caixa de forma automática.
                   </p>
                 </div>
               )}
@@ -489,10 +567,24 @@ export function ROICalculator() {
                     Receita Adormecida na Base
                   </div>
                   <p>
-                    Sua base com {baseLeadsFrios.toLocaleString()} contatos inativos sem ações de reengajamento representa uma mina de ouro de <strong className="text-emerald-400">R$ {receitaEsquecidaBase.toLocaleString('pt-BR')}</strong> por mês em reativações não aproveitadas.
+                    Sua base com {baseLeadsFrios.toLocaleString()} contatos inativos sem ações de reengajamento representa uma mina de ouro de <strong className="text-emerald-400">{formatBRL(receitaEsquecidaBase)}</strong> por mês em reativações não aproveitadas.
                   </p>
                 </div>
               )}
+
+              {/* CAC Feedback */}
+              {desperdicioCAC > 0 && (
+                <div className="p-4 bg-slate-900/40 border border-white/5 rounded-xl text-xs space-y-1.5 leading-relaxed text-slate-300">
+                  <div className="font-bold text-white flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> 
+                    Desperdício de Aquisição (CAC Elevado)
+                  </div>
+                  <p>
+                    Seu custo de aquisição atual de <strong className="text-white">{formatBRL(currentCAC)}</strong> por cliente pode ser reduzido para <strong className="text-emerald-400">{formatBRL(projectedCAC)}</strong> com automação conversacional. Isso economiza <strong className="text-emerald-400">{formatBRL(recuperadoCAC)}</strong> mensais de verba de marketing.
+                  </p>
+                </div>
+              )}
+
 
             </div>
 

@@ -7,6 +7,8 @@ import {
   PlayCircle, ShieldCheck, Sparkles, Zap, Shield, Check, Lock, HelpCircle 
 } from 'lucide-react';
 import { NicheCTAButton } from '@/components/features/solutions/NicheCTAButton';
+import { ROICalculator } from '@/components/sections/ROICalculator';
+
 
 export function generateStaticParams() {
   const niches = getAllNiches();
@@ -395,8 +397,12 @@ export default function NicheSolutionPage({
           </section>
         )}
 
+        {/* CALCULADORA DE ROI INTEGRADA AO NICHO */}
+        <ROICalculator nicheSlug={niche.slug} />
+
         {/* ANCORAGEM DE PREÇOS E PILOTO TÁTICO */}
         <section id="pricing-section" className="border-t border-white/5 py-24 bg-slate-900/20 relative overflow-hidden">
+
           <div className="container mx-auto px-6">
             
             <div className="text-center max-w-3xl mx-auto mb-20">
