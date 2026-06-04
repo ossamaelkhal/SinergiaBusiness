@@ -263,6 +263,22 @@ const FlowBuilder: React.FC<FlowBuilderProps> = ({ onClose, isInline = false, ni
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
     const canvasRef = useRef<HTMLDivElement>(null)
 
+    // New states and refs for Zoom, Pan, and Collapsible Sidebar
+    const [zoom, setZoom] = useState(1.0)
+    const [panOffset, setPanOffset] = useState({ x: 0, y: 0 })
+    const [isPanning, setIsPanning] = useState(false)
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+
+    const panStart = useRef({ x: 0, y: 0 })
+    const initialNodePos = useRef({ x: 0, y: 0 })
+
+    useEffect(() => {
+        // Auto close sidebar on tablets/mobile viewports initially
+        if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+            setIsSidebarOpen(false)
+        }
+    }, [])
+
     const nodeTemplates: NodeTemplate[] = [
         { type: 'trigger', title: 'Webhook Trigger', description: 'Recebe dados externos', category: 'Trigger' },
         { type: 'action', title: 'Ação Personalizada', description: 'Executa ação específica', category: 'Ação' },
@@ -275,14 +291,17 @@ const FlowBuilder: React.FC<FlowBuilderProps> = ({ onClose, isInline = false, ni
     ]
 
     const addNode = (template: NodeTemplate) => {
+        // Position new nodes relative to the center of the current canvas viewport
+        const xOffset = -panOffset.x + 150 + Math.random() * 100
+        const yOffset = -panOffset.y + 150 + Math.random() * 100
         const newNode: NodeData = {
             id: Date.now(),
             title: template.title,
             description: template.description,
             type: template.type,
             category: template.category,
-            x: Math.random() * 400 + 100,
-            y: Math.random() * 300 + 150
+            x: Math.max(50, xOffset),
+            y: Math.max(50, yOffset)
         }
         setNodes([...nodes, newNode])
         if (onInteraction) onInteraction();
@@ -311,31 +330,65 @@ const FlowBuilder: React.FC<FlowBuilderProps> = ({ onClose, isInline = false, ni
         }
     }
 
+    // Node Dragging Mouse Handlers
     const handleMouseDown = (e: React.MouseEvent, node: NodeData) => {
-        if (!canvasRef.current) return
-        const rect = canvasRef.current.getBoundingClientRect()
+        e.stopPropagation() // Prevent triggering canvas panning
         setDraggedNode(node.id)
         setDragOffset({
-            x: e.clientX - rect.left - node.x,
-            y: e.clientY - rect.top - node.y
+            x: e.clientX,
+            y: e.clientY
         })
+        initialNodePos.current = { x: node.x, y: node.y }
     }
 
     const handleMouseMove = useCallback((e: MouseEvent) => {
-        if (draggedNode && canvasRef.current) {
-            const rect = canvasRef.current.getBoundingClientRect()
-            const newX = e.clientX - rect.left - dragOffset.x
-            const newY = e.clientY - rect.top - dragOffset.y
+        if (draggedNode) {
+            const deltaX = (e.clientX - dragOffset.x) / zoom
+            const deltaY = (e.clientY - dragOffset.y) / zoom
 
             setNodes(nodes => nodes.map(node =>
                 node.id === draggedNode
-                    ? { ...node, x: Math.max(0, newX), y: Math.max(0, newY) }
+                    ? { ...node, x: Math.max(0, initialNodePos.current.x + deltaX), y: Math.max(0, initialNodePos.current.y + deltaY) }
                     : node
             ))
         }
-    }, [draggedNode, dragOffset])
+    }, [draggedNode, dragOffset, zoom])
 
     const handleMouseUp = useCallback(() => {
+        if (draggedNode !== null) {
+            if (onInteraction) onInteraction();
+        }
+        setDraggedNode(null)
+    }, [draggedNode, onInteraction])
+
+    // Node Dragging Touch Handlers
+    const handleTouchStart = (e: React.TouchEvent, node: NodeData) => {
+        e.stopPropagation()
+        const touch = e.touches[0]
+        setDraggedNode(node.id)
+        setDragOffset({
+            x: touch.clientX,
+            y: touch.clientY
+        })
+        initialNodePos.current = { x: node.x, y: node.y }
+    }
+
+    const handleTouchMove = useCallback((e: TouchEvent) => {
+        if (draggedNode) {
+            if (e.cancelable) e.preventDefault() // Stop page scroll
+            const touch = e.touches[0]
+            const deltaX = (touch.clientX - dragOffset.x) / zoom
+            const deltaY = (touch.clientY - dragOffset.y) / zoom
+
+            setNodes(nodes => nodes.map(node =>
+                node.id === draggedNode
+                    ? { ...node, x: Math.max(0, initialNodePos.current.x + deltaX), y: Math.max(0, initialNodePos.current.y + deltaY) }
+                    : node
+            ))
+        }
+    }, [draggedNode, dragOffset, zoom])
+
+    const handleTouchEnd = useCallback(() => {
         if (draggedNode !== null) {
             if (onInteraction) onInteraction();
         }
@@ -353,9 +406,94 @@ const FlowBuilder: React.FC<FlowBuilderProps> = ({ onClose, isInline = false, ni
         }
     }, [draggedNode, handleMouseMove, handleMouseUp])
 
+    useEffect(() => {
+        if (draggedNode) {
+            document.addEventListener('touchmove', handleTouchMove, { passive: false })
+            document.addEventListener('touchend', handleTouchEnd)
+            return () => {
+                document.removeEventListener('touchmove', handleTouchMove)
+                document.removeEventListener('touchend', handleTouchEnd)
+            }
+        }
+    }, [draggedNode, handleTouchMove, handleTouchEnd])
+
+    // Canvas Panning Mouse Handlers
+    const handleCanvasMouseDown = (e: React.MouseEvent) => {
+        const target = e.target as HTMLElement
+        if (target.closest('.canvas-control')) return
+
+        setIsPanning(true)
+        panStart.current = {
+            x: e.clientX - panOffset.x,
+            y: e.clientY - panOffset.y
+        }
+    }
+
+    const handleCanvasMouseMove = useCallback((e: MouseEvent) => {
+        if (isPanning) {
+            setPanOffset({
+                x: e.clientX - panStart.current.x,
+                y: e.clientY - panStart.current.y
+            })
+        }
+    }, [isPanning])
+
+    const handleCanvasMouseUp = useCallback(() => {
+        setIsPanning(false)
+    }, [])
+
+    useEffect(() => {
+        if (isPanning) {
+            document.addEventListener('mousemove', handleCanvasMouseMove)
+            document.addEventListener('mouseup', handleCanvasMouseUp)
+            return () => {
+                document.removeEventListener('mousemove', handleCanvasMouseMove)
+                document.removeEventListener('mouseup', handleCanvasMouseUp)
+            }
+        }
+    }, [isPanning, handleCanvasMouseMove, handleCanvasMouseUp])
+
+    // Canvas Panning Touch Handlers
+    const handleCanvasTouchStart = (e: React.TouchEvent) => {
+        const target = e.target as HTMLElement
+        if (target.closest('.canvas-control')) return
+
+        const touch = e.touches[0]
+        setIsPanning(true)
+        panStart.current = {
+            x: touch.clientX - panOffset.x,
+            y: touch.clientY - panOffset.y
+        }
+    }
+
+    const handleCanvasTouchMove = useCallback((e: TouchEvent) => {
+        if (isPanning) {
+            if (e.cancelable) e.preventDefault() // Stop page scroll
+            const touch = e.touches[0]
+            setPanOffset({
+                x: touch.clientX - panStart.current.x,
+                y: touch.clientY - panStart.current.y
+            })
+        }
+    }, [isPanning])
+
+    const handleCanvasTouchEnd = useCallback(() => {
+        setIsPanning(false)
+    }, [])
+
+    useEffect(() => {
+        if (isPanning) {
+            document.addEventListener('touchmove', handleCanvasTouchMove, { passive: false })
+            document.addEventListener('touchend', handleCanvasTouchEnd)
+            return () => {
+                document.removeEventListener('touchmove', handleCanvasTouchMove)
+                document.removeEventListener('touchend', handleCanvasTouchEnd)
+            }
+        }
+    }, [isPanning, handleCanvasTouchMove, handleCanvasTouchEnd])
+
     const simulateFlow = () => {
         setIsPlaying(!isPlaying)
-        // Simulation logic here
     }
 
     const exportFlow = () => {
@@ -397,10 +535,22 @@ const FlowBuilder: React.FC<FlowBuilderProps> = ({ onClose, isInline = false, ni
                 )}
             </div>
 
-            <div className="flex flex-1 overflow-hidden">
-                {/* Sidebar com componentes */}
-                <div className="w-80 bg-slate-900/60 backdrop-blur-md border-r border-white/10 p-6 overflow-y-auto flex flex-col">
-                    <h3 className="text-slate-400 font-bold uppercase tracking-wider text-xs mb-4">Nodos Disponíveis</h3>
+            <div className="flex flex-1 overflow-hidden relative">
+                {/* Sidebar com componentes (Retrátil) */}
+                <div className={`
+                    ${isSidebarOpen ? 'flex w-80 p-6 border-r' : 'w-0 overflow-hidden p-0 border-r-0'} 
+                    absolute lg:relative z-30 h-full bg-slate-950/95 lg:bg-slate-900/60 backdrop-blur-md border-white/10 flex-col transition-all duration-300
+                `}>
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-slate-400 font-bold uppercase tracking-wider text-xs">Nodos Disponíveis</h3>
+                        <button 
+                            onClick={() => setIsSidebarOpen(false)}
+                            className="text-slate-500 hover:text-white transition-colors p-1 hover:bg-white/5 rounded-lg"
+                            title="Recolher Painel"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
 
                     <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
                         {nodeTemplates.map((template, index) => {
@@ -466,7 +616,22 @@ const FlowBuilder: React.FC<FlowBuilderProps> = ({ onClose, isInline = false, ni
                 </div>
 
                 {/* Canvas principal */}
-                <div className="flex-1 relative overflow-hidden bg-slate-950/50">
+                <div 
+                    className="flex-1 relative overflow-hidden bg-slate-950/50 cursor-grab active:cursor-grabbing"
+                    onMouseDown={handleCanvasMouseDown}
+                    onTouchStart={handleCanvasTouchStart}
+                >
+                    {/* Botão de Expandir Painel de Componentes */}
+                    {!isSidebarOpen && (
+                        <button
+                            onClick={() => setIsSidebarOpen(true)}
+                            className="canvas-control absolute top-6 left-6 z-30 bg-fuchsia-500 hover:bg-fuchsia-400 text-white font-bold px-4 py-2.5 rounded-xl shadow-[0_0_20px_rgba(217,70,239,0.4)] flex items-center gap-2 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                        >
+                            <Plus className="w-4 h-4" />
+                            <span>Adicionar Nodos</span>
+                        </button>
+                    )}
+
                     <div
                         ref={canvasRef}
                         className="w-full h-full relative"
@@ -476,65 +641,109 @@ const FlowBuilder: React.FC<FlowBuilderProps> = ({ onClose, isInline = false, ni
                                 radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0)
                             `,
                             backgroundSize: '40px 40px, 10px 10px, 10px 10px',
-                            backgroundPosition: '0 0, 0 0'
+                            backgroundPosition: `${panOffset.x}px ${panOffset.y}px`
                         }}
                     >
-                        {/* Render connections */}
-                        {connections.map(connection => (
-                            <ConnectionLine
-                                key={connection.id}
-                                connection={connection}
-                                nodes={nodes}
-                            />
-                        ))}
-
-                        {/* Render nodes */}
-                        {nodes.map(node => (
-                            <div
-                                key={node.id}
-                                onMouseDown={(e: any) => handleMouseDown(e, node)}
-                            >
-                                <FlowNode
-                                    node={node}
-                                    onDelete={deleteNode}
-                                    onConnect={handleConnect}
-                                    isConnecting={connectingFrom === node.id}
-                                    onNodeClick={() => { }}
-                                    connections={connections}
-                                />
+                        {/* Wrapper para Panning e Zooming */}
+                        <div
+                            style={{
+                                transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`,
+                                transformOrigin: '0 0',
+                                width: '100%',
+                                height: '100%',
+                                position: 'absolute'
+                            }}
+                        >
+                            {/* Render connections */}
+                            <div className="absolute top-0 left-0 w-[5000px] h-[5000px] pointer-events-none">
+                                {connections.map(connection => (
+                                    <ConnectionLine
+                                        key={connection.id}
+                                        connection={connection}
+                                        nodes={nodes}
+                                    />
+                                ))}
                             </div>
-                        ))}
 
-                        {/* Instruções */}
-                        {nodes.length === 0 && (
-                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <div className="text-center bg-slate-900/50 backdrop-blur-md border border-white/5 p-8 rounded-3xl">
-                                    <div className="w-20 h-20 bg-fuchsia-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-fuchsia-500/20">
-                                        <Webhook className="w-10 h-10 text-fuchsia-400" />
-                                    </div>
-                                    <h3 className="text-2xl font-bold text-white mb-2">Canvas Operacional Vazio</h3>
-                                    <p className="text-slate-400 max-w-sm">Adicione os nodos da barra lateral esquerda e conecte as saídas para formar a sua automação inteligente.</p>
+                            {/* Render nodes */}
+                            {nodes.map(node => (
+                                <div
+                                    key={node.id}
+                                    onMouseDown={(e: any) => handleMouseDown(e, node)}
+                                    onTouchStart={(e: any) => handleTouchStart(e, node)}
+                                >
+                                    <FlowNode
+                                        node={node}
+                                        onDelete={deleteNode}
+                                        onConnect={handleConnect}
+                                        isConnecting={connectingFrom === node.id}
+                                        onNodeClick={() => { }}
+                                        connections={connections}
+                                    />
                                 </div>
-                            </div>
-                        )}
+                            ))}
+
+                            {/* Instruções */}
+                            {nodes.length === 0 && (
+                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                    <div className="text-center bg-slate-900/50 backdrop-blur-md border border-white/5 p-8 rounded-3xl">
+                                        <div className="w-20 h-20 bg-fuchsia-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-fuchsia-500/20">
+                                            <Webhook className="w-10 h-10 text-fuchsia-400" />
+                                        </div>
+                                        <h3 className="text-2xl font-bold text-white mb-2">Canvas Operacional Vazio</h3>
+                                        <p className="text-slate-400 max-w-sm">Adicione os nodos da barra lateral esquerda e conecte as saídas para formar a sua automação inteligente.</p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Floating Zoom Control Panel */}
+                    <div className="canvas-control absolute bottom-24 right-6 flex flex-col bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-xl p-1 shadow-2xl z-30 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                        <button
+                            onClick={() => setZoom(z => Math.min(2.0, z + 0.1))}
+                            className="w-10 h-10 hover:bg-white/10 rounded-lg flex items-center justify-center text-white transition-all font-bold cursor-pointer"
+                            title="Aumentar Zoom"
+                        >
+                            +
+                        </button>
+                        <div className="h-px bg-white/10 my-1"></div>
+                        <button
+                            onClick={() => {
+                                setPanOffset({ x: 0, y: 0 });
+                                setZoom(1.0);
+                            }}
+                            className="w-10 h-10 hover:bg-white/10 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition-all text-xs font-bold cursor-pointer"
+                            title="Resetar Visão"
+                        >
+                            {Math.round(zoom * 100)}%
+                        </button>
+                        <div className="h-px bg-white/10 my-1"></div>
+                        <button
+                            onClick={() => setZoom(z => Math.max(0.5, z - 0.1))}
+                            className="w-10 h-10 hover:bg-white/10 rounded-lg flex items-center justify-center text-white transition-all font-bold cursor-pointer"
+                            title="Diminuir Zoom"
+                        >
+                            -
+                        </button>
                     </div>
 
                     {/* Status bar */}
-                    <div className="absolute bottom-6 inset-x-6 flex items-center justify-between text-sm">
-                        <div className="bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-xl px-4 py-2 flex items-center space-x-6 shadow-xl">
+                    <div className="absolute bottom-6 inset-x-6 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between text-sm z-20 pointer-events-none">
+                        <div className="canvas-control bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-xl px-4 py-2 flex flex-wrap items-center gap-4 sm:gap-6 shadow-xl pointer-events-auto">
                             <span className="text-slate-400">Nodos Instanciados: <strong className="text-white">{nodes.length}</strong></span>
-                            <span className="w-px h-4 bg-white/10"></span>
+                            <span className="w-px h-4 bg-white/10 hidden sm:inline"></span>
                             <span className="text-slate-400">Pontes Ativas: <strong className="text-white">{connections.length}</strong></span>
-                            <span className="w-px h-4 bg-white/10"></span>
+                            <span className="w-px h-4 bg-white/10 hidden sm:inline"></span>
                             <span className={`flex items-center font-bold ${isPlaying ? 'text-green-400' : 'text-slate-500'}`}>
                                 <div className={`w-2 h-2 rounded-full mr-2 ${isPlaying ? 'bg-green-400 animate-pulse shadow-[0_0_10px_rgba(74,222,128,0.5)]' : 'bg-slate-700'}`} />
                                 {isPlaying ? 'Telemetria Ligada' : 'Motores Desligados'}
                             </span>
                         </div>
 
-                        <div className="bg-fuchsia-500/10 text-fuchsia-300 border border-fuchsia-500/20 rounded-xl px-4 py-2 shadow-xl flex items-center">
+                        <div className="canvas-control bg-fuchsia-500/10 text-fuchsia-300 border border-fuchsia-500/20 rounded-xl px-4 py-2 shadow-xl flex items-center pointer-events-auto">
                             <Zap className="w-4 h-4 mr-2" />
-                            Arraste para mover, clique nos conectores para ligar
+                            Arraste tela p/ mover, use +/- zoom, ou ligue as saídas
                         </div>
                     </div>
                 </div>

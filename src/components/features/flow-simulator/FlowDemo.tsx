@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { X, Workflow, Play, Pause, RotateCcw, CheckCircle, Clock, ArrowRight, Zap, Users, MessageSquare, BarChart3, LucideIcon } from 'lucide-react'
 
 interface FlowStep {
@@ -43,6 +43,13 @@ const FlowDemo: React.FC<FlowDemoProps> = ({ isOpen = true, onClose, isInline = 
     const [isSimulating, setIsSimulating] = useState(false)
     const [currentStep, setCurrentStep] = useState(0)
     const [simulationResults, setSimulationResults] = useState<SimulationResults | null>(null)
+    const resultsRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        if (simulationResults && resultsRef.current) {
+            resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+        }
+    }, [simulationResults])
 
     const flowTemplates: FlowTemplate[] = [
         {
@@ -687,7 +694,7 @@ const FlowDemo: React.FC<FlowDemoProps> = ({ isOpen = true, onClose, isInline = 
 
                         <div className="grid lg:grid-cols-3 gap-8">
                             {/* Flow Visualization (Left Side 2/3) */}
-                            <div className="lg:col-span-2 space-y-4">
+                            <div className="lg:col-span-2 space-y-2">
                                 {selectedFlow.steps.map((step, index) => {
                                     const Icon = stepIcons[step.type] || Workflow
                                     const isActive = index === currentStep && isSimulating
@@ -695,44 +702,45 @@ const FlowDemo: React.FC<FlowDemoProps> = ({ isOpen = true, onClose, isInline = 
                                     const isUpcoming = index > currentStep
 
                                     return (
-                                        <div key={step.id} className={`relative flex items-center p-4 rounded-2xl border transition-all duration-500 ${isActive ? 'bg-indigo-500/10 border-indigo-500/50 shadow-[0_0_30px_rgba(99,102,241,0.1)]' : isCompleted ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-slate-900/50 border-white/5'}`}>
-                                            
-                                            {/* Linking line */}
-                                            {index < selectedFlow.steps.length - 1 && (
-                                                <div className="absolute left-[39px] top-16 bottom-[-24px] w-0.5 z-0">
-                                                    <div className={`h-full w-full ${isCompleted ? 'bg-emerald-500/50' : isActive ? 'bg-gradient-to-b from-indigo-500 to-transparent' : 'bg-slate-800'}`}></div>
+                                        <div key={step.id} className="relative flex items-start gap-6 pb-6 last:pb-0">
+                                            {/* Left side: Icon column with timeline connector */}
+                                            <div className="flex flex-col items-center flex-shrink-0 relative">
+                                                <div className={`relative z-10 w-12 h-12 rounded-2xl flex items-center justify-center border transition-all duration-500 ${isActive
+                                                    ? `bg-indigo-500 border-indigo-400 shadow-[0_0_20px_rgba(99,102,241,0.6)] animate-pulse`
+                                                    : isCompleted
+                                                        ? 'bg-emerald-500/20 border-emerald-500/50'
+                                                        : 'bg-slate-800 border-slate-700'
+                                                    }`}>
+                                                    {isCompleted ? (
+                                                        <CheckCircle className="w-6 h-6 text-emerald-400" />
+                                                    ) : (
+                                                        <Icon className={`w-6 h-6 ${isActive ? 'text-white' : isUpcoming ? 'text-slate-500' : 'text-emerald-400'}`} />
+                                                    )}
                                                 </div>
-                                            )}
 
-                                            {/* Step Icon Node */}
-                                            <div className={`relative z-10 w-12 h-12 rounded-2xl flex items-center justify-center border mr-6 transition-all duration-500 flex-shrink-0 ${isActive
-                                                ? `bg-indigo-500 border-indigo-400 shadow-[0_0_20px_rgba(99,102,241,0.6)] animate-pulse`
-                                                : isCompleted
-                                                    ? 'bg-emerald-500/20 border-emerald-500/50'
-                                                    : 'bg-slate-800 border-slate-700'
-                                                }`}>
-                                                {isCompleted ? (
-                                                    <CheckCircle className="w-6 h-6 text-emerald-400" />
-                                                ) : (
-                                                    <Icon className={`w-6 h-6 ${isActive ? 'text-white' : isUpcoming ? 'text-slate-500' : 'text-emerald-400'}`} />
+                                                {/* Linking line segment connecting bottom of this icon to top of next */}
+                                                {index < selectedFlow.steps.length - 1 && (
+                                                    <div className="absolute top-12 bottom-0 w-0.5 z-0">
+                                                        <div className={`h-full w-full ${isCompleted ? 'bg-emerald-500/50' : isActive ? 'bg-gradient-to-b from-indigo-500 to-transparent' : 'bg-slate-800'}`}></div>
+                                                    </div>
                                                 )}
                                             </div>
 
-                                            {/* Step Content */}
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-1 gap-2">
-                                                    <h4 className={`text-lg font-bold truncate ${isActive ? 'text-white' : isCompleted ? 'text-emerald-300' : 'text-slate-500'}`}>
+                                            {/* Right side: Step Info Card */}
+                                            <div className={`flex-1 min-w-0 p-5 rounded-2xl border transition-all duration-500 ${isActive ? 'bg-indigo-500/10 border-indigo-500/50 shadow-[0_0_30px_rgba(99,102,241,0.1)]' : isCompleted ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-slate-900/50 border-white/5'}`}>
+                                                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-1.5 gap-2">
+                                                    <h4 className={`text-lg font-bold truncate ${isActive ? 'text-white' : isCompleted ? 'text-emerald-300' : 'text-slate-300'}`}>
                                                         {step.name}
                                                     </h4>
                                                     <div className={`flex items-center text-xs font-mono px-2 py-1 rounded bg-black/30 border ${isActive ? 'text-indigo-300 border-indigo-500/30' : isCompleted ? 'text-emerald-300 border-emerald-500/30' : 'text-slate-600 border-slate-800'}`}>
                                                         <Clock className="w-3 h-3 mr-1" />
-                                                        {step.duration}ms
+                                                        {step.duration}s
                                                     </div>
                                                 </div>
-                                                <p className={`text-sm mb-2 ${isActive ? 'text-indigo-100' : isCompleted ? 'text-slate-300' : 'text-slate-600'}`}>
+                                                <p className={`text-sm mb-3 leading-relaxed ${isActive ? 'text-indigo-100' : isCompleted ? 'text-slate-300' : 'text-slate-400'}`}>
                                                     {step.description}
                                                 </p>
-                                                <div className={`inline-flex items-center text-xs px-2 py-1 rounded-lg border ${isActive ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' : isCompleted ? 'bg-slate-800/50 text-slate-400 border-slate-700/50' : 'bg-slate-900 border-slate-800 text-slate-700'}`}>
+                                                <div className={`inline-flex items-center text-xs px-2.5 py-1 rounded-lg border ${isActive ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' : isCompleted ? 'bg-slate-800/50 text-slate-400 border-slate-700/50' : 'bg-slate-900 border-slate-800 text-slate-500'}`}>
                                                     <Zap className={`w-3 h-3 mr-1 ${isActive ? 'text-indigo-400' : 'text-slate-500'}`} />
                                                     {step.automation}
                                                 </div>
@@ -740,7 +748,7 @@ const FlowDemo: React.FC<FlowDemoProps> = ({ isOpen = true, onClose, isInline = 
 
                                             {/* Active Pulse effect container */}
                                             {isActive && (
-                                                <div className="absolute top-1/2 right-4 -translate-y-1/2 flex gap-1">
+                                                <div className="absolute top-6 right-6 flex gap-1 z-20">
                                                     <span className="w-1 h-3 bg-indigo-400 rounded-full animate-pulse"></span>
                                                     <span className="w-1 h-4 bg-indigo-500 rounded-full animate-pulse delay-75"></span>
                                                     <span className="w-1 h-2 bg-indigo-300 rounded-full animate-pulse delay-150"></span>
@@ -752,7 +760,7 @@ const FlowDemo: React.FC<FlowDemoProps> = ({ isOpen = true, onClose, isInline = 
                             </div>
 
                             {/* Results sidebar (Right Side 1/3) */}
-                            <div className="lg:col-span-1">
+                            <div className="lg:col-span-1" ref={resultsRef}>
                                 <div className="sticky top-24">
                                     {simulationResults ? (
                                         <div className="bg-slate-900/80 backdrop-blur-md border border-emerald-500/30 rounded-3xl p-6 shadow-[0_0_40px_rgba(52,211,153,0.15)] animate-in fade-in zoom-in-95 duration-500">
@@ -784,7 +792,7 @@ const FlowDemo: React.FC<FlowDemoProps> = ({ isOpen = true, onClose, isInline = 
                                                     <div className="bg-white/5 rounded-2xl p-5 border border-white/5 relative overflow-hidden flex flex-col items-center">
                                                         <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-2xl rounded-full pointer-events-none"></div>
                                                         <p className="text-slate-400 text-sm font-bold uppercase tracking-wider mb-2 relative z-10">Desperdício Estancado (Mensal) *</p>
-                                                        <div className="text-4xl font-black text-amber-400 relative z-10 w-full text-center">R$ {(simulationResults.costSaving * 500).toLocaleString()}</div>
+                                                        <div className="text-4xl font-black text-amber-400 relative z-10 w-full text-center">R$ {(simulationResults.costSaving * 500).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                                                         <p className="text-slate-500 text-xs mt-3 relative z-10">*Projeção para 500 instâncias/mês.</p>
                                                     </div>
                                                 </div>
