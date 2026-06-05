@@ -59,6 +59,47 @@ const FlowDemo: React.FC<FlowDemoProps> = ({ isOpen = true, onClose, isInline = 
     const [simulationResults, setSimulationResults] = useState<SimulationResults | null>(null)
     const resultsRef = useRef<HTMLDivElement>(null)
 
+    const telemetryMetrics = React.useMemo(() => {
+        if (!selectedFlow) return null
+
+        const nicheData = nicheSlug ? getNicheBySlug(nicheSlug) : null
+        const financialMetrics = nicheData?.financialMetrics
+
+        let totalTime = 0
+        let manualTime = 0
+        let timeSaved = 0
+        let costSaving = 0
+
+        if (financialMetrics) {
+            totalTime = financialMetrics.optimizedLatency
+            manualTime = financialMetrics.estimatedLatency
+            timeSaved = manualTime - totalTime
+            costSaving = financialMetrics.currentCAC - financialMetrics.projectedCAC
+        } else {
+            totalTime = selectedFlow.steps.reduce((acc, step) => acc + step.duration, 0)
+            manualTime = totalTime * 8
+            timeSaved = manualTime - totalTime
+            costSaving = (timeSaved / 60) * 75
+        }
+
+        const totalNodes = selectedFlow.steps.length
+        const baseCost = 490
+        const nodeCost = totalNodes * 150
+        const totalCost = baseCost + nodeCost
+
+        return {
+            totalTime,
+            manualTime,
+            timeSaved,
+            costSaving,
+            efficiency: selectedFlow.efficiency,
+            totalNodes,
+            baseCost,
+            nodeCost,
+            totalCost
+        }
+    }, [selectedFlow, nicheSlug])
+
     useEffect(() => {
         if (simulationResults && resultsRef.current) {
             resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
@@ -802,15 +843,39 @@ const FlowDemo: React.FC<FlowDemoProps> = ({ isOpen = true, onClose, isInline = 
                             {/* Results sidebar (Right Side 1/3) */}
                             <div className="lg:col-span-1" ref={resultsRef}>
                                 <div className="sticky top-24">
-                                    {simulationResults ? (
-                                        <div className="bg-slate-900/80 backdrop-blur-md border border-emerald-500/30 rounded-3xl p-6 shadow-[0_0_40px_rgba(52,211,153,0.15)] animate-in fade-in zoom-in-95 duration-500">
+                                    {telemetryMetrics && (
+                                        <div className={`bg-slate-900/80 backdrop-blur-md border rounded-3xl p-6 transition-all duration-500 ${
+                                            simulationResults
+                                                ? 'border-emerald-500/30 shadow-[0_0_40px_rgba(52,211,153,0.15)] animate-in fade-in zoom-in-95 duration-500'
+                                                : isSimulating
+                                                    ? 'border-indigo-500/30 shadow-[0_0_40px_rgba(99,102,241,0.15)] animate-pulse'
+                                                    : 'border-white/5 shadow-[0_0_30px_rgba(255,255,255,0.02)]'
+                                        }`}>
                                             <div className="flex items-center gap-3 mb-6 pb-6 border-b border-white/5">
-                                                <div className="w-12 h-12 bg-emerald-500/20 rounded-2xl flex items-center justify-center border border-emerald-500/30">
-                                                    <CheckCircle className="w-6 h-6 text-emerald-400" />
+                                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border transition-all duration-500 ${
+                                                    simulationResults
+                                                        ? 'bg-emerald-500/20 border-emerald-500/30'
+                                                        : isSimulating
+                                                            ? 'bg-indigo-500/20 border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.4)]'
+                                                            : 'bg-slate-800 border-slate-700'
+                                                }`}>
+                                                    {simulationResults ? (
+                                                        <CheckCircle className="w-6 h-6 text-emerald-400" />
+                                                    ) : isSimulating ? (
+                                                        <RotateCcw className="w-6 h-6 text-indigo-400 animate-spin" />
+                                                     ) : (
+                                                        <Workflow className="w-6 h-6 text-slate-400" />
+                                                    )}
                                                 </div>
                                                 <div>
-                                                    <h4 className="text-xl font-black text-white">Deploy Pronto</h4>
-                                                    <p className="text-emerald-400 text-sm font-bold uppercase tracking-wider">Simulação Validada</p>
+                                                    <h4 className="text-xl font-black text-white">
+                                                        {simulationResults ? 'Deploy Pronto' : isSimulating ? 'Simulação Ativa' : 'Mapeamento Pronto'}
+                                                    </h4>
+                                                    <p className={`text-sm font-bold uppercase tracking-wider ${
+                                                        simulationResults ? 'text-emerald-400' : isSimulating ? 'text-indigo-400' : 'text-slate-400'
+                                                    }`}>
+                                                        {simulationResults ? 'Simulação Validada' : isSimulating ? 'Processando Canvas' : 'Aguardando Teste ao Vivo'}
+                                                    </p>
                                                 </div>
                                             </div>
 
@@ -818,21 +883,21 @@ const FlowDemo: React.FC<FlowDemoProps> = ({ isOpen = true, onClose, isInline = 
                                                 <div>
                                                     <p className="text-slate-500 text-sm font-bold uppercase tracking-wider mb-2">Latência SinergIA vs Humano</p>
                                                     <div className="flex items-end gap-3">
-                                                        <div className="text-3xl font-black text-emerald-400">{formatSeconds(simulationResults.totalTime)}</div>
-                                                        <div className="text-xl font-bold text-slate-600 line-through pb-1">{formatSeconds(simulationResults.manualTime)}</div>
+                                                        <div className="text-3xl font-black text-emerald-400">{formatSeconds(telemetryMetrics.totalTime)}</div>
+                                                        <div className="text-xl font-bold text-slate-600 line-through pb-1">{formatSeconds(telemetryMetrics.manualTime)}</div>
                                                     </div>
                                                 </div>
 
                                                 <div>
                                                     <p className="text-slate-500 text-sm font-bold uppercase tracking-wider mb-2">Poder Computacional</p>
-                                                    <div className="text-3xl font-black text-indigo-400">+{formatSeconds(simulationResults.timeSaved)} <span className="text-sm text-indigo-300/60 font-medium">limpos p/ o time</span></div>
+                                                    <div className="text-3xl font-black text-indigo-400">+{formatSeconds(telemetryMetrics.timeSaved)} <span className="text-sm text-indigo-300/60 font-medium">limpos p/ o time</span></div>
                                                 </div>
 
                                                 <div className="pt-6 border-t border-white/5 space-y-4">
                                                     <div className="bg-white/5 rounded-2xl p-5 border border-white/5 relative overflow-hidden flex flex-col items-start gap-2">
                                                         <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-2xl rounded-full pointer-events-none"></div>
                                                         <p className="text-slate-400 text-sm font-bold uppercase tracking-wider mb-1 relative z-10">Desperdício Estancado (Mensal) *</p>
-                                                        <div className="text-4xl font-black text-amber-400 relative z-10 w-full text-left">{formatBRL(simulationResults.costSaving * 500)}</div>
+                                                        <div className="text-4xl font-black text-amber-400 relative z-10 w-full text-left">{formatBRL(telemetryMetrics.costSaving * 500)}</div>
                                                         <p className="text-slate-500 text-[10px] relative z-10 mb-2">*Projeção para 500 instâncias/mês.</p>
                                                     </div>
 
@@ -840,15 +905,15 @@ const FlowDemo: React.FC<FlowDemoProps> = ({ isOpen = true, onClose, isInline = 
                                                         <p className="text-slate-400 text-sm font-bold uppercase tracking-wider mb-1">Custo Estimado de Infraestrutura de Nuvem e Processamento</p>
                                                         <div className="flex justify-between">
                                                             <span>Infraestrutura Base SinergIA:</span>
-                                                            <span className="font-bold text-white">{formatBRL(490)}/mês</span>
+                                                            <span className="font-bold text-white">{formatBRL(telemetryMetrics.baseCost)}/mês</span>
                                                         </div>
                                                         <div className="flex justify-between">
-                                                            <span>Instâncias Sintéticas ({simulationResults.stepsCompleted} no Canvas):</span>
-                                                            <span className="font-bold text-white">{formatBRL(simulationResults.stepsCompleted * 150)}/mês</span>
+                                                            <span>Instâncias Sintéticas ({telemetryMetrics.totalNodes} no Canvas):</span>
+                                                            <span className="font-bold text-white">{formatBRL(telemetryMetrics.nodeCost)}/mês</span>
                                                         </div>
                                                         <div className="flex justify-between border-t border-white/5 pt-2 font-bold text-indigo-400">
                                                             <span>Total Nuvem & Processamento:</span>
-                                                            <span>{formatBRL(490 + simulationResults.stepsCompleted * 150)}/mês</span>
+                                                            <span>{formatBRL(telemetryMetrics.totalCost)}/mês</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -856,22 +921,22 @@ const FlowDemo: React.FC<FlowDemoProps> = ({ isOpen = true, onClose, isInline = 
 
                                             <button
                                                 onClick={() => {
-                                                    if (onCompilar) {
-                                                        onCompilar()
-                                                    } else if (onClose) {
-                                                        onClose()
+                                                    if (simulationResults) {
+                                                        if (onCompilar) {
+                                                            onCompilar()
+                                                        } else if (onClose) {
+                                                            onClose()
+                                                        }
                                                     }
                                                 }}
-                                                className="w-full mt-6 bg-white hover:bg-indigo-50 text-slate-900 font-black h-14 rounded-xl transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)] cursor-pointer"
+                                                className={`w-full mt-6 font-black h-14 rounded-xl transition-all flex items-center justify-center ${
+                                                    simulationResults
+                                                        ? 'bg-white hover:bg-indigo-50 text-slate-900 shadow-[0_0_20px_rgba(255,255,255,0.2)] cursor-pointer'
+                                                        : 'bg-slate-800 text-slate-500 border border-slate-700/50 cursor-not-allowed'
+                                                }`}
                                             >
-                                                Agendar Deploy na Empresa
+                                                {simulationResults ? 'Agendar Deploy na Empresa' : 'Execute o Teste ao Vivo'}
                                             </button>
-                                        </div>
-                                    ) : (
-                                        <div className="bg-slate-900/50 backdrop-blur-md border border-white/5 rounded-3xl p-8 text-center flex flex-col items-center justify-center min-h-[400px]">
-                                            <Workflow className="w-16 h-16 text-slate-700 mb-6" />
-                                            <h4 className="text-xl font-bold text-slate-400 mb-2">Telemetria Abaixada</h4>
-                                            <p className="text-slate-500 text-sm">Clique em &quot;Testar Fluxo Ao Vivo&quot; para iniciar os motores de IA e ver as métricas de retorno em tempo real.</p>
                                         </div>
                                     )}
                                 </div>
