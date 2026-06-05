@@ -4,10 +4,23 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { 
   ArrowLeft, AlertTriangle, CheckCircle2, ChevronRight, 
-  PlayCircle, ShieldCheck, Sparkles, Zap, Shield, Check, Lock, HelpCircle 
+  PlayCircle, ShieldCheck, Sparkles, Zap, Shield, Check, Lock, HelpCircle, Clock
 } from 'lucide-react';
 import { NicheCTAButton } from '@/components/features/solutions/NicheCTAButton';
 import { ROICalculator } from '@/components/sections/ROICalculator';
+
+const formatHumanLatency = (seconds: number): string => {
+  if (seconds >= 3600) {
+    const hours = seconds / 3600;
+    return `${hours} ${hours === 1 ? 'hora' : 'horas'}`;
+  }
+  if (seconds >= 60) {
+    const minutes = seconds / 60;
+    return `${minutes} ${minutes === 1 ? 'minuto' : 'minutos'}`;
+  }
+  return `${seconds}s`;
+};
+
 
 
 export function generateStaticParams() {
@@ -163,15 +176,18 @@ export default function NicheSolutionPage({
               </div>
               
               <h1 className="text-4xl md:text-6xl font-black text-white tracking-tight leading-[1.1]">
-                O Sistema Operacional Autónomo feito para <br />
-                <span className={`text-transparent bg-clip-text bg-gradient-to-r ${niche.color === 'emerald' ? 'from-emerald-400 to-cyan-400' : niche.color === 'indigo' ? 'from-indigo-400 to-purple-400' : niche.color === 'fuchsia' ? 'from-fuchsia-400 to-rose-400' : niche.color === 'amber' ? 'from-amber-400 to-orange-400' : niche.color === 'cyan' ? 'from-cyan-400 to-teal-400' : 'from-rose-400 to-red-400'}`}>
-                  {niche.shortTitle}
-                </span>
+                {niche.headline || niche.title}
               </h1>
               
-              <p className="text-lg text-slate-300 font-light leading-relaxed">
-                Substitua a latência de atendimento e a burocracia manual de processos por agentes cognitivos integrados que blindam a sua receita 24 horas por dia.
-              </p>
+              <div className="space-y-4">
+                <p className="text-lg md:text-xl text-slate-200 font-bold leading-relaxed">
+                  {niche.subtitle}
+                </p>
+                
+                <p className="text-sm md:text-base text-slate-400 font-light leading-relaxed">
+                  {niche.description}
+                </p>
+              </div>
 
               <div className="flex flex-col sm:flex-row gap-4 pt-2">
                 {/* Roll down to pricing/form section */}
@@ -195,7 +211,7 @@ export default function NicheSolutionPage({
               </div>
 
               {/* Metric highlights render horizontally in glass mirror cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-8">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
                 {niche.metrics.map((metric, idx) => (
                   <div key={idx} className="bg-slate-900/40 border border-white/5 rounded-2xl p-6 backdrop-blur-md hover:bg-slate-900/60 transition-all hover:border-white/10">
                     <div className={`text-3xl font-black mb-1 ${textMaps[niche.color]}`}>{metric.value}</div>
@@ -205,38 +221,81 @@ export default function NicheSolutionPage({
               </div>
             </div>
 
-            {/* Right Graphic Box */}
-            <div className="lg:col-span-5 relative aspect-square rounded-[2rem] overflow-hidden border border-white/10 bg-slate-900/30 backdrop-blur-xl flex flex-col justify-between p-8 group">
-              <div className={`absolute inset-0 bg-gradient-to-tr ${glowMaps[niche.color]} opacity-20 group-hover:opacity-40 transition-opacity duration-500`} />
+            {/* Right Graphic Box: Dashboard de Telemetria Operacional */}
+            <div className="lg:col-span-5 relative rounded-[2rem] overflow-hidden border border-white/10 bg-slate-900/30 backdrop-blur-xl flex flex-col justify-between p-6 md:p-8 group space-y-6">
+              <div className={`absolute inset-0 bg-gradient-to-tr ${glowMaps[niche.color]} opacity-10 group-hover:opacity-20 transition-opacity duration-500`} />
               
-              <div className="relative z-10 flex-1 flex flex-col items-center justify-center space-y-6">
-                <div className={`w-28 h-28 rounded-3xl ${bgMaps[niche.color]} border ${borderMaps[niche.color]} flex items-center justify-center shadow-2xl animate-pulse`}>
-                  <Icon className={`w-14 h-14 ${textMaps[niche.color]}`} />
+              <div className="relative z-10 flex items-center justify-between border-b border-white/5 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl ${bgMaps[niche.color]} border ${borderMaps[niche.color]} flex items-center justify-center`}>
+                    <Icon className={`w-5 h-5 ${textMaps[niche.color]}`} />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-mono text-slate-500">{"// ENGINE ACTIVE"}</span>
+                    <h3 className="text-sm font-black text-white font-mono uppercase tracking-wider">{niche.slug}.sys</h3>
+                  </div>
                 </div>
-                <div className="text-center">
-                  <h3 className="text-xl font-bold text-white">Configuração Ativa</h3>
-                  <span className={`text-xs font-mono ${textMaps[niche.color]}`}>{'// ' + niche.slug + '.sys'}</span>
+                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-mono text-emerald-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                  ONLINE
                 </div>
               </div>
 
-              {/* Live telemetry teaser */}
-              <div className="relative z-10 bg-slate-950/90 border border-white/10 p-5 rounded-2xl w-full flex items-center justify-between">
-                <div>
-                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block mb-0.5">Teste Piloto (PoC)</span>
-                  <div className="text-2xl font-black text-white">R$ 997 <span className="text-xs text-slate-500 font-normal">/ setup</span></div>
+              {/* Latency Comparison */}
+              <div className="relative z-10 space-y-2">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> Latência de Contato</span>
+                  <span className="text-[10px] text-slate-500 font-mono">Simulando SLA</span>
                 </div>
-                <a href="#pricing-section">
-                  <Button size="sm" className={`h-10 rounded-xl font-bold ${
-                    niche.color === 'emerald' ? 'bg-emerald-500 hover:bg-emerald-400 text-emerald-950' :
-                    niche.color === 'indigo' ? 'bg-indigo-500 hover:bg-indigo-400 text-indigo-950' :
-                    niche.color === 'fuchsia' ? 'bg-fuchsia-500 hover:bg-fuchsia-400 text-fuchsia-950' :
-                    niche.color === 'amber' ? 'bg-amber-500 hover:bg-amber-400 text-amber-950' :
-                    niche.color === 'cyan' ? 'bg-cyan-500 hover:bg-cyan-400 text-cyan-950' :
-                    'bg-rose-500 hover:bg-rose-400 text-rose-950'
-                  }`}>Ver Detalhes</Button>
-                </a>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-slate-950/60 border border-white/5 p-4 rounded-xl">
+                    <span className="text-[9px] text-slate-500 uppercase tracking-wider font-bold block mb-1">Time Humano</span>
+                    <span className="text-base font-extrabold text-red-400 line-through">
+                      {formatHumanLatency(niche.financialMetrics.estimatedLatency)}
+                    </span>
+                  </div>
+                  <div className={`bg-slate-950/60 border ${borderMaps[niche.color]} p-4 rounded-xl`}>
+                    <span className={`text-[9px] ${textMaps[niche.color]} uppercase tracking-wider font-bold block mb-1`}>SinergIA OS</span>
+                    <span className="text-base font-black text-white flex items-center gap-1">
+                      {niche.financialMetrics.optimizedLatency}s
+                      <Sparkles className={`w-3.5 h-3.5 ${textMaps[niche.color]} animate-pulse`} />
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* CAC Comparison */}
+              <div className="relative z-10 space-y-2">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1"><Zap className="w-3.5 h-3.5" /> Custo de Aquisição (CAC)</span>
+                  <span className="text-[10px] text-slate-500 font-mono">Eficiência Financeira</span>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-slate-950/60 border border-white/5 p-4 rounded-xl">
+                    <span className="text-[9px] text-slate-500 uppercase tracking-wider font-bold block mb-1">CAC Basal</span>
+                    <span className="text-base font-extrabold text-red-400 line-through">
+                      {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(niche.financialMetrics.currentCAC)}
+                    </span>
+                  </div>
+                  <div className={`bg-slate-950/60 border ${borderMaps[niche.color]} p-4 rounded-xl`}>
+                    <span className={`text-[9px] ${textMaps[niche.color]} uppercase tracking-wider font-bold block mb-1`}>CAC SinergIA</span>
+                    <span className="text-base font-black text-emerald-400">
+                      {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(niche.financialMetrics.projectedCAC)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Link */}
+              <div className="relative z-10 pt-2 border-t border-white/5">
+                <Link href={buildSimulatorUrl()} className="w-full">
+                  <Button variant="outline" className="w-full bg-white/5 hover:bg-white/10 border-white/10 text-white font-bold tracking-wider text-xs h-12 rounded-xl flex items-center justify-center gap-2">
+                    <PlayCircle className="w-4 h-4 shrink-0" /> Abrir Simulador de Tráfego do Setor
+                  </Button>
+                </Link>
               </div>
             </div>
+
 
           </div>
         </section>
