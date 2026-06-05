@@ -77,7 +77,7 @@ async function getLeadFromSession() {
   }
 }
 
-export default async function CheckoutPage() {
+export default async function CheckoutPage({ searchParams }: { searchParams?: { niche?: string, modules?: string } }) {
   const lead = await getLeadFromSession();
 
   if (!lead) {
@@ -89,5 +89,5 @@ export default async function CheckoutPage() {
     redirect('/app/client');
   }
 
-  return <CheckoutClient lead={lead} />;
+  return <CheckoutClient lead={lead} searchParams={searchParams} />;
 }

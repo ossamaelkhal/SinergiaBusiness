@@ -31,6 +31,17 @@ const respostaOptions = [
   { label: 'Mais de 4 horas', value: 'over4h', lossFactor: 0.78, desc: 'Vazamento grave. 78% de desperdício em aquisição.' }
 ];
 
+const NICHES_TEAM_SIZES: Record<string, number> = {
+  "faturamento-saude-bemestar": 3,
+  "commerce-omnichannel-vendas": 3,
+  "operacoes-urgencia-logistica": 5,
+  "bpo-financeiro-credito-tem": 3,
+  "servicos-tecnicos-comerciais": 4,
+  "reputacao-recuperacao-retencao": 3,
+  "imobiliario": 8,
+  "ecommerce": 2
+};
+
 export function ROICalculator({ nicheSlug }: { nicheSlug?: string } = {}) {
 
   // 1. Inputs Gerais
@@ -53,6 +64,11 @@ export function ROICalculator({ nicheSlug }: { nicheSlug?: string } = {}) {
   // 5. Clientes / Contatos inativos (Base)
   const [baseLeadsFrios, setBaseLeadsFrios] = useState(2000); // Base estagnada no CRM
 
+  // 6. Módulos Autônomos Ativos (Configuração de Licenciamento)
+  const [moduloPiloto, setModuloPiloto] = useState(true);
+  const [moduloResgate, setModuloResgate] = useState(true);
+  const [moduloBackoffice, setModuloBackoffice] = useState(true);
+
   // Buscar dados do nicho para preenchimento dinâmico
   const nicheData = nicheSlug ? getNicheBySlug(nicheSlug) : null;
   const financialMetrics = nicheData?.financialMetrics;
@@ -74,36 +90,26 @@ export function ROICalculator({ nicheSlug }: { nicheSlug?: string } = {}) {
         else if (latency <= 14400) setTempoResposta('1-4h');
         else setTempoResposta('over4h');
       }
-      // Ajustar volumes e baselines de forma inteligente por tipo de nicho
-      if (nicheSlug === 'imobiliario') {
-        setLeadsPorMes(150); // Menos leads porém ticket astronômico
-        setTamanhoEquipe(8);
-        setCustoVendedor(6000);
-        setFaturamentoFaturado(2500000); // Vendas imobiliárias de alto padrão
-        setTaxaInadimplencia(2.0);
-        setBaseLeadsFrios(1200);
-      } else if (nicheSlug === 'ecommerce') {
-        setLeadsPorMes(1200); // Alto volume de e-commerce
-        setTamanhoEquipe(2);
-        setCustoVendedor(3500);
-        setFaturamentoFaturado(150000);
-        setTaxaInadimplencia(5.0);
-        setBaseLeadsFrios(5000);
-      } else if (nicheSlug === 'faturamento-saude-bemestar') {
-        setLeadsPorMes(400);
-        setTamanhoEquipe(3);
-        setCustoVendedor(4000);
-        setFaturamentoFaturado(100000);
-        setTaxaInadimplencia(5.0);
-        setBaseLeadsFrios(2500);
-      } else if (nicheSlug === 'commerce-omnichannel-vendas') {
-        setLeadsPorMes(800);
-        setTamanhoEquipe(3);
-        setCustoVendedor(4000);
-        setFaturamentoFaturado(120000);
-        setTaxaInadimplencia(4.0);
-        setBaseLeadsFrios(3500);
+      if (financialMetrics.leadsPerMonth !== undefined) {
+        setLeadsPorMes(financialMetrics.leadsPerMonth);
       }
+      if (financialMetrics.billedRevenue !== undefined) {
+        setFaturamentoFaturado(financialMetrics.billedRevenue);
+      }
+      if (financialMetrics.defaultRate !== undefined) {
+        setTaxaInadimplencia(financialMetrics.defaultRate);
+      }
+      if (financialMetrics.coldLeadsBase !== undefined) {
+        setBaseLeadsFrios(financialMetrics.coldLeadsBase);
+      }
+      if (financialMetrics.teamCosts !== undefined) {
+        const teamSize = nicheSlug ? (NICHES_TEAM_SIZES[nicheSlug] ?? 4) : 4;
+        setTamanhoEquipe(teamSize);
+        setCustoVendedor(Math.round(financialMetrics.teamCosts / teamSize));
+      }
+      setModuloPiloto(true);
+      setModuloResgate(true);
+      setModuloBackoffice(true);
     }
   }, [nicheSlug, financialMetrics]);
 
@@ -132,15 +138,22 @@ export function ROICalculator({ nicheSlug }: { nicheSlug?: string } = {}) {
   // Soma de todas as perdas
   const totalDesperdicio = receitaPerdidaLatencia + desperdicioOperacional + perdaInadimplencia + receitaEsquecidaBase + desperdicioCAC;
 
+  // --- CÁLCULOS DE MONETIZAÇÃO DINÂMICA DA SINERGIA ---
+  const infraBase = Math.max(490, Math.round(leadsPorMes * 0.50));
+  const activeModulesCount = (moduloPiloto ? 1 : 0) + (moduloResgate ? 1 : 0) + (moduloBackoffice ? 1 : 0);
+  const custoSinergia = infraBase + (activeModulesCount * 350);
+  const setupSinergia = activeModulesCount * 1500;
+
   // --- CÁLCULOS DE RECUPERAÇÃO COM SINERGIA ---
-  // Taxas de mitigação realistas após implantação da plataforma
-  const recuperadoLatencia = Math.round(receitaPerdidaLatencia * 0.85); // Agente 24h atende em <10 segundos
-  const recuperadoOverhead = Math.round(desperdicioOperacional * 0.75); // Automações eliminam 75% da digitação
-  const recuperadoInadimplencia = Math.round(perdaInadimplencia * 0.45); // Régua de cobrança reduz 45% do atraso
-  const recuperadoBase = Math.round(receitaEsquecidaBase * 0.70); // Nutrição automatizada recupera 70% do potencial
-  const recuperadoCAC = Math.round((currentCAC - projectedCAC) * leadsPorMes);
+  // Taxas de mitigação realistas condicionadas à ativação de cada módulo
+  const recuperadoLatencia = moduloPiloto ? Math.round(receitaPerdidaLatencia * 0.85) : 0; // Agente 24h atende em <10 segundos
+  const recuperadoOverhead = moduloBackoffice ? Math.round(desperdicioOperacional * 0.75) : 0; // Automações eliminam 75% da digitação
+  const recuperadoInadimplencia = moduloResgate ? Math.round(perdaInadimplencia * 0.45) : 0; // Régua de cobrança reduz 45% do atraso
+  const recuperadoBase = moduloResgate ? Math.round(receitaEsquecidaBase * 0.70) : 0; // Nutrição automatizada recupera 70% do potencial
+  const recuperadoCAC = moduloPiloto ? Math.round((currentCAC - projectedCAC) * leadsPorMes) : 0;
 
   const totalRecuperado = recuperadoLatencia + recuperadoOverhead + recuperadoInadimplencia + recuperadoBase + recuperadoCAC;
+  const netROI = totalRecuperado - custoSinergia;
 
   // Porcentagem das perdas totais que conseguimos recuperar
   const percentualRecuperado = totalDesperdicio > 0 ? Math.round((totalRecuperado / totalDesperdicio) * 100) : 0;
@@ -393,6 +406,69 @@ export function ROICalculator({ nicheSlug }: { nicheSlug?: string } = {}) {
               </CardContent>
             </Card>
 
+            {/* Card 5: Seleção de Módulos Autônomos */}
+            <Card className="bg-slate-900/60 backdrop-blur-md border-white/5 shadow-xl relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div>
+              <CardContent className="p-6 md:p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+                    <Cpu className="w-5 h-5 text-indigo-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">Módulos Autônomos Ativos</h3>
+                    <p className="text-xs text-slate-500">Selecione os módulos a serem provisionados para sua infraestrutura</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Modulo 1: Piloto Automático */}
+                  <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-950/40 border border-white/5 hover:border-white/10 transition-colors">
+                    <input 
+                      type="checkbox" 
+                      id="moduloPiloto"
+                      checked={moduloPiloto}
+                      onChange={(e) => setModuloPiloto(e.target.checked)}
+                      className="mt-1 w-4 h-4 rounded border-white/10 accent-indigo-500"
+                    />
+                    <label htmlFor="moduloPiloto" className="text-xs text-slate-300 cursor-pointer w-full">
+                      <strong className="text-white block mb-0.5">O Piloto Automático (WhatsApp/Instagram)</strong>
+                      {nicheData?.hooks.pilotoAutomatico.title || "Qualificação e conversação ativa 24/7"}
+                    </label>
+                  </div>
+
+                  {/* Modulo 2: Resgate Ativo */}
+                  <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-950/40 border border-white/5 hover:border-white/10 transition-colors">
+                    <input 
+                      type="checkbox" 
+                      id="moduloResgate"
+                      checked={moduloResgate}
+                      onChange={(e) => setModuloResgate(e.target.checked)}
+                      className="mt-1 w-4 h-4 rounded border-white/10 accent-indigo-500"
+                    />
+                    <label htmlFor="moduloResgate" className="text-xs text-slate-300 cursor-pointer w-full">
+                      <strong className="text-white block mb-0.5">O Resgate Ativo (Inadimplência/Inativos)</strong>
+                      {nicheData?.hooks.resgateAtivo.title || "Recuperação de faturamento atrasado e inativos"}
+                    </label>
+                  </div>
+
+                  {/* Modulo 3: Backoffice */}
+                  <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-950/40 border border-white/5 hover:border-white/10 transition-colors">
+                    <input 
+                      type="checkbox" 
+                      id="moduloBackoffice"
+                      checked={moduloBackoffice}
+                      onChange={(e) => setModuloBackoffice(e.target.checked)}
+                      className="mt-1 w-4 h-4 rounded border-white/10 accent-indigo-500"
+                    />
+                    <label htmlFor="moduloBackoffice" className="text-xs text-slate-300 cursor-pointer w-full">
+                      <strong className="text-white block mb-0.5">O Backoffice (Auditoria/OCR)</strong>
+                      {nicheData?.hooks.backoffice.title || "Auditoria automática, OCR e SEFAZ"}
+                    </label>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
           </div>
 
           {/* RIGHT COLUMN: REPORT & RESULTS */}
@@ -496,15 +572,52 @@ export function ROICalculator({ nicheSlug }: { nicheSlug?: string } = {}) {
                     <Sparkles className="w-4 h-4" /> Projeção de Recuperação SinergIA
                   </div>
 
-                  <div className="text-3xl font-black text-white tracking-tight">
-                    + {formatBRL(totalRecuperado)} <span className="text-xs text-slate-400 font-normal">/mês</span>
+                  <div className="text-3xl font-black text-white tracking-tight mb-4">
+                    + {formatBRL(totalRecuperado)} <span className="text-xs text-slate-400 font-normal">/mês bruto</span>
                   </div>
-                  <p className="text-slate-300 text-xs mt-2 leading-relaxed">
-                    Você pode recuperar até <strong className="text-emerald-400">{percentualRecuperado}%</strong> do seu desperdício financeiro mensal aplicando automações integradas nas áreas mapeadas.
+
+                  <div className="space-y-2 border-t border-emerald-500/20 pt-4 text-xs">
+                    <div className="flex justify-between text-slate-300">
+                      <span>Infraestrutura Cognitiva Base:</span>
+                      <span className="font-bold text-white">{formatBRL(infraBase)}/mês</span>
+                    </div>
+                    <div className="flex justify-between text-slate-300">
+                      <span>Módulos Ativos ({activeModulesCount}):</span>
+                      <span className="font-bold text-white">{formatBRL(activeModulesCount * 350)}/mês</span>
+                    </div>
+                    <div className="flex justify-between text-slate-300 border-t border-white/5 pt-2">
+                      <span className="font-bold text-emerald-400">Licenciamento de Módulos de Negócio SinergIA:</span>
+                      <span className="font-extrabold text-emerald-400">{formatBRL(custoSinergia)}/mês</span>
+                    </div>
+                    <div className="flex justify-between text-slate-300">
+                      <span className="font-bold text-indigo-400">Retorno Líquido Mensal:</span>
+                      <span className="font-extrabold text-indigo-400">{formatBRL(netROI)}/mês</span>
+                    </div>
+                    <div className="flex justify-between text-slate-400 text-[10px] pt-1 border-t border-white/5 mt-2">
+                      <span>Setup de Engenharia (Provisionamento):</span>
+                      <span>{formatBRL(setupSinergia)}</span>
+                    </div>
+                  </div>
+
+                  <p className="text-slate-300 text-[11px] mt-4 leading-relaxed">
+                    Você pode recuperar até <strong className="text-emerald-400">{percentualRecuperado}%</strong> do seu desperdício financeiro mensal aplicando a nossa infraestrutura.
                   </p>
                 </div>
 
-                <Link href="/apply" className="w-full">
+                <Link 
+                  href={{
+                    pathname: '/apply',
+                    query: {
+                      nicho: nicheSlug || '',
+                      modules: [
+                        moduloPiloto ? 'piloto' : '',
+                        moduloResgate ? 'resgate' : '',
+                        moduloBackoffice ? 'backoffice' : ''
+                      ].filter(Boolean).join(',')
+                    }
+                  }} 
+                  className="w-full"
+                >
                   <Button className="w-full bg-white text-slate-950 hover:bg-emerald-400 font-bold h-14 rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2">
                     Receber Laudo Detalhado Grátis
                     <ArrowRight className="w-5 h-5" />

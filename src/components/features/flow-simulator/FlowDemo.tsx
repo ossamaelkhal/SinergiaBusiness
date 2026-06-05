@@ -828,12 +828,28 @@ const FlowDemo: React.FC<FlowDemoProps> = ({ isOpen = true, onClose, isInline = 
                                                     <div className="text-3xl font-black text-indigo-400">+{formatSeconds(simulationResults.timeSaved)} <span className="text-sm text-indigo-300/60 font-medium">limpos p/ o time</span></div>
                                                 </div>
 
-                                                <div className="pt-6 border-t border-white/5">
-                                                    <div className="bg-white/5 rounded-2xl p-5 border border-white/5 relative overflow-hidden flex flex-col items-center">
+                                                <div className="pt-6 border-t border-white/5 space-y-4">
+                                                    <div className="bg-white/5 rounded-2xl p-5 border border-white/5 relative overflow-hidden flex flex-col items-start gap-2">
                                                         <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-2xl rounded-full pointer-events-none"></div>
-                                                        <p className="text-slate-400 text-sm font-bold uppercase tracking-wider mb-2 relative z-10">Desperdício Estancado (Mensal) *</p>
-                                                        <div className="text-4xl font-black text-amber-400 relative z-10 w-full text-center">{formatBRL(simulationResults.costSaving * 500)}</div>
-                                                        <p className="text-slate-500 text-xs mt-3 relative z-10">*Projeção para 500 instâncias/mês.</p>
+                                                        <p className="text-slate-400 text-sm font-bold uppercase tracking-wider mb-1 relative z-10">Desperdício Estancado (Mensal) *</p>
+                                                        <div className="text-4xl font-black text-amber-400 relative z-10 w-full text-left">{formatBRL(simulationResults.costSaving * 500)}</div>
+                                                        <p className="text-slate-500 text-[10px] relative z-10 mb-2">*Projeção para 500 instâncias/mês.</p>
+                                                    </div>
+
+                                                    <div className="bg-slate-950/60 rounded-2xl p-5 border border-white/5 space-y-2.5 text-xs text-slate-300">
+                                                        <p className="text-slate-400 text-sm font-bold uppercase tracking-wider mb-1">Custo Estimado de Infraestrutura de Nuvem e Processamento</p>
+                                                        <div className="flex justify-between">
+                                                            <span>Infraestrutura Base SinergIA:</span>
+                                                            <span className="font-bold text-white">{formatBRL(490)}/mês</span>
+                                                        </div>
+                                                        <div className="flex justify-between">
+                                                            <span>Instâncias Sintéticas ({simulationResults.stepsCompleted} no Canvas):</span>
+                                                            <span className="font-bold text-white">{formatBRL(simulationResults.stepsCompleted * 150)}/mês</span>
+                                                        </div>
+                                                        <div className="flex justify-between border-t border-white/5 pt-2 font-bold text-indigo-400">
+                                                            <span>Total Nuvem & Processamento:</span>
+                                                            <span>{formatBRL(490 + simulationResults.stepsCompleted * 150)}/mês</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>

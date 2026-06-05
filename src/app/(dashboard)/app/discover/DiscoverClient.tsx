@@ -23,6 +23,7 @@ import { nichesData } from '@/data/niches'
 import { SetupWizard } from "@/components/dashboard/SetupWizard"
 import { toast } from 'sonner'
 import Link from 'next/link'
+import { formatBRL } from '@/lib/utils'
 
 interface LeadData {
   id?: string
@@ -59,6 +60,11 @@ export default function DiscoverClient({ lead }: DiscoverClientProps) {
   // Niche info resolving
   const activeNicheSlug = lead.nichoSlug || 'commerce-omnichannel-vendas'
   const nicheInfo = nichesData[activeNicheSlug] || nichesData['commerce-omnichannel-vendas']
+
+  // Step 4: Modular selections
+  const [moduloPiloto, setModuloPiloto] = useState(true)
+  const [moduloResgate, setModuloResgate] = useState(true)
+  const [moduloBackoffice, setModuloBackoffice] = useState(true)
 
   // Step 1: Provisioning states
   const [progress, setProgress] = useState(0)
@@ -249,38 +255,20 @@ export default function DiscoverClient({ lead }: DiscoverClientProps) {
     toast.success("Agenda reservada com os engenheiros C-Level da SinergIA!")
   }
 
-  // Dynamic pricing calculation based on lead revenue
-  const getPricingTier = () => {
-    const rev = (lead.revenue || '').toLowerCase()
-    
-    // Faturamento > 2M
-    if (rev.includes('acima') || rev.includes('2 milhões') || rev.includes('2m')) {
-      return {
-        name: 'Esquadrão IA Enterprise',
-        price: 'R$ 50.000 / ano',
-        desc: 'Para corporações com alta demanda de tráfego, múltiplos playbooks estruturados e suporte com SLA restrito de 1h.',
-        planId: 'enterprise'
-      }
-    }
-    // Faturamento intermediário: 100k a 2M
-    if (rev.includes('500 mil') || rev.includes('100 mil a')) {
-      return {
-        name: 'Integração Standard Regional',
-        price: 'R$ 15.000 / ano',
-        desc: 'Construção da esteira sob medida para empresas em expansão, com WhatsApp BBD qualificador e integração direta no CRM.',
-        planId: 'setup'
-      }
-    }
-    // Faturamento < 100k (Até 100 mil) or fallback
-    return {
-      name: 'Piloto de Validação PoC',
-      price: 'R$ 997 / ano',
-      desc: 'Perfeito para validação acelerada. Acesso aos playbooks prontos e canais compartilhados de teste da infraestrutura SinergIA.',
-      planId: 'playbooks'
-    }
-  }
+  // Dynamic pricing calculation based on active modules and leads count
+  const leadsCount = nicheInfo?.financialMetrics?.leadsPerMonth || 300
+  const infraBase = Math.max(490, Math.round(leadsCount * 0.50))
+  const activeModulesCount = (moduloPiloto ? 1 : 0) + (moduloResgate ? 1 : 0) + (moduloBackoffice ? 1 : 0)
+  const monthlyCost = infraBase + activeModulesCount * 350
+  const setupPrice = activeModulesCount * 1500
 
-  const pricing = getPricingTier()
+  const getActiveModulesList = () => {
+    const list = []
+    if (moduloPiloto) list.push('piloto')
+    if (moduloResgate) list.push('resgate')
+    if (moduloBackoffice) list.push('backoffice')
+    return list
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-300 p-4 sm:p-6 lg:p-8 relative overflow-hidden flex flex-col items-center">
@@ -482,32 +470,101 @@ export default function DiscoverClient({ lead }: DiscoverClientProps) {
             <Card className="bg-slate-900 border-white/10 backdrop-blur-xl relative overflow-hidden shadow-2xl">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 to-indigo-500"></div>
               
-              <CardContent className="p-8 md:p-12 text-center space-y-6">
+              <CardContent className="p-8 md:p-12 space-y-6">
                 <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-center mx-auto shadow-[0_0_20px_rgba(16,185,129,0.15)]">
                   <Zap className="w-8 h-8 text-emerald-400 animate-pulse" />
                 </div>
 
-                <div className="space-y-2">
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-emerald-400">Implementação Recomendada</h3>
-                  <h2 className="text-3xl font-black text-white">{pricing.name}</h2>
+                <div className="space-y-2 text-center">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-emerald-400">Configuração de Infraestrutura Cognitiva</h3>
+                  <h2 className="text-3xl font-black text-white">Selecione Seus Módulos Ativos</h2>
                   <p className="text-sm text-slate-400 max-w-md mx-auto">
-                    {pricing.desc}
+                    Personalize seu ecossistema ativando os módulos necessários para resolver os gargalos de {nicheInfo.shortTitle}.
                   </p>
                 </div>
 
-                {/* Investment / Price Anchor */}
-                <div className="py-6 px-8 bg-slate-950 rounded-2xl border border-white/5 max-w-sm mx-auto space-y-1">
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Taxa de Setup + Licença Anual</div>
-                  <div className="text-3xl font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]">
-                    {pricing.price}
+                {/* Checklist de Módulos */}
+                <div className="space-y-3 max-w-md mx-auto text-left">
+                  {/* Modulo 1: Piloto Automático */}
+                  <div className="flex items-start gap-3 p-4 rounded-2xl bg-slate-950/60 border border-white/5 hover:border-white/10 transition-colors">
+                    <input 
+                      type="checkbox" 
+                      id="moduloPilotoCheck"
+                      checked={moduloPiloto}
+                      onChange={(e) => setModuloPiloto(e.target.checked)}
+                      className="mt-1 w-4 h-4 rounded border-white/10 accent-emerald-500"
+                    />
+                    <label htmlFor="moduloPilotoCheck" className="text-xs text-slate-300 cursor-pointer w-full">
+                      <strong className="text-white block mb-0.5">O Piloto Automático (WhatsApp/Instagram)</strong>
+                      <span className="text-slate-400">{nicheInfo?.hooks.pilotoAutomatico.title}</span>
+                      <span className="block mt-1 font-bold text-emerald-400">R$ 350 /mês</span>
+                    </label>
                   </div>
-                  <div className="text-[10px] text-emerald-400/80 font-medium">Split Automático Conectado &bull; Sem taxa oculta</div>
+
+                  {/* Modulo 2: Resgate Ativo */}
+                  <div className="flex items-start gap-3 p-4 rounded-2xl bg-slate-950/60 border border-white/5 hover:border-white/10 transition-colors">
+                    <input 
+                      type="checkbox" 
+                      id="moduloResgateCheck"
+                      checked={moduloResgate}
+                      onChange={(e) => setModuloResgate(e.target.checked)}
+                      className="mt-1 w-4 h-4 rounded border-white/10 accent-emerald-500"
+                    />
+                    <label htmlFor="moduloResgateCheck" className="text-xs text-slate-300 cursor-pointer w-full">
+                      <strong className="text-white block mb-0.5">O Resgate Ativo (Inadimplência/Inativos)</strong>
+                      <span className="text-slate-400">{nicheInfo?.hooks.resgateAtivo.title}</span>
+                      <span className="block mt-1 font-bold text-emerald-400">R$ 350 /mês</span>
+                    </label>
+                  </div>
+
+                  {/* Modulo 3: Backoffice */}
+                  <div className="flex items-start gap-3 p-4 rounded-2xl bg-slate-950/60 border border-white/5 hover:border-white/10 transition-colors">
+                    <input 
+                      type="checkbox" 
+                      id="moduloBackofficeCheck"
+                      checked={moduloBackoffice}
+                      onChange={(e) => setModuloBackoffice(e.target.checked)}
+                      className="mt-1 w-4 h-4 rounded border-white/10 accent-emerald-500"
+                    />
+                    <label htmlFor="moduloBackofficeCheck" className="text-xs text-slate-300 cursor-pointer w-full">
+                      <strong className="text-white block mb-0.5">O Backoffice (Auditoria/OCR)</strong>
+                      <span className="text-slate-400">{nicheInfo?.hooks.backoffice.title}</span>
+                      <span className="block mt-1 font-bold text-emerald-400">R$ 350 /mês</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Investment / Price Anchor */}
+                <div className="py-6 px-8 bg-slate-950 rounded-2xl border border-white/5 max-w-sm mx-auto space-y-2 text-center">
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Preço da Infraestrutura Cognitiva</div>
+                  <div className="text-3xl font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]">
+                    {formatBRL(monthlyCost)} <span className="text-xs text-slate-400 font-normal">/mês</span>
+                  </div>
+                  <div className="text-[10px] text-slate-400 leading-relaxed">
+                    Infra Base ({leadsCount} leads): {formatBRL(infraBase)}/mês<br />
+                    Módulos Ativos ({activeModulesCount}): {formatBRL(activeModulesCount * 350)}/mês
+                  </div>
+                  <div className="border-t border-white/5 pt-2 text-[10px] text-indigo-400 font-semibold uppercase tracking-wider">
+                    Setup de Provisionamento: {formatBRL(setupPrice)}
+                  </div>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="space-y-4 pt-4 max-w-md mx-auto">
-                  <Link href={`/checkout?plan=${pricing.planId}`} className="block w-full">
-                    <Button className="w-full h-14 text-base font-black bg-emerald-500 hover:bg-emerald-400 text-emerald-950 uppercase tracking-widest rounded-xl transition-all shadow-[0_0_20px_rgba(52,211,153,0.3)] border-0">
+                <div className="space-y-4 pt-4 max-w-md mx-auto text-center">
+                  <Link 
+                    href={{
+                      pathname: '/checkout',
+                      query: {
+                        niche: activeNicheSlug,
+                        modules: getActiveModulesList().join(',')
+                      }
+                    }} 
+                    className="block w-full"
+                  >
+                    <Button 
+                      disabled={activeModulesCount === 0}
+                      className="w-full h-14 text-base font-black bg-emerald-500 hover:bg-emerald-400 text-emerald-950 uppercase tracking-widest rounded-xl transition-all shadow-[0_0_20px_rgba(52,211,153,0.3)] border-0 disabled:opacity-45"
+                    >
                       Ativar Minha Licença Agora <ArrowRight className="w-5 h-5 ml-2" />
                     </Button>
                   </Link>

@@ -16,6 +16,11 @@ export interface NicheMetrics {
   projectedCAC: number;      // CAC projetado com automação autônoma em R$
   estimatedLatency: number;  // Tempo de resposta original da equipe humana (segundos)
   optimizedLatency: number;  // Tempo de resposta da IA da SinergIA (segundos)
+  teamCosts: number;         // Custo mensal de equipe em R$
+  defaultRate: number;       // Taxa de inadimplência em porcentagem (ex: 3.5)
+  leadsPerMonth: number;     // Volume de Leads/mês
+  billedRevenue: number;     // Faturamento Faturado/mês
+  coldLeadsBase: number;     // Base inativa
 }
 
 export interface NicheSolution {
@@ -49,7 +54,6 @@ export interface NicheSolution {
     backoffice: AutomaçãoHook
   }
   headline?: string;
-  recommendedPlan?: 'Starter' | 'Scale' | 'Enterprise';
   featuresFreePlaybook?: string[];
   financialMetrics: NicheMetrics;
 }
@@ -64,7 +68,6 @@ export const nichesData: Record<string, NicheSolution> = {
     icon: Stethoscope,
     color: "emerald",
     headline: "Transforme Leads de Clínicas em Procedimentos Agendados em Segundos",
-    recommendedPlan: "Scale",
     featuresFreePlaybook: [
       "Confirmação automatizada de consultas via WhatsApp",
       "Resgate de pacientes inativos com IA",
@@ -76,6 +79,11 @@ export const nichesData: Record<string, NicheSolution> = {
       projectedCAC: 70,
       estimatedLatency: 7200, // 2 horas humanas
       optimizedLatency: 30,   // 30 segundos da IA
+      teamCosts: 12000,       // 3 secretárias * R$ 4.000
+      defaultRate: 5.0,       // 5% de inadimplência
+      leadsPerMonth: 400,
+      billedRevenue: 100000,
+      coldLeadsBase: 2500
     },
     painPoints: [
       {
@@ -138,7 +146,6 @@ export const nichesData: Record<string, NicheSolution> = {
     icon: ShoppingBag,
     color: "fuchsia",
     headline: "Recupere Margem Confiscada e Resgate Vendas no Segundo Zero",
-    recommendedPlan: "Scale",
     featuresFreePlaybook: [
       "Resgate de carrinho abandonado com cupom dinâmico",
       "Atendimento de Direct do Instagram integrado com ERP",
@@ -150,6 +157,11 @@ export const nichesData: Record<string, NicheSolution> = {
       projectedCAC: 22,
       estimatedLatency: 2400, // 40 mins
       optimizedLatency: 10,   // 10 segundos da IA
+      teamCosts: 12000,       // 3 vendedores * R$ 4.000
+      defaultRate: 4.0,       // 4% de inadimplência
+      leadsPerMonth: 800,
+      billedRevenue: 120000,
+      coldLeadsBase: 3500
     },
     painPoints: [
       {
@@ -210,7 +222,6 @@ export const nichesData: Record<string, NicheSolution> = {
     icon: Factory,
     color: "rose",
     headline: "Logística Inteligente: Despacho de Ordens de Serviço em 20 Segundos",
-    recommendedPlan: "Enterprise",
     featuresFreePlaybook: [
       "Triagem e roteirização autônoma de entregas",
       "Monitor preditivo de devolução de frotas",
@@ -222,6 +233,11 @@ export const nichesData: Record<string, NicheSolution> = {
       projectedCAC: 250,
       estimatedLatency: 3600, // 1 hora
       optimizedLatency: 20,   // 20 segundos da IA
+      teamCosts: 25000,       // 5 operadores * R$ 5.000
+      defaultRate: 3.5,       // 3.5% de inadimplência
+      leadsPerMonth: 300,
+      billedRevenue: 300000,
+      coldLeadsBase: 2000
     },
     painPoints: [
       {
@@ -283,7 +299,6 @@ export const nichesData: Record<string, NicheSolution> = {
     icon: Landmark,
     color: "amber",
     headline: "Mesa de Crédito Autônoma e Auditoria de Contas Sem Erro Humano",
-    recommendedPlan: "Enterprise",
     featuresFreePlaybook: [
       "Leitor automático de faturas de utilities",
       "Auditoria de canhotos de entrega por OCR",
@@ -295,6 +310,11 @@ export const nichesData: Record<string, NicheSolution> = {
       projectedCAC: 400,
       estimatedLatency: 10800, // 3 horas
       optimizedLatency: 60,    // 60 segundos da IA
+      teamCosts: 18000,       // 3 analistas * R$ 6.000
+      defaultRate: 6.0,       // 6% de inadimplência
+      leadsPerMonth: 200,
+      billedRevenue: 500000,
+      coldLeadsBase: 1500
     },
     painPoints: [
       {
@@ -354,7 +374,6 @@ export const nichesData: Record<string, NicheSolution> = {
     icon: Briefcase,
     color: "cyan",
     headline: "Cotações e Orçamentos Técnicos no WhatsApp em Tempo Real",
-    recommendedPlan: "Scale",
     featuresFreePlaybook: [
       "Orçamentista autônomo por WhatsApp",
       "Validador e consulta de laudos automotivos",
@@ -366,6 +385,11 @@ export const nichesData: Record<string, NicheSolution> = {
       projectedCAC: 550,
       estimatedLatency: 14400, // 4 horas
       optimizedLatency: 45,    // 45 segundos da IA
+      teamCosts: 22000,       // 4 técnicos * R$ 5.500
+      defaultRate: 4.5,       // 4.5% de inadimplência
+      leadsPerMonth: 250,
+      billedRevenue: 400000,
+      coldLeadsBase: 1800
     },
     painPoints: [
       {
@@ -387,7 +411,7 @@ export const nichesData: Record<string, NicheSolution> = {
     metrics: [
       { value: "+4x", label: "Capacidade de Propostas" },
       { value: "Sub-60s", label: "Mesa de Troca Usados" },
-      { value: "95%", label: "Eficiência de Escala" },
+      { value: "95%", label: "Escala de Facilities" },
     ],
     demoType: "sales",
     subNicheGroup: {
@@ -426,7 +450,6 @@ export const nichesData: Record<string, NicheSolution> = {
     icon: Scale,
     color: "indigo",
     headline: "Recuperação Ativa de Inadimplência e Blindagem de Reputação",
-    recommendedPlan: "Scale",
     featuresFreePlaybook: [
       "Varredor de queixas no Reclame Aqui com resposta por IA",
       "Régua amigável de cobrança de inadimplentes via WhatsApp",
@@ -438,6 +461,11 @@ export const nichesData: Record<string, NicheSolution> = {
       projectedCAC: 45,
       estimatedLatency: 18000, // 5 horas
       optimizedLatency: 90,    // 90 segundos da IA
+      teamCosts: 15000,       // 3 operadores * R$ 5.000
+      defaultRate: 8.0,       // 8% de inadimplência
+      leadsPerMonth: 500,
+      billedRevenue: 200000,
+      coldLeadsBase: 4000
     },
     painPoints: [
       {
@@ -447,7 +475,7 @@ export const nichesData: Record<string, NicheSolution> = {
       },
       {
         title: "A Inadimplência Asfixiante",
-        description: "Mensalidades e contratos atrasados em escolas e serviços recorrentes que exigem cobranças desconfortáveis, lentas e ineficientes.",
+        description: "Mensalidades e contratos atrasados in escolas e serviços recorrentes que exigem cobranças desconfortáveis, lentas e ineficientes.",
         icon: Activity,
       },
       {
@@ -498,7 +526,6 @@ export const nichesData: Record<string, NicheSolution> = {
     icon: Home,
     color: "indigo",
     headline: "Transforme Leads de Alto Padrão em Visitas Agendadas em 42 Segundos",
-    recommendedPlan: "Scale",
     featuresFreePlaybook: [
       "Fluxo de triagem autônoma para portais (Zap/VivaReal)",
       "Qualificação por score de crédito automatizada",
@@ -510,6 +537,11 @@ export const nichesData: Record<string, NicheSolution> = {
       projectedCAC: 350,
       estimatedLatency: 14400, // 4 horas humanas
       optimizedLatency: 42,    // 42 segundos da IA
+      teamCosts: 48000,       // 8 corretores * R$ 6.000
+      defaultRate: 2.0,       // 2% de inadimplência
+      leadsPerMonth: 150,
+      billedRevenue: 2500000,
+      coldLeadsBase: 1200
     },
     painPoints: [
       {
@@ -549,7 +581,7 @@ export const nichesData: Record<string, NicheSolution> = {
     hooks: {
       pilotoAutomatico: {
         title: "O Triador de Portais",
-        description: "Agente inteligente integrado com Zap Imóveis, VivaReal e Imovelweb que responde e qualifica leads in menos de 1 minuto."
+        description: "Agente inteligente integrado com Zap Imóveis, VivaReal e Imovelweb que responde e qualifica leads em menos de 1 minuto."
       },
       resgateAtivo: {
         title: "O Qualificador de Crédito",
@@ -571,7 +603,6 @@ export const nichesData: Record<string, NicheSolution> = {
     icon: ShoppingBag,
     color: "emerald",
     headline: "Recuperação de Carrinhos e Upsell Inteligente com Margem Exponencial",
-    recommendedPlan: "Starter",
     featuresFreePlaybook: [
       "Régua de conversão transacional via Webhook",
       "Oferta personalizada de Upsell com Inteligência de Margem",
@@ -583,6 +614,11 @@ export const nichesData: Record<string, NicheSolution> = {
       projectedCAC: 18,
       estimatedLatency: 1800,  // 30 minutos humanos
       optimizedLatency: 15,    // 15 segundos da IA
+      teamCosts: 7000,        // 2 atendentes * R$ 3.500
+      defaultRate: 5.0,       // 5% de inadimplência
+      leadsPerMonth: 1200,
+      billedRevenue: 150000,
+      coldLeadsBase: 5000
     },
     painPoints: [
       {

@@ -32,7 +32,7 @@ export interface PaymentSessionResponse {
   monthlyLoss?: number;
 }
 
-export async function generatePaymentSession(leadId: string): Promise<PaymentSessionResponse> {
+export async function generatePaymentSession(leadId: string, modulesStr?: string): Promise<PaymentSessionResponse> {
   try {
     if (!leadId) {
       return { success: false, error: 'Lead ID é obrigatório.' };
@@ -80,8 +80,17 @@ export async function generatePaymentSession(leadId: string): Promise<PaymentSes
       return base;
     })();
 
-    // 2. Cálculo do Setup (10% do anual com piso de R$ 1.500)
-    const setupPrice = Math.max(1500, (monthlyLoss * 12) * 0.10);
+    // 2. Módulos ativos e Precificação Modular Dinâmica
+    const activeModules = modulesStr ? modulesStr.split(',').filter(Boolean) : ['piloto', 'resgate', 'backoffice'];
+    
+    // Obter o nicho para buscar a volumetria de leads
+    const niche = nichoSlug ? getNicheBySlug(nichoSlug) : null;
+    const leadsCount = niche?.financialMetrics?.leadsPerMonth || 300;
+    
+    const infraBase = Math.max(490, Math.round(leadsCount * 0.50));
+    const modulesCost = activeModules.length * 350;
+    const monthlyLicense = infraBase + modulesCost;
+    const setupPrice = activeModules.length * 1500; // R$ 1.500 por módulo ativo
 
     if (setupPrice <= 5000) {
       // Gerar PIX Imediato simulado
@@ -93,8 +102,10 @@ export async function generatePaymentSession(leadId: string): Promise<PaymentSes
       const pixString = `00020126580014br.gov.bcb.pix0136${pixKey}52040000530398654${priceLenStr}${priceStr}5802BR5911SinergIA OS6009Sao Paulo62070503***6304E5D4`;
 
       await leadRef.update({
-        planId: 'dynamic_pix',
+        planId: 'modular_infrastructure',
         contractValue: setupPrice,
+        monthlyLicense: monthlyLicense,
+        activeModules: activeModules,
         billing_status: 'pending',
         transactionId: transactionId,
         updatedAt: new Date().toISOString()
@@ -115,8 +126,10 @@ export async function generatePaymentSession(leadId: string): Promise<PaymentSes
     } else {
       // Booking Concierge para setups corporativos
       await leadRef.update({
-        planId: 'dynamic_booking',
+        planId: 'modular_infrastructure',
         contractValue: setupPrice,
+        monthlyLicense: monthlyLicense,
+        activeModules: activeModules,
         billing_status: 'waiting_call',
         status: 'waiting_onboarding_call',
         updatedAt: new Date().toISOString()
@@ -125,7 +138,7 @@ export async function generatePaymentSession(leadId: string): Promise<PaymentSes
       return {
         success: true,
         type: 'booking',
-        plan: 'Dynamic Value Setup',
+        plan: 'Modular Value Setup',
         price: setupPrice,
         setupPrice,
         monthlyLoss

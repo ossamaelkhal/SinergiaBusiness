@@ -10,6 +10,7 @@ import { generatePaymentSession, bookOnboardingCall, PaymentSessionResponse } fr
 import { db } from '@/lib/firebase'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { Badge } from '@/components/ui/badge'
+import { getNicheBySlug } from '@/data/niches'
 
 interface LeadData {
   id: string
@@ -25,9 +26,10 @@ interface LeadData {
 
 interface CheckoutClientProps {
   lead: LeadData
+  searchParams?: { niche?: string, modules?: string }
 }
 
-export default function CheckoutClient({ lead }: CheckoutClientProps) {
+export default function CheckoutClient({ lead, searchParams }: CheckoutClientProps) {
   const router = useRouter()
 
   const [loading, setLoading] = useState(true)
@@ -47,8 +49,22 @@ export default function CheckoutClient({ lead }: CheckoutClientProps) {
 
   // Lógica de cálculo síncrona no front-end para exibição imediata
   const auditedLoss = Number(lead.auditedLoss) || 0
-  const nichoSlug = lead.nichoSlug || ''
+  const nicheSlug = searchParams?.niche || lead.nichoSlug || ''
   const revenue = lead.revenue || ''
+
+  // Resolvendo nicho e módulos dinamicamente
+  const activeModules = searchParams?.modules 
+    ? searchParams.modules.split(',').filter(Boolean)
+    : ['piloto', 'resgate', 'backoffice']
+
+  const niche = nicheSlug ? getNicheBySlug(nicheSlug) : null
+  const leadsCount = niche?.financialMetrics?.leadsPerMonth || 300
+  const infraBase = Math.max(490, Math.round(leadsCount * 0.50))
+  const modulesCost = activeModules.length * 350
+  
+  const clientSetupPrice = activeModules.length * 1500
+  const clientMonthlyLicense = infraBase + modulesCost
+  const isPixFlow = clientSetupPrice <= 5000
 
   const clientMonthlyLoss = (() => {
     if (auditedLoss > 0) {
@@ -61,7 +77,7 @@ export default function CheckoutClient({ lead }: CheckoutClientProps) {
       'bpo-financeiro-credito-tem': 28200,
       'servicos-tecnicos-comerciais': 14700,
     }
-    const base = baselines[nichoSlug] || 16500
+    const base = baselines[nicheSlug] || 16500
 
     // Multiplicador por Receita
     const rev = revenue.toLowerCase()
@@ -74,14 +90,11 @@ export default function CheckoutClient({ lead }: CheckoutClientProps) {
     return base
   })()
 
-  const clientSetupPrice = Math.max(1500, (clientMonthlyLoss * 12) * 0.10)
-  const isPixFlow = clientSetupPrice <= 5000
-
   // 1. Inicializar sessão de pagamento / booking no servidor (Cálculo Dinâmico Blindado)
   useEffect(() => {
     async function initSession() {
       try {
-        const res = await generatePaymentSession(lead.id)
+        const res = await generatePaymentSession(lead.id, activeModules.join(','))
         setSessionData(res)
       } catch (err) {
         console.error("Falha ao iniciar faturamento do lead:", err)
@@ -90,7 +103,7 @@ export default function CheckoutClient({ lead }: CheckoutClientProps) {
       }
     }
     initSession()
-  }, [lead.id])
+  }, [lead.id, searchParams?.modules])
 
   // 2. Polling Reativo do Firestore para o fluxo de Pix
   useEffect(() => {
@@ -253,16 +266,37 @@ export default function CheckoutClient({ lead }: CheckoutClientProps) {
 
             <div className="border-t border-white/5 pt-4 space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Setup de Engenharia (10%)</span>
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Setup de Engenharia:</span>
                 <span className="text-2xl font-black text-white">{formatCurrency(clientSetupPrice)}</span>
               </div>
-              <div className="flex items-center justify-between bg-slate-950/80 border border-white/5 rounded-xl px-4 py-2.5">
-                <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Esteira Alocada</span>
-                <span className="text-[10px] text-emerald-400 font-bold tracking-wider uppercase">
-                  {clientSetupPrice <= 3000 ? "Esteira Piloto (Até 1.500 conversas/mês)" : 
-                   clientSetupPrice <= 10000 ? "Esteira Regional (Até 10.000 conversas/mês)" : 
-                   "Esteira Enterprise (Volume Concorrente)"}
-                </span>
+              <div className="flex justify-between items-center border-t border-white/5 pt-3">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Licenciamento de Módulos SinergIA:</span>
+                <span className="text-2xl font-black text-emerald-400">{formatCurrency(clientMonthlyLicense)}/mês</span>
+              </div>
+              
+              <div className="bg-slate-950/80 border border-white/5 rounded-2xl p-4 space-y-2 mt-2">
+                <div className="flex justify-between text-[10px] text-slate-400">
+                  <span>Infraestrutura Base ({leadsCount} leads):</span>
+                  <span>{formatCurrency(infraBase)}/mês</span>
+                </div>
+                <div className="flex justify-between text-[10px] text-slate-400">
+                  <span>Módulos Ativos ({activeModules.length}):</span>
+                  <span>{formatCurrency(modulesCost)}/mês</span>
+                </div>
+                <div className="border-t border-white/5 pt-2 flex flex-wrap gap-1">
+                  {activeModules.map((mod) => {
+                    const names: Record<string, string> = {
+                      piloto: 'Piloto Automático',
+                      resgate: 'Resgate Ativo',
+                      backoffice: 'Backoffice'
+                    };
+                    return (
+                      <Badge key={mod} className="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[9px] font-bold uppercase py-0.5 px-2">
+                        {names[mod] || mod}
+                      </Badge>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
