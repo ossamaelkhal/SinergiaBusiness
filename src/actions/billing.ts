@@ -3,6 +3,7 @@
 import * as admin from 'firebase-admin'
 import { revalidatePath } from 'next/cache'
 import { getNicheBySlug } from '@/data/niches'
+import { calculateInfraBase } from '@/lib/utils'
 
 // Inicializar o Firebase Admin SDK com segurança no escopo do servidor
 if (!admin.apps.length) {
@@ -87,7 +88,7 @@ export async function generatePaymentSession(leadId: string, modulesStr?: string
     const niche = nichoSlug ? getNicheBySlug(nichoSlug) : null;
     const leadsCount = niche?.financialMetrics?.leadsPerMonth || 300;
     
-    const infraBase = Math.max(490, Math.round(leadsCount * 0.50));
+    const infraBase = calculateInfraBase(leadsCount, nichoSlug || undefined);
     const modulesCost = activeModules.length * 350;
     const monthlyLicense = infraBase + modulesCost;
     const setupPrice = activeModules.length * 1500; // R$ 1.500 por módulo ativo

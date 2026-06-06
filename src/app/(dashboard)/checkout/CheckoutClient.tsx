@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { Check, Shield, Lock, Calendar, Clock, ArrowRight, CheckCircle2, Loader2, Copy, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
-import { formatBRL } from '@/lib/utils'
+import { formatBRL, calculateInfraBase } from '@/lib/utils'
 
 import { generatePaymentSession, bookOnboardingCall, PaymentSessionResponse } from '@/actions/billing'
 import { db } from '@/lib/firebase'
@@ -59,7 +59,7 @@ export default function CheckoutClient({ lead, searchParams }: CheckoutClientPro
 
   const niche = nicheSlug ? getNicheBySlug(nicheSlug) : null
   const leadsCount = niche?.financialMetrics?.leadsPerMonth || 300
-  const infraBase = Math.max(490, Math.round(leadsCount * 0.50))
+  const infraBase = calculateInfraBase(leadsCount, nicheSlug || undefined)
   const modulesCost = activeModules.length * 350
   
   const clientSetupPrice = activeModules.length * 1500

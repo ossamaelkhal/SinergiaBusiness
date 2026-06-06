@@ -23,7 +23,7 @@ import { nichesData } from '@/data/niches'
 import { SetupWizard } from "@/components/dashboard/SetupWizard"
 import { toast } from 'sonner'
 import Link from 'next/link'
-import { formatBRL } from '@/lib/utils'
+import { formatBRL, calculateInfraBase } from '@/lib/utils'
 
 interface LeadData {
   id?: string
@@ -257,7 +257,7 @@ export default function DiscoverClient({ lead }: DiscoverClientProps) {
 
   // Dynamic pricing calculation based on active modules and leads count
   const leadsCount = nicheInfo?.financialMetrics?.leadsPerMonth || 300
-  const infraBase = Math.max(490, Math.round(leadsCount * 0.50))
+  const infraBase = calculateInfraBase(leadsCount, lead.nichoSlug || undefined)
   const activeModulesCount = (moduloPiloto ? 1 : 0) + (moduloResgate ? 1 : 0) + (moduloBackoffice ? 1 : 0)
   const monthlyCost = infraBase + activeModulesCount * 350
   const setupPrice = activeModulesCount * 1500

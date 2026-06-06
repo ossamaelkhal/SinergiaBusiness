@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getNicheBySlug } from '@/data/niches';
-import { formatBRL } from '@/lib/utils';
+import { formatBRL, calculateInfraBase } from '@/lib/utils';
 
 const respostaOptions = [
   { label: 'Menos de 5 minutos', value: 'under5', lossFactor: 0.0, desc: 'Ideal. Quase 100% de aproveitamento de leads.' },
@@ -113,46 +113,37 @@ export function ROICalculator({ nicheSlug }: { nicheSlug?: string } = {}) {
     }
   }, [nicheSlug, financialMetrics]);
 
-  // --- CÁLCULOS DETALHADOS DE PERDAS (Dinheiro deixado na mesa) ---
-
-  // A. Perda por Latência de Leads
+  // --- CÁLCULOS DETALHADOS DE PERDAS (Módulo de Cadeia de Valor Operacional) ---
   const selectedResposta = respostaOptions.find(o => o.value === tempoResposta) || respostaOptions[2];
   const fatorPerdaLatencia = selectedResposta.lossFactor;
-  // Perda = leads que converteriam se o atendimento fosse imediato (<5m), mas que são perdidos pela lentidão
-  const receitaPerdidaLatencia = Math.round(leadsPorMes * (taxaConversaoAtual / 100) * fatorPerdaLatencia * ticketMedio);
 
-  // B. Desperdício Operacional (Overhead)
-  // Horas ou salários pagos a vendedores para fazer trabalho de inserção manual, digitação e controle
-  const desperdicioOperacional = Math.round(tamanhoEquipe * custoVendedor * (tempoAdmin / 100));
+  // A. Custo de Degradação por Resposta Tardia (Lead Decay)
+  const leadDecayCost = Math.round(leadsPorMes * (taxaConversaoAtual / 100) * fatorPerdaLatencia * ticketMedio);
+  const recuperadoLeadDecay = moduloPiloto ? Math.round(leadDecayCost * 0.90) : 0;
 
-  // C. Caixa Preso por Inadimplência Ativa
-  const perdaInadimplencia = Math.round(faturamentoFaturado * (taxaInadimplencia / 100));
+  // B. Alavancagem de Headcount & Turnover (Salary Waste + Encargos + Turnover Risk)
+  const humanTurnoverRate = financialMetrics?.humanTurnoverRate ?? 25;
+  const monthlyTurnoverCost = Math.round(tamanhoEquipe * (custoVendedor * 1.70) * (humanTurnoverRate / 100) / 12);
+  const adminWastedCost = Math.round(tamanhoEquipe * (custoVendedor * 1.70) * (tempoAdmin / 100));
+  const headcountCost = adminWastedCost + monthlyTurnoverCost;
+  const recuperadoHeadcount = (moduloPiloto || moduloBackoffice) ? Math.round(headcountCost * 0.85) : 0;
 
-  // D. Oportunidades Esquecidas na Base Fria
-  // Conversão de 0.3% ao mês de contatos inativos se houvesse régua ativa automática
-  const receitaEsquecidaBase = Math.round((baseLeadsFrios * 0.003) * ticketMedio);
+  // C. Consolidação de Stack Legado (Software tools consolidation)
+  const legacyStackCostPerRep = financialMetrics?.legacyStackCostPerRep ?? 250;
+  const legacyStackCost = Math.round((tamanhoEquipe * legacyStackCostPerRep) + 1200);
+  const recuperadoLegacyStack = moduloBackoffice ? legacyStackCost : 0;
 
-  // E. Desperdício por CAC Elevado (antes da SinergIA)
-  const desperdicioCAC = Math.round(currentCAC * leadsPorMes);
-
-  // Soma de todas as perdas
-  const totalDesperdicio = receitaPerdidaLatencia + desperdicioOperacional + perdaInadimplencia + receitaEsquecidaBase + desperdicioCAC;
+  // Soma de todas as perdas operacionais
+  const totalDesperdicio = leadDecayCost + headcountCost + legacyStackCost;
 
   // --- CÁLCULOS DE MONETIZAÇÃO DINÂMICA DA SINERGIA ---
-  const infraBase = Math.max(490, Math.round(leadsPorMes * 0.50));
+  const infraBase = calculateInfraBase(leadsPorMes, nicheSlug);
   const activeModulesCount = (moduloPiloto ? 1 : 0) + (moduloResgate ? 1 : 0) + (moduloBackoffice ? 1 : 0);
   const custoSinergia = infraBase + (activeModulesCount * 350);
   const setupSinergia = activeModulesCount * 1500;
 
   // --- CÁLCULOS DE RECUPERAÇÃO COM SINERGIA ---
-  // Taxas de mitigação realistas condicionadas à ativação de cada módulo
-  const recuperadoLatencia = moduloPiloto ? Math.round(receitaPerdidaLatencia * 0.85) : 0; // Agente 24h atende em <10 segundos
-  const recuperadoOverhead = moduloBackoffice ? Math.round(desperdicioOperacional * 0.75) : 0; // Automações eliminam 75% da digitação
-  const recuperadoInadimplencia = moduloResgate ? Math.round(perdaInadimplencia * 0.45) : 0; // Régua de cobrança reduz 45% do atraso
-  const recuperadoBase = moduloResgate ? Math.round(receitaEsquecidaBase * 0.70) : 0; // Nutrição automatizada recupera 70% do potencial
-  const recuperadoCAC = moduloPiloto ? Math.round((currentCAC - projectedCAC) * leadsPorMes) : 0;
-
-  const totalRecuperado = recuperadoLatencia + recuperadoOverhead + recuperadoInadimplencia + recuperadoBase + recuperadoCAC;
+  const totalRecuperado = recuperadoLeadDecay + recuperadoHeadcount + recuperadoLegacyStack;
   const netROI = totalRecuperado - custoSinergia;
 
   // Porcentagem das perdas totais que conseguimos recuperar
@@ -491,77 +482,47 @@ export function ROICalculator({ nicheSlug }: { nicheSlug?: string } = {}) {
                 <div className="space-y-4 mb-8">
                   <h4 className="text-xs font-bold uppercase text-slate-400 tracking-wider">Origem do Vazamento Financeiro:</h4>
                   
-                  {/* Latency Leak */}
+                  {/* Lead Decay */}
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs font-medium text-slate-300">
-                      <span>Perda por Latência (Comercial)</span>
-                      <span className="font-bold text-rose-400">{formatBRL(receitaPerdidaLatencia)}</span>
+                      <span>Custo de Degradação (Lead Decay)</span>
+                      <span className="font-bold text-rose-400">{formatBRL(leadDecayCost)}</span>
                     </div>
                     <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden">
                       <div 
                         className="h-full bg-indigo-500 rounded-full" 
-                        style={{ width: `${totalDesperdicio > 0 ? (receitaPerdidaLatencia / totalDesperdicio) * 100 : 0}%` }}
+                        style={{ width: `${totalDesperdicio > 0 ? (leadDecayCost / totalDesperdicio) * 100 : 0}%` }}
                       ></div>
                     </div>
                   </div>
 
-                  {/* Operational Overhead Leak */}
+                  {/* Headcount Leverage */}
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs font-medium text-slate-300">
-                      <span>Overhead Burocrático (Mão de obra)</span>
-                      <span className="font-bold text-rose-400">{formatBRL(desperdicioOperacional)}</span>
+                      <span>Alavancagem de Headcount & Turnover</span>
+                      <span className="font-bold text-rose-400">{formatBRL(headcountCost)}</span>
                     </div>
                     <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden">
                       <div 
                         className="h-full bg-amber-500 rounded-full" 
-                        style={{ width: `${totalDesperdicio > 0 ? (desperdicioOperacional / totalDesperdicio) * 100 : 0}%` }}
+                        style={{ width: `${totalDesperdicio > 0 ? (headcountCost / totalDesperdicio) * 100 : 0}%` }}
                       ></div>
                     </div>
                   </div>
 
-                  {/* Defaults Leak */}
+                  {/* Legacy Stack */}
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs font-medium text-slate-300">
-                      <span>Inadimplência e Contas Atrasadas</span>
-                      <span className="font-bold text-rose-400">{formatBRL(perdaInadimplencia)}</span>
+                      <span>Consolidação de Stack Legado</span>
+                      <span className="font-bold text-rose-400">{formatBRL(legacyStackCost)}</span>
                     </div>
                     <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-rose-500 rounded-full" 
-                        style={{ width: `${totalDesperdicio > 0 ? (perdaInadimplencia / totalDesperdicio) * 100 : 0}%` }}
+                        className="h-full bg-fuchsia-500 rounded-full" 
+                        style={{ width: `${totalDesperdicio > 0 ? (legacyStackCost / totalDesperdicio) * 100 : 0}%` }}
                       ></div>
                     </div>
                   </div>
-
-                  {/* Inactive Database Leak */}
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs font-medium text-slate-300">
-                      <span>Oportunidades Inativas (Base CRM)</span>
-                      <span className="font-bold text-rose-400">{formatBRL(receitaEsquecidaBase)}</span>
-                    </div>
-                    <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-emerald-500 rounded-full" 
-                        style={{ width: `${totalDesperdicio > 0 ? (receitaEsquecidaBase / totalDesperdicio) * 100 : 0}%` }}
-                      ></div>
-                    </div>
-                  </div>
-
-                  {/* CAC Leak */}
-                  {desperdicioCAC > 0 && (
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-xs font-medium text-slate-300">
-                        <span>Desperdício por CAC Elevado</span>
-                        <span className="font-bold text-rose-400">{formatBRL(desperdicioCAC)}</span>
-                      </div>
-                      <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-cyan-500 rounded-full" 
-                          style={{ width: `${totalDesperdicio > 0 ? (desperdicioCAC / totalDesperdicio) * 100 : 0}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 {/* SinergIA Optimization Box */}
@@ -633,67 +594,41 @@ export function ROICalculator({ nicheSlug }: { nicheSlug?: string } = {}) {
                 <AlertTriangle className="w-4 h-4 text-amber-500" /> Laudo de Oportunidades:
               </h4>
 
-              {/* Latency Feedback */}
-              {receitaPerdidaLatencia > 0 && (
+              {/* Latency / Lead Decay Feedback */}
+              {leadDecayCost > 0 && (
                 <div className="p-4 bg-slate-900/40 border border-white/5 rounded-xl text-xs space-y-1.5 leading-relaxed text-slate-300">
                   <div className="font-bold text-white flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> 
-                    Perda Comercial (Tempo de Resposta)
+                    Custo de Degradação (Lead Decay)
                   </div>
                   <p>
-                    Com tempo de contato em <strong className="text-white">{selectedResposta.label}</strong>, você perde aproximadamente <strong className="text-rose-400">{formatBRL(receitaPerdidaLatencia)}</strong> mensais de receita por leads que esfriam ou fecham com concorrentes mais rápidos.
+                    Com tempo de contato médio em <strong className="text-white">{selectedResposta.label}</strong>, você perde aproximadamente <strong className="text-rose-400">{formatBRL(leadDecayCost)}</strong> mensais de receita por leads que esfriam ou fecham com concorrentes mais ágeis. A SinergIA responde em segundos, recuperando até <strong className="text-emerald-400">{formatBRL(recuperadoLeadDecay)}</strong>.
                   </p>
                 </div>
               )}
 
-              {/* Overhead Feedback */}
-              {desperdicioOperacional > 0 && (
+              {/* Headcount Leverage Feedback */}
+              {headcountCost > 0 && (
                 <div className="p-4 bg-slate-900/40 border border-white/5 rounded-xl text-xs space-y-1.5 leading-relaxed text-slate-300">
                   <div className="font-bold text-white flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span> 
-                    Desperdício de Salário (Burocracia)
+                    Alavancagem de Headcount & Turnover
                   </div>
                   <p>
-                    Seus {tamanhoEquipe} vendedores passam {tempoAdmin}% do tempo copiando dados, organizando planilhas ou fazendo follow-ups manuais. Isso joga <strong className="text-rose-400">{formatBRL(desperdicioOperacional)}</strong> no ralo em salários improdutivos.
+                    Seus {tamanhoEquipe} operadores passam {tempoAdmin}% do tempo em burocracias repetitivas, somando custos de encargos operacionais e encargos trabalhistas de turnover ({humanTurnoverRate}% de rotatividade anual). Isso drena <strong className="text-rose-400">{formatBRL(headcountCost)}</strong>/mês. SinergIA economiza até <strong className="text-emerald-400">{formatBRL(recuperadoHeadcount)}</strong>.
                   </p>
                 </div>
               )}
 
-              {/* Inadimplência Feedback */}
-              {perdaInadimplencia > 0 && (
+              {/* Legacy Stack Feedback */}
+              {legacyStackCost > 0 && (
                 <div className="p-4 bg-slate-900/40 border border-white/5 rounded-xl text-xs space-y-1.5 leading-relaxed text-slate-300">
                   <div className="font-bold text-white flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span> 
-                    Caixa Retido por Atrasos
+                    <span className="w-1.5 h-1.5 rounded-full bg-fuchsia-500"></span> 
+                    Consolidação de Stack Legado
                   </div>
                   <p>
-                    A taxa de inadimplência de {taxaInadimplencia}% faz com que <strong className="text-rose-400">{formatBRL(perdaInadimplencia)}</strong> de faturamento legítimo fiquem presos ou perdidos. Cobranças automáticas amigáveis via WhatsApp recuperam esse caixa de forma automática.
-                  </p>
-                </div>
-              )}
-
-              {/* Base Inativa Feedback */}
-              {receitaEsquecidaBase > 0 && (
-                <div className="p-4 bg-slate-900/40 border border-white/5 rounded-xl text-xs space-y-1.5 leading-relaxed text-slate-300">
-                  <div className="font-bold text-white flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 
-                    Receita Adormecida na Base
-                  </div>
-                  <p>
-                    Sua base com {baseLeadsFrios.toLocaleString()} contatos inativos sem ações de reengajamento representa uma mina de ouro de <strong className="text-emerald-400">{formatBRL(receitaEsquecidaBase)}</strong> por mês em reativações não aproveitadas.
-                  </p>
-                </div>
-              )}
-
-              {/* CAC Feedback */}
-              {desperdicioCAC > 0 && (
-                <div className="p-4 bg-slate-900/40 border border-white/5 rounded-xl text-xs space-y-1.5 leading-relaxed text-slate-300">
-                  <div className="font-bold text-white flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> 
-                    Desperdício de Aquisição (CAC Elevado)
-                  </div>
-                  <p>
-                    Seu custo de aquisição atual de <strong className="text-white">{formatBRL(currentCAC)}</strong> por cliente pode ser reduzido para <strong className="text-emerald-400">{formatBRL(projectedCAC)}</strong> com automação conversacional. Isso economiza <strong className="text-emerald-400">{formatBRL(recuperadoCAC)}</strong> mensais de verba de marketing.
+                    Desligar CRMs paralelos, robôs de mensagens fragmentados, sistemas de OCR e discadoras manuais que custam {formatBRL(legacyStackCostPerRep)}/mês por operador economiza <strong className="text-emerald-400">{formatBRL(legacyStackCost)}</strong> mensais ao centralizar tudo na infraestrutura SinergIA.
                   </p>
                 </div>
               )}

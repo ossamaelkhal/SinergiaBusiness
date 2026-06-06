@@ -21,6 +21,10 @@ export interface NicheMetrics {
   leadsPerMonth: number;     // Volume de Leads/mês
   billedRevenue: number;     // Faturamento Faturado/mês
   coldLeadsBase: number;     // Base inativa
+  humanTurnoverRate: number;     // Taxa de rotatividade humana (%)
+  crmDataErrorRate: number;      // Taxa de erros em dados no CRM (%)
+  legacyStackCostPerRep: number; // Custo mensal de ferramentas legadas por atendente (R$)
+  leadsHumanCapacity: number;    // Volume máximo de leads atendidos por vendedor/mês
 }
 
 export interface NicheSolution {
@@ -83,7 +87,11 @@ export const nichesData: Record<string, NicheSolution> = {
       defaultRate: 5.0,       // 5% de inadimplência
       leadsPerMonth: 400,
       billedRevenue: 100000,
-      coldLeadsBase: 2500
+      coldLeadsBase: 2500,
+      humanTurnoverRate: 25,
+      crmDataErrorRate: 12,
+      legacyStackCostPerRep: 250,
+      leadsHumanCapacity: 150
     },
     painPoints: [
       {
@@ -161,7 +169,11 @@ export const nichesData: Record<string, NicheSolution> = {
       defaultRate: 4.0,       // 4% de inadimplência
       leadsPerMonth: 800,
       billedRevenue: 120000,
-      coldLeadsBase: 3500
+      coldLeadsBase: 3500,
+      humanTurnoverRate: 35,
+      crmDataErrorRate: 18,
+      legacyStackCostPerRep: 150,
+      leadsHumanCapacity: 250
     },
     painPoints: [
       {
@@ -237,7 +249,11 @@ export const nichesData: Record<string, NicheSolution> = {
       defaultRate: 3.5,       // 3.5% de inadimplência
       leadsPerMonth: 300,
       billedRevenue: 300000,
-      coldLeadsBase: 2000
+      coldLeadsBase: 2000,
+      humanTurnoverRate: 20,
+      crmDataErrorRate: 15,
+      legacyStackCostPerRep: 400,
+      leadsHumanCapacity: 120
     },
     painPoints: [
       {
@@ -314,7 +330,11 @@ export const nichesData: Record<string, NicheSolution> = {
       defaultRate: 6.0,       // 6% de inadimplência
       leadsPerMonth: 200,
       billedRevenue: 500000,
-      coldLeadsBase: 1500
+      coldLeadsBase: 1500,
+      humanTurnoverRate: 15,
+      crmDataErrorRate: 8,
+      legacyStackCostPerRep: 500,
+      leadsHumanCapacity: 80
     },
     painPoints: [
       {
@@ -389,7 +409,11 @@ export const nichesData: Record<string, NicheSolution> = {
       defaultRate: 4.5,       // 4.5% de inadimplência
       leadsPerMonth: 250,
       billedRevenue: 400000,
-      coldLeadsBase: 1800
+      coldLeadsBase: 1800,
+      humanTurnoverRate: 22,
+      crmDataErrorRate: 14,
+      legacyStackCostPerRep: 200,
+      leadsHumanCapacity: 100
     },
     painPoints: [
       {
@@ -465,7 +489,11 @@ export const nichesData: Record<string, NicheSolution> = {
       defaultRate: 8.0,       // 8% de inadimplência
       leadsPerMonth: 500,
       billedRevenue: 200000,
-      coldLeadsBase: 4000
+      coldLeadsBase: 4000,
+      humanTurnoverRate: 40,
+      crmDataErrorRate: 20,
+      legacyStackCostPerRep: 300,
+      leadsHumanCapacity: 300
     },
     painPoints: [
       {
@@ -541,7 +569,11 @@ export const nichesData: Record<string, NicheSolution> = {
       defaultRate: 2.0,       // 2% de inadimplência
       leadsPerMonth: 150,
       billedRevenue: 2500000,
-      coldLeadsBase: 1200
+      coldLeadsBase: 1200,
+      humanTurnoverRate: 30,
+      crmDataErrorRate: 10,
+      legacyStackCostPerRep: 350,
+      leadsHumanCapacity: 100
     },
     painPoints: [
       {
@@ -618,7 +650,11 @@ export const nichesData: Record<string, NicheSolution> = {
       defaultRate: 5.0,       // 5% de inadimplência
       leadsPerMonth: 1200,
       billedRevenue: 150000,
-      coldLeadsBase: 5000
+      coldLeadsBase: 5000,
+      humanTurnoverRate: 30,
+      crmDataErrorRate: 16,
+      legacyStackCostPerRep: 180,
+      leadsHumanCapacity: 400
     },
     painPoints: [
       {
