@@ -452,7 +452,16 @@ export async function deleteLead(id: string) {
     }
 }
 
-export async function saveLeadPreferences(leadId: string, preferences: { niche: string, tone: string, objective: string }) {
+export async function saveLeadPreferences(leadId: string, preferences: { 
+  niche: string; 
+  tone: string; 
+  objective: string;
+  frictionIndex?: number;
+  blueprintId?: string;
+  malhas?: string[];
+  selectedTools?: string[];
+  stackLevel?: number;
+}) {
   try {
     const dbAdmin = admin.firestore();
     const leadRef = dbAdmin.collection('leads').doc(leadId);
@@ -461,11 +470,21 @@ export async function saveLeadPreferences(leadId: string, preferences: { niche: 
       preferences: {
         niche: preferences.niche,
         tone: preferences.tone,
-        objective: preferences.objective
+        objective: preferences.objective,
+        frictionIndex: preferences.frictionIndex || null,
+        blueprintId: preferences.blueprintId || null,
+        malhas: preferences.malhas || null,
+        selectedTools: preferences.selectedTools || null,
+        stackLevel: preferences.stackLevel || null
       },
       niche: preferences.niche,
       tone: preferences.tone,
       objective: preferences.objective,
+      frictionIndex: preferences.frictionIndex || null,
+      blueprintId: preferences.blueprintId || null,
+      malhas: preferences.malhas || null,
+      selectedTools: preferences.selectedTools || null,
+      stackLevel: preferences.stackLevel || null,
       updatedAt: new Date().toISOString()
     });
     
@@ -475,6 +494,7 @@ export async function saveLeadPreferences(leadId: string, preferences: { niche: 
     return { success: false, error: error.message || "Falha ao atualizar preferências do lead" };
   }
 }
+
 
 /**
  * Auxiliar para verificar e validar a sessão do usuário via cookies no servidor

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { Check, Shield, Lock, Calendar, Clock, ArrowRight, CheckCircle2, Loader2, Copy, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
-import { formatBRL, calculateInfraBase } from '@/lib/utils'
+import { formatBRL, calculateInfraBase, calculateSinergiaOSPricing } from '@/lib/utils'
 
 import { generatePaymentSession, bookOnboardingCall, PaymentSessionResponse } from '@/actions/billing'
 import { db } from '@/lib/firebase'
@@ -22,11 +22,20 @@ interface LeadData {
   revenue?: string
   status: string
   auditedLoss?: number
+  blueprintId?: string
+  malhas?: string[]
+  stackLevel?: number
 }
 
 interface CheckoutClientProps {
   lead: LeadData
-  searchParams?: { niche?: string, modules?: string }
+  searchParams?: { 
+    niche?: string; 
+    blueprint?: string; 
+    slots?: string; 
+    setup?: string; 
+    modules?: string; 
+  }
 }
 
 export default function CheckoutClient({ lead, searchParams }: CheckoutClientProps) {
@@ -52,19 +61,24 @@ export default function CheckoutClient({ lead, searchParams }: CheckoutClientPro
   const nicheSlug = searchParams?.niche || lead.nichoSlug || ''
   const revenue = lead.revenue || ''
 
-  // Resolvendo nicho e módulos dinamicamente
-  const activeModules = searchParams?.modules 
-    ? searchParams.modules.split(',').filter(Boolean)
-    : ['piloto', 'resgate', 'backoffice']
-
-  const niche = nicheSlug ? getNicheBySlug(nicheSlug) : null
-  const leadsCount = niche?.financialMetrics?.leadsPerMonth || 300
-  const infraBase = calculateInfraBase(leadsCount, nicheSlug || undefined)
-  const modulesCost = activeModules.length * 350
+  // Resolvendo nicho e malhas/slots dinamicamente a partir do Firestore (lead)
+  // com fallback nos searchParams/nicheData
+  const activeNicheSlug = nicheSlug || 'commerce-omnichannel-vendas'
+  const niche = activeNicheSlug ? getNicheBySlug(activeNicheSlug) : null
   
-  const clientSetupPrice = activeModules.length * 1500
-  const clientMonthlyLicense = infraBase + modulesCost
-  const isPixFlow = clientSetupPrice <= 5000
+  const defaultMalhas = niche?.operationalDNA?.activeFlowNetworks || ['Intercepção e Resgate 24/7']
+  
+  const malhas = Array.isArray(lead.malhas) && lead.malhas.length > 0
+    ? lead.malhas
+    : (searchParams?.slots ? defaultMalhas.slice(0, Number(searchParams.slots)) : defaultMalhas)
+
+  const stackLevel = Number(lead.stackLevel) || (searchParams?.setup ? Number(searchParams.setup) : 1)
+
+  // Faturamento SinergIA OS
+  const { platformFee, slotsFee, setupFee, monthlyTotal } = calculateSinergiaOSPricing(malhas.length, stackLevel)
+  const clientSetupPrice = setupFee
+  const clientMonthlyLicense = monthlyTotal
+  const isPixFlow = clientSetupPrice <= 12000
 
   const clientMonthlyLoss = (() => {
     if (auditedLoss > 0) {
@@ -94,7 +108,7 @@ export default function CheckoutClient({ lead, searchParams }: CheckoutClientPro
   useEffect(() => {
     async function initSession() {
       try {
-        const res = await generatePaymentSession(lead.id, activeModules.join(','))
+        const res = await generatePaymentSession(lead.id)
         setSessionData(res)
       } catch (err) {
         console.error("Falha ao iniciar faturamento do lead:", err)
@@ -103,7 +117,7 @@ export default function CheckoutClient({ lead, searchParams }: CheckoutClientPro
       }
     }
     initSession()
-  }, [lead.id, searchParams?.modules])
+  }, [lead.id])
 
   // 2. Polling Reativo do Firestore para o fluxo de Pix
   useEffect(() => {
@@ -266,36 +280,29 @@ export default function CheckoutClient({ lead, searchParams }: CheckoutClientPro
 
             <div className="border-t border-white/5 pt-4 space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Setup de Engenharia:</span>
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Setup de Engenharia (Nível {stackLevel}):</span>
                 <span className="text-2xl font-black text-white">{formatCurrency(clientSetupPrice)}</span>
               </div>
               <div className="flex justify-between items-center border-t border-white/5 pt-3">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Licenciamento de Módulos SinergIA:</span>
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Mensalidade SinergIA OS Core:</span>
                 <span className="text-2xl font-black text-emerald-400">{formatCurrency(clientMonthlyLicense)}/mês</span>
               </div>
               
               <div className="bg-slate-950/80 border border-white/5 rounded-2xl p-4 space-y-2 mt-2">
                 <div className="flex justify-between text-[10px] text-slate-400">
-                  <span>Infraestrutura Base ({leadsCount} leads):</span>
-                  <span>{formatCurrency(infraBase)}/mês</span>
+                  <span>Platform Fee Recorrente:</span>
+                  <span>{formatCurrency(platformFee)}/mês</span>
                 </div>
                 <div className="flex justify-between text-[10px] text-slate-400">
-                  <span>Módulos Ativos ({activeModules.length}):</span>
-                  <span>{formatCurrency(modulesCost)}/mês</span>
+                  <span>Slots de Agentes Concorrentes ({malhas.length}):</span>
+                  <span>{formatCurrency(slotsFee)}/mês</span>
                 </div>
                 <div className="border-t border-white/5 pt-2 flex flex-wrap gap-1">
-                  {activeModules.map((mod) => {
-                    const names: Record<string, string> = {
-                      piloto: 'Piloto Automático',
-                      resgate: 'Resgate Ativo',
-                      backoffice: 'Backoffice'
-                    };
-                    return (
-                      <Badge key={mod} className="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[9px] font-bold uppercase py-0.5 px-2">
-                        {names[mod] || mod}
-                      </Badge>
-                    );
-                  })}
+                  {malhas.map((m) => (
+                    <Badge key={m} className="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[9px] font-bold uppercase py-0.5 px-2">
+                      {m}
+                    </Badge>
+                  ))}
                 </div>
               </div>
             </div>

@@ -19,11 +19,11 @@ import {
   Cpu, 
   FileText 
 } from "lucide-react"
-import { nichesData } from '@/data/niches'
+import { nichesData, STACK_TOOLS } from '@/data/niches'
 import { SetupWizard } from "@/components/dashboard/SetupWizard"
 import { toast } from 'sonner'
 import Link from 'next/link'
-import { formatBRL, calculateInfraBase } from '@/lib/utils'
+import { formatBRL, calculateInfraBase, calculateSinergiaOSPricing } from '@/lib/utils'
 
 interface LeadData {
   id?: string
@@ -61,10 +61,12 @@ export default function DiscoverClient({ lead }: DiscoverClientProps) {
   const activeNicheSlug = lead.nichoSlug || 'commerce-omnichannel-vendas'
   const nicheInfo = nichesData[activeNicheSlug] || nichesData['commerce-omnichannel-vendas']
 
-  // Step 4: Modular selections
-  const [moduloPiloto, setModuloPiloto] = useState(true)
-  const [moduloResgate, setModuloResgate] = useState(true)
-  const [moduloBackoffice, setModuloBackoffice] = useState(true)
+  // Step 4: Auditoria States
+  const [frictionIndex, setFrictionIndex] = useState<number | null>(null)
+  const [recommendedBlueprintId, setRecommendedBlueprintId] = useState<string>('')
+  const [activeMalhas, setActiveMalhas] = useState<string[]>([])
+  const [stackLevel, setStackLevel] = useState<number>(1)
+  const [selectedTools, setSelectedTools] = useState<string[]>([])
 
   // Step 1: Provisioning states
   const [progress, setProgress] = useState(0)
@@ -255,20 +257,7 @@ export default function DiscoverClient({ lead }: DiscoverClientProps) {
     toast.success("Agenda reservada com os engenheiros C-Level da SinergIA!")
   }
 
-  // Dynamic pricing calculation based on active modules and leads count
-  const leadsCount = nicheInfo?.financialMetrics?.leadsPerMonth || 300
-  const infraBase = calculateInfraBase(leadsCount, lead.nichoSlug || undefined)
-  const activeModulesCount = (moduloPiloto ? 1 : 0) + (moduloResgate ? 1 : 0) + (moduloBackoffice ? 1 : 0)
-  const monthlyCost = infraBase + activeModulesCount * 350
-  const setupPrice = activeModulesCount * 1500
-
-  const getActiveModulesList = () => {
-    const list = []
-    if (moduloPiloto) list.push('piloto')
-    if (moduloResgate) list.push('resgate')
-    if (moduloBackoffice) list.push('backoffice')
-    return list
-  }
+  // Pricing variables resolved dynamically inside the render step
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-300 p-4 sm:p-6 lg:p-8 relative overflow-hidden flex flex-col items-center">
@@ -458,152 +447,212 @@ export default function DiscoverClient({ lead }: DiscoverClientProps) {
         {/* STEP 3: SETUPWIZARD INTEGRATION */}
         {step === 3 && (
           <div className="animate-in fade-in duration-500">
-            <SetupWizard leadId={lead.id} onComplete={() => setStep(4)} />
+            <SetupWizard 
+              leadId={lead.id} 
+              onComplete={(friction, blueprint, malhasList, level, tools) => {
+                setFrictionIndex(friction);
+                setRecommendedBlueprintId(blueprint);
+                setActiveMalhas(malhasList);
+                setStackLevel(level);
+                setSelectedTools(tools);
+                setStep(4);
+              }} 
+            />
           </div>
         )}
 
-        {/* STEP 4: ANCORAGEM COMERCIAL E CHECKOUT */}
-        {step === 4 && (
-          <div className="max-w-2xl mx-auto space-y-8 animate-in zoom-in-95 fade-in duration-700">
-            
-            {/* Main Activation Card */}
-            <Card className="bg-slate-900 border-white/10 backdrop-blur-xl relative overflow-hidden shadow-2xl">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 to-indigo-500"></div>
+        {/* STEP 4: LAUDO TÉCNICO E CHECKOUT/BOOKING */}
+        {step === 4 && (() => {
+          const { platformFee, slotsFee, setupFee, monthlyTotal } = calculateSinergiaOSPricing(activeMalhas.length, stackLevel);
+          const activeBlueprint = nicheInfo.operationalDNA?.recommendedBlueprints?.find(b => b.id === recommendedBlueprintId) 
+            || nicheInfo.operationalDNA?.recommendedBlueprints?.[0]
+            || { name: 'SinergIA OS Engine Core', description: 'Blueprint comportamental adaptado às dores da empresa.' };
+
+          const isLevel3 = stackLevel === 3;
+
+          return (
+            <div className="max-w-2xl mx-auto space-y-8 animate-in zoom-in-95 fade-in duration-700">
               
-              <CardContent className="p-8 md:p-12 space-y-6">
-                <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-center mx-auto shadow-[0_0_20px_rgba(16,185,129,0.15)]">
-                  <Zap className="w-8 h-8 text-emerald-400 animate-pulse" />
-                </div>
-
-                <div className="space-y-2 text-center">
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-emerald-400">Configuração de Infraestrutura Cognitiva</h3>
-                  <h2 className="text-3xl font-black text-white">Selecione Seus Módulos Ativos</h2>
-                  <p className="text-sm text-slate-400 max-w-md mx-auto">
-                    Personalize seu ecossistema ativando os módulos necessários para resolver os gargalos de {nicheInfo.shortTitle}.
-                  </p>
-                </div>
-
-                {/* Checklist de Módulos */}
-                <div className="space-y-3 max-w-md mx-auto text-left">
-                  {/* Modulo 1: Piloto Automático */}
-                  <div className="flex items-start gap-3 p-4 rounded-2xl bg-slate-950/60 border border-white/5 hover:border-white/10 transition-colors">
-                    <input 
-                      type="checkbox" 
-                      id="moduloPilotoCheck"
-                      checked={moduloPiloto}
-                      onChange={(e) => setModuloPiloto(e.target.checked)}
-                      className="mt-1 w-4 h-4 rounded border-white/10 accent-emerald-500"
-                    />
-                    <label htmlFor="moduloPilotoCheck" className="text-xs text-slate-300 cursor-pointer w-full">
-                      <strong className="text-white block mb-0.5">O Piloto Automático (WhatsApp/Instagram)</strong>
-                      <span className="text-slate-400">{nicheInfo?.hooks.pilotoAutomatico.title}</span>
-                      <span className="block mt-1 font-bold text-emerald-400">R$ 350 /mês</span>
-                    </label>
+              {/* Main Technical Report Card */}
+              <Card className="bg-slate-900 border-white/10 backdrop-blur-xl relative overflow-hidden shadow-2xl">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 via-amber-500 to-indigo-500"></div>
+                
+                <CardContent className="p-8 md:p-12 space-y-6">
+                  
+                  {/* Friction Index Header */}
+                  <div className="text-center space-y-2">
+                    <span className="text-[10px] font-mono tracking-widest text-rose-400 uppercase font-black">Laudo Técnico de Auditoria</span>
+                    <div className="text-5xl font-black text-rose-500 mt-2 tracking-tight">
+                      {frictionIndex}% <span className="text-sm font-normal text-slate-400">Fricção Operacional</span>
+                    </div>
+                    <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed mt-1">
+                      Foi detectada uma perda grave de eficiência nos seus processos comerciais e operacionais.
+                    </p>
                   </div>
 
-                  {/* Modulo 2: Resgate Ativo */}
-                  <div className="flex items-start gap-3 p-4 rounded-2xl bg-slate-950/60 border border-white/5 hover:border-white/10 transition-colors">
-                    <input 
-                      type="checkbox" 
-                      id="moduloResgateCheck"
-                      checked={moduloResgate}
-                      onChange={(e) => setModuloResgate(e.target.checked)}
-                      className="mt-1 w-4 h-4 rounded border-white/10 accent-emerald-500"
-                    />
-                    <label htmlFor="moduloResgateCheck" className="text-xs text-slate-300 cursor-pointer w-full">
-                      <strong className="text-white block mb-0.5">O Resgate Ativo (Inadimplência/Inativos)</strong>
-                      <span className="text-slate-400">{nicheInfo?.hooks.resgateAtivo.title}</span>
-                      <span className="block mt-1 font-bold text-emerald-400">R$ 350 /mês</span>
-                    </label>
+                  {/* Blueprint details */}
+                  <div className="bg-slate-950/80 border border-white/5 rounded-2xl p-6 space-y-4">
+                    <div className="flex items-center gap-2 text-indigo-400 text-xs font-bold uppercase tracking-wider">
+                      <Cpu className="w-4 h-4" /> Recomendação do SinergIA OS
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-black text-white">{activeBlueprint.name}</h4>
+                      <p className="text-xs text-slate-400 mt-1 leading-relaxed">{activeBlueprint.description}</p>
+                    </div>
+                    
+                    <div className="border-t border-white/5 pt-4 space-y-2">
+                      <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold block">Malhas de Fluxo Ativas a serem Injetadas:</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {activeMalhas.map((m, idx) => (
+                          <span key={idx} className="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[9px] font-black uppercase py-0.5 px-2.5 rounded-full">
+                            {m}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Modulo 3: Backoffice */}
-                  <div className="flex items-start gap-3 p-4 rounded-2xl bg-slate-950/60 border border-white/5 hover:border-white/10 transition-colors">
-                    <input 
-                      type="checkbox" 
-                      id="moduloBackofficeCheck"
-                      checked={moduloBackoffice}
-                      onChange={(e) => setModuloBackoffice(e.target.checked)}
-                      className="mt-1 w-4 h-4 rounded border-white/10 accent-emerald-500"
-                    />
-                    <label htmlFor="moduloBackofficeCheck" className="text-xs text-slate-300 cursor-pointer w-full">
-                      <strong className="text-white block mb-0.5">O Backoffice (Auditoria/OCR)</strong>
-                      <span className="text-slate-400">{nicheInfo?.hooks.backoffice.title}</span>
-                      <span className="block mt-1 font-bold text-emerald-400">R$ 350 /mês</span>
-                    </label>
+                  {/* Tools Stack metadata */}
+                  <div className="bg-slate-950/40 border border-white/5 p-4 rounded-xl space-y-2">
+                    <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold block">Stack Sistêmica Identificada:</span>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedTools.map((t) => {
+                        const name = STACK_TOOLS[t]?.name || t;
+                        return (
+                          <span key={t} className="bg-slate-800 text-slate-300 border border-white/5 text-[10px] px-2 py-0.5 rounded">
+                            {name}
+                          </span>
+                        );
+                      })}
+                    </div>
+                    <div className="text-[10px] text-slate-400 mt-1">
+                      Complexidade Geral do Projeto: <strong className={isLevel3 ? "text-rose-400" : stackLevel === 2 ? "text-amber-400" : "text-emerald-400"}>Nível {stackLevel}</strong>
+                    </div>
                   </div>
-                </div>
 
-                {/* Investment / Price Anchor */}
-                <div className="py-6 px-8 bg-slate-950 rounded-2xl border border-white/5 max-w-sm mx-auto space-y-2 text-center">
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Preço da Infraestrutura Cognitiva</div>
-                  <div className="text-3xl font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]">
-                    {formatBRL(monthlyCost)} <span className="text-xs text-slate-400 font-normal">/mês</span>
-                  </div>
-                  <div className="text-[10px] text-slate-400 leading-relaxed">
-                    Infra Base ({leadsCount} leads): {formatBRL(infraBase)}/mês<br />
-                    Módulos Ativos ({activeModulesCount}): {formatBRL(activeModulesCount * 350)}/mês
-                  </div>
-                  <div className="border-t border-white/5 pt-2 text-[10px] text-indigo-400 font-semibold uppercase tracking-wider">
-                    Setup de Provisionamento: {formatBRL(setupPrice)}
-                  </div>
-                </div>
+                  {/* Gate rendering: Level 3 vs Level 1/2 */}
+                  {isLevel3 ? (
+                    /* HARD GATE: Level 3 Corporate/Legacy Stacks */
+                    <div className="space-y-6">
+                      <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-start gap-3 text-left">
+                        <ShieldCheck className="w-6 h-6 text-rose-400 shrink-0 mt-0.5 animate-pulse" />
+                        <div className="space-y-1">
+                          <h5 className="text-xs font-bold text-rose-400 uppercase tracking-wider">Aprovação Manual Requerida (SLA de Engenharia)</h5>
+                          <p className="text-[10px] text-slate-300 leading-relaxed">
+                            Sistemas de <strong>Nível 3 (TOTVS/SAP/Senior/SEFAZ)</strong> exigem provisionamento assistido e homologação técnica de SLA. Por segurança, a ativação imediata foi bloqueada. Um arquiteto sênior de nuvem fará o desenho da topologia em uma call técnica de deploy obrigatória.
+                          </p>
+                        </div>
+                      </div>
 
-                {/* Action Buttons */}
-                <div className="space-y-4 pt-4 max-w-md mx-auto text-center">
-                  <Link 
-                    href={{
-                      pathname: '/checkout',
-                      query: {
-                        niche: activeNicheSlug,
-                        modules: getActiveModulesList().join(',')
-                      }
-                    }} 
-                    className="block w-full"
-                  >
-                    <Button 
-                      disabled={activeModulesCount === 0}
-                      className="w-full h-14 text-base font-black bg-emerald-500 hover:bg-emerald-400 text-emerald-950 uppercase tracking-widest rounded-xl transition-all shadow-[0_0_20px_rgba(52,211,153,0.3)] border-0 disabled:opacity-45"
-                    >
-                      Ativar Minha Licença Agora <ArrowRight className="w-5 h-5 ml-2" />
-                    </Button>
-                  </Link>
+                      {/* Setup and Monthly information (informational only) */}
+                      <div className="py-4 px-6 bg-slate-950/60 rounded-xl border border-white/5 text-xs text-slate-400 flex justify-between">
+                        <span>Setup Estimado (Nível 3): <strong className="text-white">{formatBRL(setupFee)}</strong></span>
+                        <span>Mensalidade Base: <strong className="text-white">{formatBRL(monthlyTotal)}/mês</strong></span>
+                      </div>
 
-                  {!bookingConfirmed ? (
-                    <Button 
-                      variant="outline" 
-                      onClick={handleBookCall}
-                      className="w-full h-14 text-sm font-bold border-white/10 hover:bg-white/5 text-slate-300 hover:text-white rounded-xl flex items-center justify-center gap-2"
-                    >
-                      <Calendar className="w-4 h-4 text-indigo-400" /> Agendar Call Técnica de Deploy
-                    </Button>
+                      {/* Call Booking CTA */}
+                      <div className="space-y-4 pt-2">
+                        {!bookingConfirmed ? (
+                          <Button 
+                            onClick={handleBookCall}
+                            className="w-full h-14 text-base font-black bg-rose-600 hover:bg-rose-500 text-white uppercase tracking-widest rounded-xl transition-all shadow-[0_0_20px_rgba(239,68,68,0.2)] flex items-center justify-center gap-2 border-0"
+                          >
+                            <Calendar className="w-5 h-5" /> Agendar Homologação de Escopo
+                          </Button>
+                        ) : (
+                          <div className="py-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs font-bold text-emerald-400 flex items-center justify-center gap-2 animate-in fade-in zoom-in-95">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Agenda técnica reservada! Enviamos as instruções para o seu WhatsApp comercial.
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   ) : (
-                    <div className="py-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-xs font-bold text-indigo-400 flex items-center justify-center gap-2 animate-in fade-in zoom-in-95">
-                      <CheckCircle2 className="w-4 h-4 text-indigo-400" /> Call Técnica de 30m agendada! Link enviado ao seu WhatsApp.
+                    /* PASS FLOW: Level 1 and 2 Stacks */
+                    <div className="space-y-6">
+                      {/* Price breakdown */}
+                      <div className="py-6 px-8 bg-slate-950 rounded-2xl border border-white/5 max-w-sm mx-auto space-y-2.5 text-center">
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Investimento SinergIA OS</div>
+                        <div className="text-3xl font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]">
+                          {formatBRL(monthlyTotal)} <span className="text-xs text-slate-400 font-normal">/mês</span>
+                        </div>
+                        <div className="text-[10px] text-slate-400 leading-relaxed">
+                          Platform Fee Core: {formatBRL(platformFee)}/mês<br />
+                          Slots de Agentes ({activeMalhas.length}): {formatBRL(slotsFee)}/mês
+                        </div>
+                        <div className="border-t border-white/5 pt-2 text-[10px] text-indigo-400 font-semibold uppercase tracking-wider">
+                          Setup de Engenharia (Nível {stackLevel}): {formatBRL(setupFee)}
+                        </div>
+                      </div>
+
+                      {/* Checkout Action */}
+                      <div className="space-y-4 pt-2 max-w-md mx-auto text-center">
+                        <Link 
+                          href={{
+                            pathname: '/checkout',
+                            query: {
+                              blueprint: recommendedBlueprintId,
+                              slots: activeMalhas.length,
+                              setup: stackLevel
+                            }
+                          }} 
+                          className="block w-full"
+                        >
+                          <Button 
+                            className="w-full h-14 text-base font-black bg-emerald-500 hover:bg-emerald-400 text-emerald-950 uppercase tracking-widest rounded-xl transition-all shadow-[0_0_20px_rgba(52,211,153,0.3)] border-0"
+                          >
+                            Ativar SinergIA OS Core <ArrowRight className="w-5 h-5 ml-2" />
+                          </Button>
+                        </Link>
+
+                        {!bookingConfirmed ? (
+                          <Button 
+                            variant="outline" 
+                            onClick={handleBookCall}
+                            className="w-full h-14 text-sm font-bold border-white/10 hover:bg-white/5 text-slate-300 hover:text-white rounded-xl flex items-center justify-center gap-2"
+                          >
+                            <Calendar className="w-4 h-4 text-indigo-400" /> Agendar Auxílio de Setup (Opcional)
+                          </Button>
+                        ) : (
+                          <div className="py-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-xs font-bold text-indigo-400 flex items-center justify-center gap-2 animate-in fade-in zoom-in-95">
+                            <CheckCircle2 className="w-4 h-4 text-indigo-400" /> Auxílio de setup agendado com sucesso!
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
+
+                  {/* Trust Policy */}
+                  <div className="relative bg-gradient-to-br from-amber-500/10 via-emerald-500/5 to-slate-950 border border-amber-500/20 rounded-2xl p-4 text-left">
+                    <div className="flex items-start gap-3">
+                      <ShieldCheck className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                      <p className="text-[9px] text-slate-300 leading-relaxed font-light">
+                        <strong>Garantia Comercial Invertida de 30 dias ativa.</strong> Se em até 30 dias após a homologação e deploy o SinergIA OS não se provar lucrativo eliminando a fricção operacional de {nicheInfo.shortTitle}, devolvemos 100% do seu setup de engenharia.
+                      </p>
+                    </div>
+                  </div>
+
+                </CardContent>
+              </Card>
+
+              {/* Trust badges */}
+              <div className="grid grid-cols-3 gap-4 text-center opacity-65">
+                <div className="p-4 bg-slate-900/40 border border-white/5 rounded-2xl flex flex-col items-center">
+                  <ShieldCheck className="w-5 h-5 text-emerald-400 mb-1.5" />
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">100% Protegido</span>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="p-4 bg-slate-900/40 border border-white/5 rounded-2xl flex flex-col items-center">
+                  <Laptop className="w-5 h-5 text-emerald-400 mb-1.5" />
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Provisionado</span>
+                </div>
+                <div className="p-4 bg-slate-900/40 border border-white/5 rounded-2xl flex flex-col items-center">
+                  <Cpu className="w-5 h-5 text-emerald-400 mb-1.5" />
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Engines Ativas</span>
+                </div>
+              </div>
 
-            {/* Trust and safety details */}
-            <div className="grid grid-cols-3 gap-4 text-center opacity-65">
-              <div className="p-4 bg-slate-900/40 border border-white/5 rounded-2xl flex flex-col items-center">
-                <ShieldCheck className="w-5 h-5 text-emerald-400 mb-1.5" />
-                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">100% Protegido</span>
-              </div>
-              <div className="p-4 bg-slate-900/40 border border-white/5 rounded-2xl flex flex-col items-center">
-                <Laptop className="w-5 h-5 text-emerald-400 mb-1.5" />
-                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Provisionado</span>
-              </div>
-              <div className="p-4 bg-slate-900/40 border border-white/5 rounded-2xl flex flex-col items-center">
-                <Cpu className="w-5 h-5 text-emerald-400 mb-1.5" />
-                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Engines Ativas</span>
-              </div>
             </div>
-
-          </div>
-        )}
+          );
+        })()}
 
       </div>
     </div>

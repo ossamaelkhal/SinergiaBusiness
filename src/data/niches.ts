@@ -27,6 +27,24 @@ export interface NicheMetrics {
   leadsHumanCapacity: number;    // Volume máximo de leads atendidos por vendedor/mês
 }
 
+export interface BehavioralFriction {
+  name: string;             // ex: 'Lead Cherry-Picking'
+  rate: number;             // ex: 35 (%)
+  impactDescription: string; // ex: 'Corretores ignoram 35% de leads de menor ticket...'
+}
+
+export interface SinergiaBlueprint {
+  id: string;               // ex: 'omni-interceptor'
+  name: string;             // ex: 'Roleta de Corretores Dinâmica & Qualificação Cognitiva'
+  description: string;      // ex: 'Interceptação e qualificação automática...'
+}
+
+export interface OperationalDNA {
+  friction: BehavioralFriction;
+  recommendedBlueprints: SinergiaBlueprint[];
+  activeFlowNetworks: string[]; // ex: ['Intercepção e Resgate 24/7', 'Backoffice e Conciliação']
+}
+
 export interface NicheSolution {
   slug: string
   title: string
@@ -60,6 +78,7 @@ export interface NicheSolution {
   headline?: string;
   featuresFreePlaybook?: string[];
   financialMetrics: NicheMetrics;
+  operationalDNA: OperationalDNA;
 }
 
 export const nichesData: Record<string, NicheSolution> = {
@@ -142,6 +161,21 @@ export const nichesData: Record<string, NicheSolution> = {
         title: "O Auditor de Guias TISS/TUSS",
         description: "Inteligência de retaguarda que valida prontuários e códigos em tempo real antes do envio, eliminando glosas e liberando o dinheiro retido pelos convênios."
       }
+    },
+    operationalDNA: {
+      friction: {
+        name: 'Discovery No-Show Rate',
+        rate: 28,
+        impactDescription: 'Pacientes esquecem de comparecer ou desmarcar consultas, gerando 28% de ociosidade operacional nas salas médicas'
+      },
+      recommendedBlueprints: [
+        {
+          id: 'agenda-guardian',
+          name: 'Blueprint Guardião da Agenda & Triagem Conversacional',
+          description: 'Confirmação e reagendamento de consultas via linguagem natural fluida, com preenchimento automático de ociosidades.'
+        }
+      ],
+      activeFlowNetworks: ['Intercepção e Resgate 24/7', 'Validação Documental']
     }
   },
 
@@ -222,6 +256,21 @@ export const nichesData: Record<string, NicheSolution> = {
         title: "A Mesa de Cotação Autônoma",
         description: "Processamento por visão computacional (OCR) de listas de compras enviadas por foto ou áudio, gerando o pedido pronto no ERP em menos de um minuto."
       }
+    },
+    operationalDNA: {
+      friction: {
+        name: 'Latency Decay Factor',
+        rate: 42,
+        impactDescription: 'Demora no WhatsApp faz com que 42% dos compradores migrem para concorrentes em menos de 5 minutos'
+      },
+      recommendedBlueprints: [
+        {
+          id: 'omni-checkout-rescuing',
+          name: 'Blueprint Resgate Transacional Omnichannel',
+          description: 'Acionamento de leads de carrinho abandonado com propostas empáticas integradas ao ERP'
+        }
+      ],
+      activeFlowNetworks: ['Intercepção e Resgate 24/7']
     }
   },
 
@@ -303,6 +352,21 @@ export const nichesData: Record<string, NicheSolution> = {
         title: "O Guardião Documental Aduaneiro",
         description: "Leitura algorítmica e cruzamento de Invoices com as regras fiscais vigentes para detectar inconsistências e aprovar documentações em massa para evitar travas aduaneiras."
       }
+    },
+    operationalDNA: {
+      friction: {
+        name: 'Manual Route Allocation Overhead',
+        rate: 30,
+        impactDescription: 'Demora manual na triagem de endereços e despacho de coletas urgentes causa 30% de atraso e ociosidade de frota'
+      },
+      recommendedBlueprints: [
+        {
+          id: 'logistics-router',
+          name: 'Blueprint Roteirização e Triagem de Ordens',
+          description: 'Roteirização preditiva e alocação de motoristas baseada em contexto geolocalizado em 20s'
+        }
+      ],
+      activeFlowNetworks: ['Intercepção e Resgate 24/7', 'Backoffice e Conciliação']
     }
   },
 
@@ -382,6 +446,21 @@ export const nichesData: Record<string, NicheSolution> = {
         title: "A Mesa de Crédito Expresso",
         description: "Análise inteligente para Factoring e FIDCs que valida a NF-e na SEFAZ, audita assinaturas em canhotos de entrega por visão computacional e aprova crédito em 5 minutos."
       }
+    },
+    operationalDNA: {
+      friction: {
+        name: 'Duplicate/Fraud Invoicing Rate',
+        rate: 15,
+        impactDescription: '15% de notas fiscais antecipadas possuem inconsistências de canhotos ou assinaturas falsas sem auditoria'
+      },
+      recommendedBlueprints: [
+        {
+          id: 'credit-desk-ocr',
+          name: 'Blueprint Auditoria e Liberação de Mesa de Crédito',
+          description: 'Mesa de análise instantânea que cruza canhotos de entrega via visão computacional e notas na SEFAZ'
+        }
+      ],
+      activeFlowNetworks: ['Backoffice e Conciliação']
     }
   },
 
@@ -462,6 +541,21 @@ export const nichesData: Record<string, NicheSolution> = {
         title: "O Coordenador de Escalas Ativo",
         description: "Monitoramento de presença e validação por OCR de atestados via WhatsApp para equipes descentralizadas, acionando substitutos automaticamente ao detectar furos."
       }
+    },
+    operationalDNA: {
+      friction: {
+        name: 'Quote Abandonment Rate',
+        rate: 32,
+        impactDescription: 'Técnico sênior em campo deixa 32% dos orçamentos técnicos de alto ticket sem resposta por falta de tempo'
+      },
+      recommendedBlueprints: [
+        {
+          id: 'technical-estimator',
+          name: 'Blueprint Orçamentista Técnico Autônomo',
+          description: 'Cálculo de insumos por tabelas via fotos de escopo enviadas no WhatsApp e agendamento da visita final'
+        }
+      ],
+      activeFlowNetworks: ['Intercepção e Resgate 24/7']
     }
   },
 
@@ -542,6 +636,21 @@ export const nichesData: Record<string, NicheSolution> = {
         title: "O Defensor de Receita Automático",
         description: "Defesa automatizada de chargebacks que reúne logs de acesso, termos assinados e comprovantes de entrega de forma algorítmica para vencer disputas bancárias."
       }
+    },
+    operationalDNA: {
+      friction: {
+        name: 'Churn Risk Neglect',
+        rate: 25,
+        impactDescription: '25% de reclamações públicas e atrasos de mensalidades causam churn silencioso por falta de réguas'
+      },
+      recommendedBlueprints: [
+        {
+          id: 'reputation-shield',
+          name: 'Blueprint Escudo de Reputação & Cobrança Amigável',
+          description: 'Cobrança conversacional amigável via WhatsApp combinada com defesa e monitoramento de queixas públicas'
+        }
+      ],
+      activeFlowNetworks: ['Intercepção e Resgate 24/7', 'Backoffice e Conciliação']
     }
   },
 
@@ -574,6 +683,21 @@ export const nichesData: Record<string, NicheSolution> = {
       crmDataErrorRate: 10,
       legacyStackCostPerRep: 350,
       leadsHumanCapacity: 100
+    },
+    operationalDNA: {
+      friction: {
+        name: 'Lead Cherry-Picking',
+        rate: 35,
+        impactDescription: 'Corretores ignoram 35% de leads de menor ticket, desperdiçando verba de marketing nos portais'
+      },
+      recommendedBlueprints: [
+        {
+          id: 'realtor-roleta-qualifier',
+          name: 'Blueprint Triador Cognitivo & Roleta de Corretores',
+          description: 'Distribuição transparente via roleta instantânea após pré-qualificação financeira no WhatsApp'
+        }
+      ],
+      activeFlowNetworks: ['Intercepção e Resgate 24/7']
     },
     painPoints: [
       {
@@ -656,6 +780,21 @@ export const nichesData: Record<string, NicheSolution> = {
       legacyStackCostPerRep: 180,
       leadsHumanCapacity: 400
     },
+    operationalDNA: {
+      friction: {
+        name: 'Cart Churn Factor',
+        rate: 45,
+        impactDescription: 'Carrinhos e PIX/boletos gerados sem aviso ativo resultam em 45% de perda nas vendas brutas'
+      },
+      recommendedBlueprints: [
+        {
+          id: 'cart-rescuer',
+          name: 'Blueprint Recuperador Ativo de Vendas e Upsells',
+          description: 'Recuperação conversacional acionada por webhook com cupom dinâmico e prospecção de Upsell'
+        }
+      ],
+      activeFlowNetworks: ['Intercepção e Resgate 24/7']
+    },
     painPoints: [
       {
         title: "Carrinhos Abandonados",
@@ -710,3 +849,30 @@ export const nichesData: Record<string, NicheSolution> = {
 
 export const getAllNiches = () => Object.values(nichesData)
 export const getNicheBySlug = (slug: string) => nichesData[slug]
+
+export interface ToolStackComplexity {
+  id: string;
+  name: string;
+  level: 1 | 2 | 3;
+  category: 'SaaS Nativo' | 'Híbrido' | 'Corporativo/Legado';
+  setupFee: number;
+}
+
+export const STACK_TOOLS: Record<string, ToolStackComplexity> = {
+  // Nível 1
+  'shopify': { id: 'shopify', name: 'Shopify', level: 1, category: 'SaaS Nativo', setupFee: 3000 },
+  'bling': { id: 'bling', name: 'Bling', level: 1, category: 'SaaS Nativo', setupFee: 3000 },
+  'hubspot': { id: 'hubspot', name: 'Hubspot', level: 1, category: 'SaaS Nativo', setupFee: 3000 },
+  
+  // Nível 2
+  'rdstation': { id: 'rdstation', name: 'RD Station', level: 2, category: 'Híbrido', setupFee: 12000 },
+  'salesforce': { id: 'salesforce', name: 'Salesforce', level: 2, category: 'Híbrido', setupFee: 12000 },
+  'zoho': { id: 'zoho', name: 'Zoho', level: 2, category: 'Híbrido', setupFee: 12000 },
+  
+  // Nível 3
+  'totvs': { id: 'totvs', name: 'TOTVS', level: 3, category: 'Corporativo/Legado', setupFee: 35000 },
+  'sap': { id: 'sap', name: 'SAP', level: 3, category: 'Corporativo/Legado', setupFee: 35000 },
+  'senior': { id: 'senior', name: 'Senior Sistemas', level: 3, category: 'Corporativo/Legado', setupFee: 35000 },
+  'sefaz': { id: 'sefaz', name: 'RPA de Portais Fiscais / SEFAZ', level: 3, category: 'Corporativo/Legado', setupFee: 35000 }
+};
+

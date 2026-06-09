@@ -68,6 +68,9 @@ async function getLeadFromSession() {
         phone: data.phone || '',
         revenue: data.revenue || '',
         status: data.status || '',
+        blueprintId: data.blueprintId || '',
+        malhas: data.malhas || [],
+        stackLevel: data.stackLevel || 1,
       };
     }
     return null;
@@ -77,7 +80,7 @@ async function getLeadFromSession() {
   }
 }
 
-export default async function CheckoutPage({ searchParams }: { searchParams?: { niche?: string, modules?: string } }) {
+export default async function CheckoutPage({ searchParams }: { searchParams?: { niche?: string, blueprint?: string, slots?: string, setup?: string, modules?: string } }) {
   const lead = await getLeadFromSession();
 
   if (!lead) {

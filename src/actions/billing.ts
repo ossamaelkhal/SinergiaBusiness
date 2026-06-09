@@ -3,7 +3,7 @@
 import * as admin from 'firebase-admin'
 import { revalidatePath } from 'next/cache'
 import { getNicheBySlug } from '@/data/niches'
-import { calculateInfraBase } from '@/lib/utils'
+import { calculateInfraBase, calculateSinergiaOSPricing } from '@/lib/utils'
 
 // Inicializar o Firebase Admin SDK com segurança no escopo do servidor
 if (!admin.apps.length) {
@@ -33,7 +33,7 @@ export interface PaymentSessionResponse {
   monthlyLoss?: number;
 }
 
-export async function generatePaymentSession(leadId: string, modulesStr?: string): Promise<PaymentSessionResponse> {
+export async function generatePaymentSession(leadId: string): Promise<PaymentSessionResponse> {
   try {
     if (!leadId) {
       return { success: false, error: 'Lead ID é obrigatório.' };
@@ -81,19 +81,24 @@ export async function generatePaymentSession(leadId: string, modulesStr?: string
       return base;
     })();
 
-    // 2. Módulos ativos e Precificação Modular Dinâmica
-    const activeModules = modulesStr ? modulesStr.split(',').filter(Boolean) : ['piloto', 'resgate', 'backoffice'];
-    
-    // Obter o nicho para buscar a volumetria de leads
+    // 2. Slots de Agentes e Complexidade de Stack salvos no Firestore
     const niche = nichoSlug ? getNicheBySlug(nichoSlug) : null;
-    const leadsCount = niche?.financialMetrics?.leadsPerMonth || 300;
+    const defaultMalhas = niche?.operationalDNA?.activeFlowNetworks || ['Intercepção e Resgate 24/7'];
     
-    const infraBase = calculateInfraBase(leadsCount, nichoSlug || undefined);
-    const modulesCost = activeModules.length * 350;
-    const monthlyLicense = infraBase + modulesCost;
-    const setupPrice = activeModules.length * 1500; // R$ 1.500 por módulo ativo
+    // Ler preferências salvos no Firestore
+    const malhas = Array.isArray(leadData.malhas) && leadData.malhas.length > 0 
+      ? leadData.malhas 
+      : defaultMalhas;
+      
+    const activeSlotsCount = malhas.length;
+    const stackLevel = Number(leadData.stackLevel) || 1;
 
-    if (setupPrice <= 5000) {
+    // 3. Faturamento institucional no servidor
+    const { platformFee, slotsFee, setupFee, monthlyTotal } = calculateSinergiaOSPricing(activeSlotsCount, stackLevel);
+    const monthlyLicense = monthlyTotal;
+    const setupPrice = setupFee;
+
+    if (setupPrice <= 12000) {
       // Gerar PIX Imediato simulado
       const transactionId = `MP-${Math.floor(Math.random() * 1000000000)}`;
       const pixKey = "financeiro@sinergia.ai";
@@ -103,10 +108,14 @@ export async function generatePaymentSession(leadId: string, modulesStr?: string
       const pixString = `00020126580014br.gov.bcb.pix0136${pixKey}52040000530398654${priceLenStr}${priceStr}5802BR5911SinergIA OS6009Sao Paulo62070503***6304E5D4`;
 
       await leadRef.update({
-        planId: 'modular_infrastructure',
+        planId: 'sinergia_os_core',
         contractValue: setupPrice,
+        setupEngineeringFee: setupPrice,
         monthlyLicense: monthlyLicense,
-        activeModules: activeModules,
+        activeSlotsCount: activeSlotsCount,
+        activeFlowNetworks: malhas,
+        blueprintId: leadData.blueprintId || 'agenda-guardian',
+        invertedGuarantee30Days: true,
         billing_status: 'pending',
         transactionId: transactionId,
         updatedAt: new Date().toISOString()
@@ -127,10 +136,14 @@ export async function generatePaymentSession(leadId: string, modulesStr?: string
     } else {
       // Booking Concierge para setups corporativos
       await leadRef.update({
-        planId: 'modular_infrastructure',
+        planId: 'sinergia_os_core',
         contractValue: setupPrice,
+        setupEngineeringFee: setupPrice,
         monthlyLicense: monthlyLicense,
-        activeModules: activeModules,
+        activeSlotsCount: activeSlotsCount,
+        activeFlowNetworks: malhas,
+        blueprintId: leadData.blueprintId || 'agenda-guardian',
+        invertedGuarantee30Days: true,
         billing_status: 'waiting_call',
         status: 'waiting_onboarding_call',
         updatedAt: new Date().toISOString()
@@ -139,7 +152,7 @@ export async function generatePaymentSession(leadId: string, modulesStr?: string
       return {
         success: true,
         type: 'booking',
-        plan: 'Modular Value Setup',
+        plan: 'SinergIA OS Core setup',
         price: setupPrice,
         setupPrice,
         monthlyLoss

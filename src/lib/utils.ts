@@ -46,4 +46,31 @@ export function calculateInfraBase(leadsCount: number, nicheSlug?: string): numb
       return Math.max(490, Math.round(500 * 0.50 + 1000 * 0.40 + (leadsCount - 1500) * 0.30));
     }
   }
-}
+}
+
+export interface SinergiaOSBillingDetails {
+  platformFee: number;
+  slotsFee: number;
+  setupFee: number;
+  monthlyTotal: number;
+}
+
+export function calculateSinergiaOSPricing(slotsCount: number, stackLevel: number): SinergiaOSBillingDetails {
+  const platformFee = 1500;
+  const slotsFee = Math.max(0, slotsCount) * 1200;
+  
+  let setupFee = 3000;
+  if (stackLevel === 2) {
+    setupFee = 12000;
+  } else if (stackLevel === 3) {
+    setupFee = 35000;
+  }
+  
+  return {
+    platformFee,
+    slotsFee,
+    setupFee,
+    monthlyTotal: platformFee + slotsFee
+  };
+}
+

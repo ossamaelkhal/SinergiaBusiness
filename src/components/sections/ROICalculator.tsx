@@ -64,11 +64,6 @@ export function ROICalculator({ nicheSlug }: { nicheSlug?: string } = {}) {
   // 5. Clientes / Contatos inativos (Base)
   const [baseLeadsFrios, setBaseLeadsFrios] = useState(2000); // Base estagnada no CRM
 
-  // 6. Módulos Autônomos Ativos (Configuração de Licenciamento)
-  const [moduloPiloto, setModuloPiloto] = useState(true);
-  const [moduloResgate, setModuloResgate] = useState(true);
-  const [moduloBackoffice, setModuloBackoffice] = useState(true);
-
   // Buscar dados do nicho para preenchimento dinâmico
   const nicheData = nicheSlug ? getNicheBySlug(nicheSlug) : null;
   const financialMetrics = nicheData?.financialMetrics;
@@ -107,9 +102,6 @@ export function ROICalculator({ nicheSlug }: { nicheSlug?: string } = {}) {
         setTamanhoEquipe(teamSize);
         setCustoVendedor(Math.round(financialMetrics.teamCosts / teamSize));
       }
-      setModuloPiloto(true);
-      setModuloResgate(true);
-      setModuloBackoffice(true);
     }
   }, [nicheSlug, financialMetrics]);
 
@@ -119,32 +111,25 @@ export function ROICalculator({ nicheSlug }: { nicheSlug?: string } = {}) {
 
   // A. Custo de Degradação por Resposta Tardia (Lead Decay)
   const leadDecayCost = Math.round(leadsPorMes * (taxaConversaoAtual / 100) * fatorPerdaLatencia * ticketMedio);
-  const recuperadoLeadDecay = moduloPiloto ? Math.round(leadDecayCost * 0.90) : 0;
+  const recuperadoLeadDecay = Math.round(leadDecayCost * 0.90);
 
   // B. Alavancagem de Headcount & Turnover (Salary Waste + Encargos + Turnover Risk)
   const humanTurnoverRate = financialMetrics?.humanTurnoverRate ?? 25;
   const monthlyTurnoverCost = Math.round(tamanhoEquipe * (custoVendedor * 1.70) * (humanTurnoverRate / 100) / 12);
   const adminWastedCost = Math.round(tamanhoEquipe * (custoVendedor * 1.70) * (tempoAdmin / 100));
   const headcountCost = adminWastedCost + monthlyTurnoverCost;
-  const recuperadoHeadcount = (moduloPiloto || moduloBackoffice) ? Math.round(headcountCost * 0.85) : 0;
+  const recuperadoHeadcount = Math.round(headcountCost * 0.85);
 
   // C. Consolidação de Stack Legado (Software tools consolidation)
   const legacyStackCostPerRep = financialMetrics?.legacyStackCostPerRep ?? 250;
   const legacyStackCost = Math.round((tamanhoEquipe * legacyStackCostPerRep) + 1200);
-  const recuperadoLegacyStack = moduloBackoffice ? legacyStackCost : 0;
+  const recuperadoLegacyStack = legacyStackCost;
 
   // Soma de todas as perdas operacionais
   const totalDesperdicio = leadDecayCost + headcountCost + legacyStackCost;
 
-  // --- CÁLCULOS DE MONETIZAÇÃO DINÂMICA DA SINERGIA ---
-  const infraBase = calculateInfraBase(leadsPorMes, nicheSlug);
-  const activeModulesCount = (moduloPiloto ? 1 : 0) + (moduloResgate ? 1 : 0) + (moduloBackoffice ? 1 : 0);
-  const custoSinergia = infraBase + (activeModulesCount * 350);
-  const setupSinergia = activeModulesCount * 1500;
-
   // --- CÁLCULOS DE RECUPERAÇÃO COM SINERGIA ---
   const totalRecuperado = recuperadoLeadDecay + recuperadoHeadcount + recuperadoLegacyStack;
-  const netROI = totalRecuperado - custoSinergia;
 
   // Porcentagem das perdas totais que conseguimos recuperar
   const percentualRecuperado = totalDesperdicio > 0 ? Math.round((totalRecuperado / totalDesperdicio) * 100) : 0;
@@ -396,8 +381,7 @@ export function ROICalculator({ nicheSlug }: { nicheSlug?: string } = {}) {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Card 5: Seleção de Módulos Autônomos */}
+            {/* Card 5: DNA do Fluxo de Dados Operacionais Recomendado */}
             <Card className="bg-slate-900/60 backdrop-blur-md border-white/5 shadow-xl relative overflow-hidden">
               <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div>
               <CardContent className="p-6 md:p-8">
@@ -406,56 +390,44 @@ export function ROICalculator({ nicheSlug }: { nicheSlug?: string } = {}) {
                     <Cpu className="w-5 h-5 text-indigo-400" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">Módulos Autônomos Ativos</h3>
-                    <p className="text-xs text-slate-500">Selecione os módulos a serem provisionados para sua infraestrutura</p>
+                    <h3 className="text-lg font-bold text-white">DNA do Fluxo Operacional SinergIA OS</h3>
+                    <p className="text-xs text-slate-500">Mapeamento de processos recomendados para o seu perfil</p>
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  {/* Modulo 1: Piloto Automático */}
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-950/40 border border-white/5 hover:border-white/10 transition-colors">
-                    <input 
-                      type="checkbox" 
-                      id="moduloPiloto"
-                      checked={moduloPiloto}
-                      onChange={(e) => setModuloPiloto(e.target.checked)}
-                      className="mt-1 w-4 h-4 rounded border-white/10 accent-indigo-500"
-                    />
-                    <label htmlFor="moduloPiloto" className="text-xs text-slate-300 cursor-pointer w-full">
-                      <strong className="text-white block mb-0.5">O Piloto Automático (WhatsApp/Instagram)</strong>
-                      {nicheData?.hooks.pilotoAutomatico.title || "Qualificação e conversação ativa 24/7"}
-                    </label>
-                  </div>
+                  {nicheData?.operationalDNA ? (
+                    <>
+                      <div className="bg-slate-950/40 p-4 rounded-xl border border-white/5">
+                        <span className="text-[10px] font-mono tracking-wider uppercase text-rose-400 font-bold block mb-1">Atrito Comportamental Mapeado</span>
+                        <h4 className="text-sm font-bold text-white">{nicheData.operationalDNA.friction.name} ({nicheData.operationalDNA.friction.rate}%)</h4>
+                        <p className="text-xs text-slate-400 mt-1 leading-relaxed">{nicheData.operationalDNA.friction.impactDescription}</p>
+                      </div>
 
-                  {/* Modulo 2: Resgate Ativo */}
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-950/40 border border-white/5 hover:border-white/10 transition-colors">
-                    <input 
-                      type="checkbox" 
-                      id="moduloResgate"
-                      checked={moduloResgate}
-                      onChange={(e) => setModuloResgate(e.target.checked)}
-                      className="mt-1 w-4 h-4 rounded border-white/10 accent-indigo-500"
-                    />
-                    <label htmlFor="moduloResgate" className="text-xs text-slate-300 cursor-pointer w-full">
-                      <strong className="text-white block mb-0.5">O Resgate Ativo (Inadimplência/Inativos)</strong>
-                      {nicheData?.hooks.resgateAtivo.title || "Recuperação de faturamento atrasado e inativos"}
-                    </label>
-                  </div>
+                      <div className="space-y-2">
+                        <span className="text-[10px] font-mono tracking-wider uppercase text-indigo-400 font-bold block">Blueprints com Ativação Recomendada</span>
+                        {nicheData.operationalDNA.recommendedBlueprints.map((blueprint) => (
+                          <div key={blueprint.id} className="bg-slate-950/40 p-3.5 rounded-xl border border-white/5">
+                            <h5 className="text-xs font-bold text-white">{blueprint.name}</h5>
+                            <p className="text-[10px] text-slate-500 mt-0.5 leading-relaxed">{blueprint.description}</p>
+                          </div>
+                        ))}
+                      </div>
 
-                  {/* Modulo 3: Backoffice */}
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-950/40 border border-white/5 hover:border-white/10 transition-colors">
-                    <input 
-                      type="checkbox" 
-                      id="moduloBackoffice"
-                      checked={moduloBackoffice}
-                      onChange={(e) => setModuloBackoffice(e.target.checked)}
-                      className="mt-1 w-4 h-4 rounded border-white/10 accent-indigo-500"
-                    />
-                    <label htmlFor="moduloBackoffice" className="text-xs text-slate-300 cursor-pointer w-full">
-                      <strong className="text-white block mb-0.5">O Backoffice (Auditoria/OCR)</strong>
-                      {nicheData?.hooks.backoffice.title || "Auditoria automática, OCR e SEFAZ"}
-                    </label>
-                  </div>
+                      <div className="space-y-2 pt-2">
+                        <span className="text-[10px] font-mono tracking-wider uppercase text-emerald-400 font-bold block">Malhas de Fluxo Ativas de Nuvem</span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {nicheData.operationalDNA.activeFlowNetworks.map((network, idx) => (
+                            <span key={idx} className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] font-bold uppercase py-0.5 px-2.5 rounded-full">
+                              {network}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-xs text-slate-500 italic">Selecione um nicho acima para mapear o DNA operacional correspondente.</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -530,38 +502,15 @@ export function ROICalculator({ nicheSlug }: { nicheSlug?: string } = {}) {
                   <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/10 blur-xl rounded-full"></div>
                   
                   <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">
-                    <Sparkles className="w-4 h-4" /> Projeção de Recuperação SinergIA
+                    <Sparkles className="w-4 h-4" /> Projeção de Recuperação SinergIA OS
                   </div>
 
                   <div className="text-3xl font-black text-white tracking-tight mb-4">
-                    + {formatBRL(totalRecuperado)} <span className="text-xs text-slate-400 font-normal">/mês bruto</span>
+                    + {formatBRL(totalRecuperado)} <span className="text-xs text-slate-400 font-normal">/mês em economia bruta</span>
                   </div>
 
-                  <div className="space-y-2 border-t border-emerald-500/20 pt-4 text-xs">
-                    <div className="flex justify-between text-slate-300">
-                      <span>Infraestrutura Cognitiva Base:</span>
-                      <span className="font-bold text-white">{formatBRL(infraBase)}/mês</span>
-                    </div>
-                    <div className="flex justify-between text-slate-300">
-                      <span>Módulos Ativos ({activeModulesCount}):</span>
-                      <span className="font-bold text-white">{formatBRL(activeModulesCount * 350)}/mês</span>
-                    </div>
-                    <div className="flex justify-between text-slate-300 border-t border-white/5 pt-2">
-                      <span className="font-bold text-emerald-400">Licenciamento de Módulos de Negócio SinergIA:</span>
-                      <span className="font-extrabold text-emerald-400">{formatBRL(custoSinergia)}/mês</span>
-                    </div>
-                    <div className="flex justify-between text-slate-300">
-                      <span className="font-bold text-indigo-400">Retorno Líquido Mensal:</span>
-                      <span className="font-extrabold text-indigo-400">{formatBRL(netROI)}/mês</span>
-                    </div>
-                    <div className="flex justify-between text-slate-400 text-[10px] pt-1 border-t border-white/5 mt-2">
-                      <span>Setup de Engenharia (Provisionamento):</span>
-                      <span>{formatBRL(setupSinergia)}</span>
-                    </div>
-                  </div>
-
-                  <p className="text-slate-300 text-[11px] mt-4 leading-relaxed">
-                    Você pode recuperar até <strong className="text-emerald-400">{percentualRecuperado}%</strong> do seu desperdício financeiro mensal aplicando a nossa infraestrutura.
+                  <p className="text-slate-300 text-[11px] mt-4 leading-relaxed font-light">
+                    A implantação do SinergIA OS neutraliza gargalos de processos de forma autônoma. O cálculo projeta uma taxa de estancamento de vazamento financeiro de até <strong className="text-emerald-400">{percentualRecuperado}%</strong> das perdas atuais da sua empresa.
                   </p>
                 </div>
 
@@ -569,18 +518,13 @@ export function ROICalculator({ nicheSlug }: { nicheSlug?: string } = {}) {
                   href={{
                     pathname: '/apply',
                     query: {
-                      nicho: nicheSlug || '',
-                      modules: [
-                        moduloPiloto ? 'piloto' : '',
-                        moduloResgate ? 'resgate' : '',
-                        moduloBackoffice ? 'backoffice' : ''
-                      ].filter(Boolean).join(',')
+                      nicho: nicheSlug || ''
                     }
                   }} 
                   className="w-full"
                 >
                   <Button className="w-full bg-white text-slate-950 hover:bg-emerald-400 font-bold h-14 rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2">
-                    Receber Laudo Detalhado Grátis
+                    Liberar Meu Diagnóstico de Fricção
                     <ArrowRight className="w-5 h-5" />
                   </Button>
                 </Link>
