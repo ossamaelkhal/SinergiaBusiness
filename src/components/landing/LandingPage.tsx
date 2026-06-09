@@ -12,6 +12,7 @@ import SinergiaOS from '@/components/sections/SinergiaOS' // 4 Pilares da Opera�
 import SinergiaCosmos from '@/components/sections/SinergiaCosmos' // Memória RAG
 import SinergiaFAQ from '@/components/sections/SinergiaFAQ' // FAQ e Quebra de Objeções
 import CTA from '@/components/sections/CTA' // CTA Dupla (Diagnóstico / Licenciamento)
+import SinergiaPricingOS from '@/components/sections/SinergiaPricingOS'
 
 export default function LandingPage() {
     return (
@@ -42,10 +43,13 @@ export default function LandingPage() {
                 {/* 4. A Memória RAG e Conexão Cosmos */}
                 <SinergiaCosmos />
 
-                {/* 5. Quebra de Objeções (FAQ) */}
+                {/* 5. Simulador de Alocação de Infraestrutura SinergIA OS */}
+                <SinergiaPricingOS nicheColor="emerald" />
+
+                {/* 6. Quebra de Objeções (FAQ) */}
                 <SinergiaFAQ />
 
-                {/* 6. Fechamento de Duplo Caminho */}
+                {/* 7. Fechamento de Duplo Caminho */}
                 <div id="cta-section">
                   <CTA />
                 </div>

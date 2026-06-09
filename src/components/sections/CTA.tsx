@@ -88,7 +88,7 @@ export default function CTA() {
                 </li>
                 <li className="flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-indigo-400 shrink-0" />
-                  <span>Certificação na academia Aura Learn AI incluída</span>
+                  <span>Certificação Oficial SinergIA Academy incluída</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-indigo-400 shrink-0" />

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { NicheCTAButton } from '@/components/features/solutions/NicheCTAButton';
 import { ROICalculator } from '@/components/sections/ROICalculator';
+import SinergiaPricingOS from '@/components/sections/SinergiaPricingOS';
 
 const formatHumanLatency = (seconds: number): string => {
   if (seconds >= 3600) {
@@ -459,132 +460,8 @@ export default function NicheSolutionPage({
         {/* CALCULADORA DE ROI INTEGRADA AO NICHO */}
         <ROICalculator nicheSlug={niche.slug} />
 
-        {/* ANCORAGEM DE PREÇOS E PILOTO TÁTICO */}
-        <section id="pricing-section" className="border-t border-white/5 py-24 bg-slate-900/20 relative overflow-hidden">
-
-          <div className="container mx-auto px-6">
-            
-            <div className="text-center max-w-3xl mx-auto mb-20">
-              <span className={`text-xs font-bold uppercase tracking-widest ${textMaps[niche.color]} bg-white/5 border ${borderMaps[niche.color]} px-4 py-1.5 rounded-full`}>
-                Tabela de Investimentos
-              </span>
-              <h2 className="text-3xl md:text-5xl font-black text-white mt-6 tracking-tight">
-                Estrutura de Modelos de Investimento
-              </h2>
-              <p className="text-slate-400 mt-4 leading-relaxed font-light">
-                Modelos de contratação realistas de mercado construídos para garantir viabilidade imediata, consistência técnica e alinhamento de ROI.
-              </p>
-            </div>
-
-            <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto items-stretch">
-              
-              {/* Tabela 1: Piloto PoC */}
-              <div className="bg-slate-950 border border-white/10 rounded-[2rem] p-8 flex flex-col justify-between hover:bg-slate-900/40 transition-all group relative">
-                <div className="space-y-6">
-                  <div className="inline-flex items-center px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    Mitigação Límbica de Risco
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-black text-white">Piloto de Validação (PoC)</h3>
-                    <p className="text-xs text-slate-400 mt-2 font-light leading-relaxed">
-                      Instalamos 1 agente cognitivo treinado rodando ativo no seu canal em até 7 dias. Teste o funcionamento prático com tráfego real.
-                    </p>
-                  </div>
-                  
-                  <div className="pt-4">
-                    <span className="text-4xl font-black text-white">R$ 997</span>
-                    <span className="text-slate-500 text-xs font-medium"> / setup único</span>
-                    <span className="text-[10px] text-emerald-400 block mt-1 font-bold uppercase tracking-wider">
-                      ✓ 100% convertido em crédito no projeto final
-                    </span>
-                  </div>
-
-                  <ul className="space-y-3 pt-6 border-t border-white/5 text-xs text-slate-300">
-                    <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> 1 Agente de atendimento ou triagem</li>
-                    <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Integração com WhatsApp ou Instagram</li>
-                    <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Painel básico de monitoramento de logs</li>
-                    <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> 7 dias de sustentação ativa inclusos</li>
-                  </ul>
-                </div>
-
-                <div className="pt-8">
-                  <NicheCTAButton slug={niche.slug} text="Ativar Piloto PoC" variant="outline" color={niche.color} className="w-full" />
-                </div>
-              </div>
-
-              {/* Tabela 2: Integração Standard (Recomendada) */}
-              <div className={`bg-slate-900 border-2 ${borderMaps[niche.color]} rounded-[2rem] p-8 flex flex-col justify-between hover:bg-slate-900/80 transition-all relative overflow-hidden`}>
-                <div className={`absolute top-0 right-0 w-32 h-32 ${bgMaps[niche.color]} blur-3xl rounded-full opacity-30`} />
-                
-                <div className="space-y-6 relative z-10">
-                  <div className="flex justify-between items-center">
-                    <span className={`inline-flex items-center px-3 py-1 bg-white/10 rounded-full text-[10px] font-black ${textMaps[niche.color]} uppercase tracking-widest`}>
-                      Mais Contratado (Regional)
-                    </span>
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-black text-white">Integração Standard</h3>
-                    <p className="text-xs text-slate-300 mt-2 font-light leading-relaxed">
-                      Sua operação blindada de ponta a ponta. Solução padrão com implantação completa do fluxo comercial ou financeiro no seu nicho.
-                    </p>
-                  </div>
-                  
-                  <div className="pt-4">
-                    <div className="text-slate-400 text-xs">Setup de Implantação</div>
-                    <div className="text-3xl font-black text-white">R$ 15.000</div>
-                    <div className="text-slate-400 text-xs mt-2">Mensalidade (SaaS / Manutenção)</div>
-                    <div className="text-2xl font-black text-white">R$ 1.990<span className="text-xs text-slate-500 font-normal">/mês</span></div>
-                  </div>
-
-                  <ul className="space-y-3 pt-6 border-t border-white/5 text-xs text-slate-200">
-                    <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Até 3 Agentes Cognitivos em Swarm</li>
-                    <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Conexão com banco de dados CRM / ERP</li>
-                    <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Relatório ativo de leads e faturamento</li>
-                    <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Suporte com SLA de 24h úteis</li>
-                  </ul>
-                </div>
-
-                <div className="pt-8 relative z-10">
-                  <NicheCTAButton slug={niche.slug} text="Solicitar Implantação" variant="primary" color={niche.color} className="w-full" />
-                </div>
-              </div>
-
-              {/* Tabela 3: Esquadrão Customizado (Enterprise) */}
-              <div className="bg-slate-950 border border-white/10 rounded-[2rem] p-8 flex flex-col justify-between hover:bg-slate-900/40 transition-all group relative">
-                <div className="space-y-6">
-                  <div className="inline-flex items-center px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    Alta Complexidade B2B
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-black text-white">Esquadrão Custom</h3>
-                    <p className="text-xs text-slate-400 mt-2 font-light leading-relaxed">
-                      Sistemas customizados integrando bases massivas de dados, APIs fechadas e fine-tuning de LLM próprio com segurança dedicada.
-                    </p>
-                  </div>
-                  
-                  <div className="pt-4">
-                    <div className="text-slate-400 text-xs">Setup a partir de</div>
-                    <div className="text-3xl font-black text-white">R$ 50.000</div>
-                    <div className="text-slate-400 text-xs mt-2">Mensalidade Recorrente</div>
-                    <div className="text-2xl font-black text-white">Sob Demanda</div>
-                  </div>
-
-                  <ul className="space-y-3 pt-6 border-t border-white/5 text-xs text-slate-300">
-                    <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Múltiplos agentes com conexões complexas</li>
-                    <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Fine-tuning dedicado e segurança de dados</li>
-                    <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Acordo SLA customizado com suporte imediato</li>
-                    <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Auditoria legal sob LGPD e conformidade</li>
-                  </ul>
-                </div>
-
-                <div className="pt-8">
-                  <NicheCTAButton slug={niche.slug} text="Falar com Especialista" variant="outline" color={niche.color} className="w-full" />
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </section>
+        {/* SIMULADOR DE ALOCAÇÃO DE INFRAESTRUTURA SINERGIA OS */}
+        <SinergiaPricingOS nicheColor={niche.color} nicheSlug={niche.slug} />
 
         {/* CTA DE FECHAMENTO (Persistência de Contexto) */}
         <section className="container mx-auto px-6 py-24 text-center">
