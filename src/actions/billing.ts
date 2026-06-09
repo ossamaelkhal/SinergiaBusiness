@@ -4,18 +4,7 @@ import * as admin from 'firebase-admin'
 import { revalidatePath } from 'next/cache'
 import { getNicheBySlug } from '@/data/niches'
 import { calculateInfraBase, calculateSinergiaOSPricing } from '@/lib/utils'
-
-// Inicializar o Firebase Admin SDK com segurança no escopo do servidor
-if (!admin.apps.length) {
-  try {
-    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
-    admin.initializeApp({
-      projectId: projectId,
-    });
-  } catch (error) {
-    console.error('Falha ao inicializar o Firebase Admin SDK em billing.ts:', error);
-  }
-}
+import * as fbHelper from '@/lib/firebase-admin-helper'
 
 export interface PaymentSessionResponse {
   success: boolean;
@@ -39,17 +28,9 @@ export async function generatePaymentSession(leadId: string): Promise<PaymentSes
       return { success: false, error: 'Lead ID é obrigatório.' };
     }
 
-    const dbAdmin = admin.firestore();
-    const leadRef = dbAdmin.collection('leads').doc(leadId);
-    const leadSnap = await leadRef.get();
-
-    if (!leadSnap.exists) {
-      return { success: false, error: 'Lead não encontrado.' };
-    }
-
-    const leadData = leadSnap.data();
+    const leadData = await fbHelper.getLeadById(leadId);
     if (!leadData) {
-      return { success: false, error: 'Dados do lead inválidos.' };
+      return { success: false, error: 'Lead não encontrado.' };
     }
 
     const auditedLoss = Number(leadData.auditedLoss) || 0;
@@ -107,7 +88,7 @@ export async function generatePaymentSession(leadId: string): Promise<PaymentSes
       // Pix EMV string formatada
       const pixString = `00020126580014br.gov.bcb.pix0136${pixKey}52040000530398654${priceLenStr}${priceStr}5802BR5911SinergIA OS6009Sao Paulo62070503***6304E5D4`;
 
-      await leadRef.update({
+      await fbHelper.updateLeadBilling(leadId, {
         planId: 'sinergia_os_core',
         contractValue: setupPrice,
         setupEngineeringFee: setupPrice,
@@ -118,7 +99,6 @@ export async function generatePaymentSession(leadId: string): Promise<PaymentSes
         invertedGuarantee30Days: true,
         billing_status: 'pending',
         transactionId: transactionId,
-        updatedAt: new Date().toISOString()
       });
 
       return {
@@ -135,7 +115,7 @@ export async function generatePaymentSession(leadId: string): Promise<PaymentSes
       };
     } else {
       // Booking Concierge para setups corporativos
-      await leadRef.update({
+      await fbHelper.updateLeadBilling(leadId, {
         planId: 'sinergia_os_core',
         contractValue: setupPrice,
         setupEngineeringFee: setupPrice,
@@ -146,7 +126,6 @@ export async function generatePaymentSession(leadId: string): Promise<PaymentSes
         invertedGuarantee30Days: true,
         billing_status: 'waiting_call',
         status: 'waiting_onboarding_call',
-        updatedAt: new Date().toISOString()
       });
 
       return {
@@ -166,25 +145,21 @@ export async function generatePaymentSession(leadId: string): Promise<PaymentSes
 
 export async function bookOnboardingCall(leadId: string, datetime: string) {
   try {
-    const dbAdmin = admin.firestore();
-    const leadRef = dbAdmin.collection('leads').doc(leadId);
-    
-    await leadRef.update({
+    await fbHelper.updateLeadBilling(leadId, {
       onboarding_call_slot: datetime,
       status: 'waiting_onboarding_call',
       billing_status: 'waiting_call_scheduled',
-      updatedAt: new Date().toISOString()
     });
 
     const n8nWebhookUrl = process.env.N8N_APPLY_WEBHOOK_URL;
     if (n8nWebhookUrl) {
-      const leadSnap = await leadRef.get();
+      const leadData = await fbHelper.getLeadById(leadId);
       fetch(n8nWebhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'onboarding_call_scheduled',
-          lead: { id: leadId, ...leadSnap.data() },
+          lead: { id: leadId, ...leadData },
           timestamp: new Date().toISOString()
         })
       }).catch(err => console.error("Falha ao enviar agendamento ao n8n:", err));

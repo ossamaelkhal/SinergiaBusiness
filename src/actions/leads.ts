@@ -6,18 +6,7 @@ import { CreateLeadInput, UpdateLeadInput } from "@/types"
 import * as admin from 'firebase-admin'
 import { headers, cookies } from 'next/headers'
 import crypto from 'crypto'
-
-// Inicializar o Firebase Admin SDK com segurança no escopo do servidor
-if (!admin.apps.length) {
-  try {
-    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
-    admin.initializeApp({
-      projectId: projectId,
-    });
-  } catch (error) {
-    console.error('Falha ao inicializar o Firebase Admin SDK em leads.ts:', error);
-  }
-}
+import * as fbHelper from '@/lib/firebase-admin-helper'
 
 export interface SubmitApplicationPayload {
   userData: {
@@ -128,12 +117,6 @@ export async function submitApplication(payload: SubmitApplicationPayload) {
       return { success: false, error: 'Nome e E-mail são obrigatórios.' };
     }
 
-    const dbAdmin = admin.firestore();
-    
-    // 1. DEDUPLICAÇÃO E ID DE DOCUMENTO ANTECIPADO (event_id)
-    const leadRef = dbAdmin.collection('leads').doc();
-    const eventId = leadRef.id;
-
     // 2. PARSING DE METADADOS DE REDE E IP (Limpando proxies)
     const ipHeader = headers().get('x-forwarded-for') || '';
     const cleanClientIp = ipHeader.split(',')[0].trim() || headers().get('x-real-ip') || '';
@@ -143,74 +126,45 @@ export async function submitApplication(payload: SubmitApplicationPayload) {
     const cleanFbp = trackingData.fbp || cookies().get('_fbp')?.value || '';
     const cleanAffiliateId = trackingData.sinergia_affiliate_id || cookies().get('sinergia_affiliate_id')?.value || '';
 
-    // 3. FLUXO DE AUTENTICAÇÃO SILENCIOSA & AUTO-LOGIN (Firebase Auth Admin)
-    const adminAuth = admin.auth();
-    let uid = '';
+    // Chamando o helper que abstrai Firestore e Auth com fallback mock local
+    const helperResult = await fbHelper.submitLeadApplication(
+      userData,
+      {
+        utm_source: trackingData.utm_source || '',
+        utm_medium: trackingData.utm_medium || '',
+        utm_campaign: trackingData.utm_campaign || '',
+        utm_content: trackingData.utm_content || '',
+        fbc: cleanFbc,
+        fbp: cleanFbp,
+        ga_client_id: trackingData.ga_client_id || '',
+        gclid: trackingData.gclid || '',
+        sinergia_affiliate_id: cleanAffiliateId
+      },
+      cleanClientIp,
+      cleanUserAgent
+    );
 
-    try {
-      const userRecord = await adminAuth.getUserByEmail(email);
-      uid = userRecord.uid;
-    } catch (error: any) {
-      if (error.code === 'auth/user-not-found') {
-        // Criar usuário silenciosamente
-        const tempPassword = hashSHA256(document || email).slice(0, 15);
-        const newUser = await adminAuth.createUser({
-          email: email,
-          displayName: name,
-          password: tempPassword,
-        });
-        uid = newUser.uid;
-      } else {
-        console.error("Erro ao buscar ou criar usuário no Firebase Auth:", error);
-        throw error;
-      }
+    if (!helperResult.success) {
+      return { success: false, error: helperResult.error || 'Erro ao processar aplicação.' };
     }
 
-    // Gerar Custom Token e trocar por ID Token via REST API para criar o Session Cookie
-    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY || process.env.VITE_FIREBASE_API_KEY;
-    if (!apiKey) {
-      console.warn("Aviso: NEXT_PUBLIC_FIREBASE_API_KEY ausente. Cookie de autenticação silenciosa não gerado.");
-    } else {
-      try {
-        const customToken = await adminAuth.createCustomToken(uid);
-        
-        // Troca do Custom Token por ID Token usando o endpoint oficial do Google Identity Toolkit
-        const tokenResponse = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key=${apiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            token: customToken,
-            returnSecureToken: true
-          })
-        });
+    const eventId = helperResult.eventId;
+    const uid = helperResult.uid;
 
-        if (!tokenResponse.ok) {
-          const errData = await tokenResponse.json();
-          console.error("Erro na API do Identity Toolkit ao autenticar silenciosamente:", errData);
-        } else {
-          const { idToken } = await tokenResponse.json();
-          const expiresIn = 1000 * 60 * 60 * 24 * 5; // 5 dias
-          const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
-          
-          // Injeção direta nos cabeçalhos de resposta HTTP
-          cookies().set('sinergia_session', sessionCookie, {
-            maxAge: 5 * 24 * 60 * 60, // 5 dias em segundos
-            httpOnly: true,
-            secure: true,
-            sameSite: 'lax',
-            path: '/'
-          });
-        }
-      } catch (authError) {
-        console.error("Falha ao gerar o session cookie na Server Action:", authError);
-      }
-    }
+    // Injeção direta nos cabeçalhos de resposta HTTP
+    cookies().set('sinergia_session', helperResult.sessionCookie, {
+      maxAge: 5 * 24 * 60 * 60, // 5 dias em segundos
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      path: '/'
+    });
 
-    // 4. ESTRUTURAÇÃO DO LEAD COM ATRIBUIÇÃO DE IDENTITY
+    // Construção do leadData estruturado para envio de telemetria externa
     const leadData = {
       id: eventId,
       companyId: eventId, // ID padrão de empresa associado ao lead
-      uid: uid,           // UID unificado de autenticação silenciosa
+      uid: uid,           // UID unificado
       name,
       email,
       document: document || '',
@@ -398,7 +352,6 @@ export async function submitApplication(payload: SubmitApplicationPayload) {
 
     // 8. PARALELISMO SEGURO: PROMISE.ALL PARA EVITAR CONGELAMENTO EM AMBIENTE SERVERLESS
     await Promise.all([
-      leadRef.set(leadData),
       capiPromise(),
       ga4Promise(),
       n8nPromise()
@@ -407,9 +360,9 @@ export async function submitApplication(payload: SubmitApplicationPayload) {
     revalidatePath('/admin/leads');
 
     return { success: true, eventId, docId: eventId };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Erro interno na Server Action submitApplication:", error);
-    return { success: false, error: 'Erro interno do servidor ao processar aplicação.' };
+    return { success: false, error: `Erro ao processar aplicação: ${error.message || error}` };
   }
 }
 
@@ -463,32 +416,7 @@ export async function saveLeadPreferences(leadId: string, preferences: {
   stackLevel?: number;
 }) {
   try {
-    const dbAdmin = admin.firestore();
-    const leadRef = dbAdmin.collection('leads').doc(leadId);
-    
-    await leadRef.update({
-      preferences: {
-        niche: preferences.niche,
-        tone: preferences.tone,
-        objective: preferences.objective,
-        frictionIndex: preferences.frictionIndex || null,
-        blueprintId: preferences.blueprintId || null,
-        malhas: preferences.malhas || null,
-        selectedTools: preferences.selectedTools || null,
-        stackLevel: preferences.stackLevel || null
-      },
-      niche: preferences.niche,
-      tone: preferences.tone,
-      objective: preferences.objective,
-      frictionIndex: preferences.frictionIndex || null,
-      blueprintId: preferences.blueprintId || null,
-      malhas: preferences.malhas || null,
-      selectedTools: preferences.selectedTools || null,
-      stackLevel: preferences.stackLevel || null,
-      updatedAt: new Date().toISOString()
-    });
-    
-    return { success: true };
+    return await fbHelper.saveLeadPreferences(leadId, preferences);
   } catch (error: any) {
     console.error("Erro ao salvar preferências do lead:", error);
     return { success: false, error: error.message || "Falha ao atualizar preferências do lead" };

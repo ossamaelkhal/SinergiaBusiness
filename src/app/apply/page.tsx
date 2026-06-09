@@ -131,7 +131,7 @@ function ApplyContent() {
           <div className="hidden lg:block space-y-8">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-widest">
               <ShieldCheck className="w-4 h-4" />
-              Sessão Confidencial
+              Auditoria Operacional
             </div>
             <h1 className="text-5xl font-black text-white leading-tight">
               O primeiro passo para a <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-indigo-400">Autonomia.</span>
@@ -244,8 +244,8 @@ function ApplyContent() {
 
              {step === 4 && (
                 <form onSubmit={handleSubmit} className="animate-in fade-in slide-in-from-right-4 duration-500">
-                  <h3 className="text-2xl font-black text-white mb-2">Última etapa.</h3>
-                  <p className="text-sm text-slate-400 mb-8">Para onde enviamos o retorno do seu diagnóstico operacional?</p>
+                  <h3 className="text-2xl font-black text-white mb-2">Acesso e Identificação</h3>
+                  <p className="text-sm text-slate-400 mb-8">Forneça os detalhes abaixo para configurar sua credencial corporativa.</p>
                   
                   <div className="space-y-5">
                      <div>
@@ -306,7 +306,7 @@ function ApplyContent() {
                         </>
                       ) : (
                         <>
-                          Enviar Diagnóstico <ArrowRight className="w-5 h-5 ml-2" />
+                          Iniciar Simulação <ArrowRight className="w-5 h-5 ml-2" />
                         </>
                       )}
                     </Button>
