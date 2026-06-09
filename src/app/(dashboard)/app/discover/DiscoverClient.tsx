@@ -135,7 +135,7 @@ export default function DiscoverClient({ lead }: DiscoverClientProps) {
   useEffect(() => {
     if (step !== 2) return
 
-    const hookName = nicheInfo.hooks?.pilotoAutomatico?.title || "Aura Sales"
+    const hookName = nicheInfo.hooks?.pilotoAutomatico?.title || "SinergIA Sales"
     setChatMessages([
       {
         id: 'welcome-1',
@@ -342,7 +342,7 @@ export default function DiscoverClient({ lead }: DiscoverClientProps) {
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-white leading-tight">Canal de Homologação</h3>
-                  <p className="text-[10px] text-emerald-400 font-semibold uppercase tracking-wider">Aura CX Piloto</p>
+                  <p className="text-[10px] text-emerald-400 font-semibold uppercase tracking-wider">SinergIA CX Piloto</p>
                 </div>
               </div>
 

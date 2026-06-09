@@ -102,11 +102,11 @@ function SonarAdsContent() {
   const totalPerdidoRealidade = perdaLatencia + overheadBurocratico + perdaInadimplencia;
 
   // Ganhos com SinergIA
-  const ganhoAuraSales = Math.round(perdaLatencia * 0.85); // Recupera 85% respondendo em <10s
-  const ganhoAuraCX = Math.round(perdaInadimplencia * 0.50); // Mitiga 50% com réguas automatizadas
-  const ganhoAuraOperations = Math.round(overheadBurocratico * 0.75); // Automatiza 75% da inserção de dados
+  const ganhoSinergiaSales = Math.round(perdaLatencia * 0.85); // Recupera 85% respondendo em <10s
+  const ganhoSinergiaCX = Math.round(perdaInadimplencia * 0.50); // Mitiga 50% com réguas automatizadas
+  const ganhoSinergiaOperations = Math.round(overheadBurocratico * 0.75); // Automatiza 75% da inserção de dados
 
-  const totalRecuperadoSinergia = ganhoAuraSales + ganhoAuraCX + ganhoAuraOperations;
+  const totalRecuperadoSinergia = ganhoSinergiaSales + ganhoSinergiaCX + ganhoSinergiaOperations;
 
   // Intercepta as UTMs atuais para passar para o formulário final
   const getBlindarUrl = () => {
@@ -361,16 +361,16 @@ function SonarAdsContent() {
                       
                       <div className="space-y-3 pt-2">
                         <div className="flex justify-between items-center text-xs py-2 border-b border-white/5">
-                          <span className="text-slate-400">Aura Sales (Contato em 10s):</span>
-                          <span className="font-mono font-bold text-emerald-400">+ R$ {ganhoAuraSales.toLocaleString('pt-BR')}</span>
+                          <span className="text-slate-400">SinergIA Sales (Contato em 10s):</span>
+                          <span className="font-mono font-bold text-emerald-400">+ R$ {ganhoSinergiaSales.toLocaleString('pt-BR')}</span>
                         </div>
                         <div className="flex justify-between items-center text-xs py-2 border-b border-white/5">
-                          <span className="text-slate-400">Aura Operations (Automações):</span>
-                          <span className="font-mono font-bold text-emerald-400">+ R$ {ganhoAuraOperations.toLocaleString('pt-BR')}</span>
+                          <span className="text-slate-400">SinergIA Ops (Automações):</span>
+                          <span className="font-mono font-bold text-emerald-400">+ R$ {ganhoSinergiaOperations.toLocaleString('pt-BR')}</span>
                         </div>
                         <div className="flex justify-between items-center text-xs py-2">
-                          <span className="text-slate-400">Aura CX (Réguas Inteligentes):</span>
-                          <span className="font-mono font-bold text-emerald-400">+ R$ {ganhoAuraCX.toLocaleString('pt-BR')}</span>
+                          <span className="text-slate-400">SinergIA CX (Réguas Inteligentes):</span>
+                          <span className="font-mono font-bold text-emerald-400">+ R$ {ganhoSinergiaCX.toLocaleString('pt-BR')}</span>
                         </div>
                       </div>
                     </div>

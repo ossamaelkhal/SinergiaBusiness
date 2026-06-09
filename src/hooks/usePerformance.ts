@@ -1,55 +1,63 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
-export function usePerformance() {
+export function usePerformance(slotsCount: number, nichoSlug: string) {
+  // Platform Core cost: platformFee = 1500
+  // Cost per slot: 1200
+  const platformFee = 1500;
+  const pricePerSlot = 1200;
+  const totalCost = platformFee + (slotsCount * pricePerSlot);
+
+  // Headcount Leverage (CLT cost savings in Brazil):
+  // Each agent slot replaces 1 human FTE. Average cost to company: R$ 4.500/month.
+  const headcountLeverage = slotsCount * 4500;
+
+  // Revenue Capture (Operational leakage stopped):
+  // Baselines based on the niche's average monthly leakage.
+  const baselines: Record<string, number> = {
+    'faturamento-saude-bemestar': 12400,
+    'commerce-omnichannel-vendas': 18900,
+    'operacoes-urgencia-logistica': 22500,
+    'bpo-financeiro-credito-tem': 28200,
+    'servicos-tecnicos-comerciais': 14700,
+    'reputacao-recuperacao-retencao': 16500,
+  };
+  const defaultLeakage = 15000;
+  const nicheLeakage = baselines[nichoSlug || ''] || defaultLeakage;
+  
+  // Revenue Captured = 75% of leakage saved by the agents
+  const initialRevenueCapture = nicheLeakage * 0.75;
+  
+  const initialSavings = headcountLeverage + initialRevenueCapture;
+
+  // Ticker reativo
+  const [efficiencyGains, setEfficiencyGains] = useState(initialSavings);
+
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    setEfficiencyGains(initialSavings);
+  }, [initialSavings]);
 
-    // Monitorar Core Web Vitals
-    const observer = new PerformanceObserver((list) => {
-      list.getEntries().forEach((entry: any) => {
-        if (entry.entryType === 'largest-contentful-paint') {
-          // Tracking LCP para Google Analytics
-          if (window.gtag) {
-            window.gtag('event', 'web_vitals', {
-              event_category: 'performance',
-              event_label: 'LCP',
-              value: Math.round(entry.startTime),
-              non_interaction: true
-            })
-          }
-        }
+  useEffect(() => {
+    // Incrementa um pequeno valor (centavos/reais) a cada 1.500ms
+    // Simula a economia em tempo real dos robôs rodando ativos no back-office
+    const interval = setInterval(() => {
+      setEfficiencyGains((prev) => {
+        const increment = Number((Math.random() * (0.45 - 0.15) + 0.15).toFixed(2));
+        return prev + increment;
+      });
+    }, 1500);
 
-        if (entry.entryType === 'first-input') {
-          // Tracking FID
-          if (window.gtag) {
-            window.gtag('event', 'web_vitals', {
-              event_category: 'performance',
-              event_label: 'FID',
-              value: Math.round(entry.processingStart - entry.startTime),
-              non_interaction: true
-            })
-          }
-        }
+    return () => clearInterval(interval);
+  }, []);
 
-        if (entry.entryType === 'layout-shift') {
-          // Tracking CLS
-          if (window.gtag && entry.hadRecentInput === false) {
-            window.gtag('event', 'web_vitals', {
-              event_category: 'performance',
-              event_label: 'CLS',
-              value: Math.round(entry.value * 1000),
-              non_interaction: true
-            })
-          }
-        }
-      })
-    })
+  const netRoi = efficiencyGains - totalCost;
 
-    // Observar métricas
-    observer.observe({ entryTypes: ['largest-contentful-paint', 'first-input', 'layout-shift'] })
-
-    return () => observer.disconnect()
-  }, [])
+  return {
+    efficiencyGains,
+    headcountLeverage,
+    revenueCapture: initialRevenueCapture,
+    totalCost,
+    netRoi
+  };
 }

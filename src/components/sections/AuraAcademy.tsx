@@ -5,7 +5,7 @@ import { Link2, Network, FolderKanban, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
-export default function AuraAcademy() {
+export default function SinergiaAcademy() {
     return (
         <section id="academy" className="w-full py-24 bg-slate-950/80 relative border-y border-white/5">
             <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay pointer-events-none" />

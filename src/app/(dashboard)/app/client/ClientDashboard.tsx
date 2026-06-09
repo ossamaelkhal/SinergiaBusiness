@@ -22,6 +22,7 @@ import {
   PlayCircle 
 } from "lucide-react"
 import { nichesData } from '@/data/niches'
+import { usePerformance } from '@/hooks/usePerformance'
 import { getOperationLogsStream, OperationLog } from '@/services/firestoreService'
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from "@/components/ui/chart"
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, AreaChart, Area, XAxis, YAxis, CartesianGrid, BarChart, Bar } from "recharts"
@@ -42,9 +43,9 @@ const revenueRecoveryConfig = {
 } satisfies ChartConfig
 
 const allocationConfig = {
-  comercial: { label: "Comercial (Aura Sales)", color: "#10b981" },
-  suporte: { label: "Atendimento (Aura CX)", color: "#6366f1" },
-  backoffice: { label: "Backoffice (Aura Ops)", color: "#06b6d4" },
+  comercial: { label: "Comercial (SinergIA Sales)", color: "#10b981" },
+  suporte: { label: "Atendimento (SinergIA CX)", color: "#6366f1" },
+  backoffice: { label: "Backoffice (SinergIA Ops)", color: "#06b6d4" },
 } satisfies ChartConfig
 
 const recoveryData = [
@@ -84,6 +85,9 @@ interface LeadData {
   phone?: string
   revenue?: string
   status: string
+  blueprintId?: string
+  malhas?: string[]
+  stackLevel?: number
 }
 
 interface ClientDashboardProps {
@@ -101,6 +105,9 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
   const activeNicheSlug = lead.nichoSlug || 'commerce-omnichannel-vendas'
   const nicheInfo = nichesData[activeNicheSlug] || nichesData['commerce-omnichannel-vendas']
 
+  const slotsCount = lead.malhas?.length || 0
+  const { efficiencyGains } = usePerformance(slotsCount, lead.nichoSlug)
+
   useEffect(() => {
     // Escuta em tempo real dos logs de operação da empresa do cliente
     const unsubscribe = getOperationLogsStream(lead.companyId, (streamedLogs) => {
@@ -109,41 +116,65 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
     return () => unsubscribe()
   }, [lead.companyId])
 
-  // Agentes dinâmicos baseados no nicho
-  const getNicheAgents = () => {
-    const slug = lead.nichoSlug
-    const hooks = nicheInfo.hooks || {
-      pilotoAutomatico: { title: 'Aura Sales', description: 'Qualificador de Leads e fechamento autônomo' },
-      resgateAtivo: { title: 'Aura Support', description: 'Monitoramento de inativos' },
-      backoffice: { title: 'Aura Backoffice', description: 'Processador de fluxos' }
-    }
+  // Obter agentes dinâmicos a partir das malhas contratadas
+  const getActiveAgents = () => {
+    const activeMalhas = lead.malhas && lead.malhas.length > 0 
+      ? lead.malhas 
+      : ['SinergIA Sales', 'SinergIA CX']; // fallback robusto
 
-    return [
-      {
-        name: hooks.pilotoAutomatico.title,
-        desc: hooks.pilotoAutomatico.description,
-        ping: '34ms',
-        uptime: '99.98%',
-        role: 'Commercial Engine'
-      },
-      {
-        name: hooks.resgateAtivo.title,
-        desc: hooks.resgateAtivo.description,
-        ping: '42ms',
-        uptime: '99.95%',
-        role: 'Retention Engine'
-      },
-      {
-        name: hooks.backoffice.title,
-        desc: hooks.backoffice.description,
-        ping: '28ms',
-        uptime: '100.00%',
-        role: 'Operations Engine'
+    return activeMalhas.map((m, idx) => {
+      const lower = m.toLowerCase();
+      let name = 'SinergIA Agent';
+      let desc = 'Módulo autônomo de processamento cognitivo.';
+      let ping = '30ms';
+      let uptime = '99.99%';
+      let role = 'Cognitive Engine';
+
+      if (lower.includes('sales') || lower.includes('venda') || lower.includes('comercial') || lower.includes('piloto')) {
+        name = 'SinergIA Sales';
+        desc = nicheInfo.hooks?.pilotoAutomatico?.description || 'Qualificador de leads e fechamento autônomo rodando 24/7 no funil comercial.';
+        ping = '34ms';
+        uptime = '99.98%';
+        role = 'Commercial Engine';
+      } else if (lower.includes('resgate') || lower.includes('intercepção') || lower.includes('cx') || lower.includes('suporte') || lower.includes('support')) {
+        name = 'SinergIA CX';
+        desc = nicheInfo.hooks?.resgateAtivo?.description || 'Monitoramento reativo, recuperação de carrinhos e suporte a clientes de alta retenção.';
+        ping = '42ms';
+        uptime = '99.95%';
+        role = 'Retention Engine';
+      } else if (lower.includes('backoffice') || lower.includes('conciliação') || lower.includes('ops') || lower.includes('bpo') || lower.includes('fluxo')) {
+        name = 'SinergIA Ops';
+        desc = nicheInfo.hooks?.backoffice?.description || 'Processamento automático de transações, integração com ERP/CRM e auditoria logística.';
+        ping = '28ms';
+        uptime = '100.00%';
+        role = 'Operations Engine';
+      } else {
+        if (idx === 0) {
+          name = 'SinergIA Sales';
+          desc = nicheInfo.hooks?.pilotoAutomatico?.description || 'Qualificador de leads e fechamento autônomo rodando 24/7 no funil comercial.';
+          ping = '34ms';
+          uptime = '99.98%';
+          role = 'Commercial Engine';
+        } else if (idx === 1) {
+          name = 'SinergIA CX';
+          desc = nicheInfo.hooks?.resgateAtivo?.description || 'Monitoramento reativo, recuperação de carrinhos e suporte a clientes de alta retenção.';
+          ping = '42ms';
+          uptime = '99.95%';
+          role = 'Retention Engine';
+        } else {
+          name = 'SinergIA Ops';
+          desc = nicheInfo.hooks?.backoffice?.description || 'Processamento automático de transações, integração com ERP/CRM e auditoria logística.';
+          ping = '28ms';
+          uptime = '100.00%';
+          role = 'Operations Engine';
+        }
       }
-    ]
+
+      return { name, desc, ping, uptime, role };
+    });
   }
 
-  const agents = getNicheAgents()
+  const agents = getActiveAgents()
 
   // Logs fallback temáticos por nicho caso a coleção do Firestore esteja vazia
   const getNicheFallbackLogs = (): OperationLog[] => {
@@ -154,37 +185,37 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
 
     if (slug === 'faturamento-saude-bemestar') {
       return [
-        { agentName: 'Aura Health (CX)', action: 'Paciente detectado sem retorno há 30 dias. Mensagem de reengajamento enviada.', status: 'SUCCESS', createdAt: formatAgo(4) },
-        { agentName: 'Aura Health (CX)', action: 'Consulta agendada confirmada pelo paciente via WhatsApp.', status: 'SUCCESS', createdAt: formatAgo(12) },
-        { agentName: 'Aura Backoffice', action: 'Auditoria de guias médicas TISS/TUSS concluída para a operadora SulAmérica.', status: 'SUCCESS', createdAt: formatAgo(25) },
-        { agentName: 'Aura Health (CX)', action: 'Paciente solicitou cancelamento. Vaga remanejada automaticamente para lista de espera.', status: 'SUCCESS', createdAt: formatAgo(45) },
+        { agentName: 'SinergIA Health (CX)', action: 'Paciente detectado sem retorno há 30 dias. Mensagem de reengajamento enviada.', status: 'SUCCESS', createdAt: formatAgo(4) },
+        { agentName: 'SinergIA Health (CX)', action: 'Consulta agendada confirmada pelo paciente via WhatsApp.', status: 'SUCCESS', createdAt: formatAgo(12) },
+        { agentName: 'SinergIA Ops', action: 'Auditoria de guias médicas TISS/TUSS concluída para a operadora SulAmérica.', status: 'SUCCESS', createdAt: formatAgo(25) },
+        { agentName: 'SinergIA Health (CX)', action: 'Paciente solicitou cancelamento. Vaga remanejada automaticamente para lista de espera.', status: 'SUCCESS', createdAt: formatAgo(45) },
       ]
     }
     
     if (slug === 'commerce-omnichannel-vendas') {
       return [
-        { agentName: 'Aura Sales', action: 'Abandono de carrinho detectado. Recuperação de Pix enviada via WhatsApp.', status: 'SUCCESS', createdAt: formatAgo(3) },
-        { agentName: 'Aura Auditor', action: 'Divergência de frete de R$ 14,80 detectada na API dos Correios e contestada no ERP.', status: 'SUCCESS', createdAt: formatAgo(10) },
-        { agentName: 'Aura BPO', action: 'Áudio com lista de compras recebido no atacado. Carrinho gerado no ERP em 42s.', status: 'SUCCESS', createdAt: formatAgo(18) },
-        { agentName: 'Aura Sales', action: 'Venda de Playbook fechada no Direct do Instagram. Cupom fiscal emitido.', status: 'SUCCESS', createdAt: formatAgo(35) },
+        { agentName: 'SinergIA Sales', action: 'Abandono de carrinho detectado. Recuperação de Pix enviada via WhatsApp.', status: 'SUCCESS', createdAt: formatAgo(3) },
+        { agentName: 'SinergIA Auditor', action: 'Divergência de frete de R$ 14,80 detectada na API dos Correios e contestada no ERP.', status: 'SUCCESS', createdAt: formatAgo(10) },
+        { agentName: 'SinergIA BPO', action: 'Áudio com lista de compras recebido no atacado. Carrinho gerado no ERP em 42s.', status: 'SUCCESS', createdAt: formatAgo(18) },
+        { agentName: 'SinergIA Sales', action: 'Venda de Playbook fechada no Direct do Instagram. Cupom fiscal emitido.', status: 'SUCCESS', createdAt: formatAgo(35) },
       ]
     }
 
     if (slug === 'operacoes-urgencia-logistica') {
       return [
-        { agentName: 'Aura Dispatcher', action: 'Endereço validado. Motorista despachado para entrega prioritária.', status: 'SUCCESS', createdAt: formatAgo(5) },
-        { agentName: 'Aura Monitor', action: 'Alerta de revisão preventiva emitido por telemetria IoT do ativo #AC-40.', status: 'SUCCESS', createdAt: formatAgo(14) },
-        { agentName: 'Aura DocValidator', action: 'Packing list e Invoice auditados. Liberação na SEFAZ concluída.', status: 'SUCCESS', createdAt: formatAgo(22) },
-        { agentName: 'Aura Dispatcher', action: 'Ordem de serviço de urgência gerada. Entrega finalizada.', status: 'SUCCESS', createdAt: formatAgo(40) },
+        { agentName: 'SinergIA Dispatcher', action: 'Endereço validado. Motorista despachado para entrega prioritária.', status: 'SUCCESS', createdAt: formatAgo(5) },
+        { agentName: 'SinergIA Monitor', action: 'Alerta de revisão preventiva emitido por telemetria IoT do ativo #AC-40.', status: 'SUCCESS', createdAt: formatAgo(14) },
+        { agentName: 'SinergIA DocValidator', action: 'Packing list e Invoice auditados. Liberação na SEFAZ concluída.', status: 'SUCCESS', createdAt: formatAgo(22) },
+        { agentName: 'SinergIA Dispatcher', action: 'Ordem de serviço de urgência gerada. Entrega finalizada.', status: 'SUCCESS', createdAt: formatAgo(40) },
       ]
     }
 
     // Default Fallback
     return [
-      { agentName: 'Aura Sales', action: 'Lead qualificado interceptado e integrado ao funil do Pipefy.', status: 'SUCCESS', createdAt: formatAgo(5) },
-      { agentName: 'Aura Support', action: 'Respostas de FAQ enviadas automaticamente via chat bot.', status: 'SUCCESS', createdAt: formatAgo(15) },
-      { agentName: 'Aura Backoffice', action: 'Webhook de telemetria recebido do n8n com status 200 OK.', status: 'SUCCESS', createdAt: formatAgo(30) },
-      { agentName: 'Aura Support', action: 'Boleto pendente de R$ 1.200 recuperado via mensagens ativas.', status: 'SUCCESS', createdAt: formatAgo(50) },
+      { agentName: 'SinergIA Sales', action: 'Lead qualificado interceptado e integrado ao funil do Pipefy.', status: 'SUCCESS', createdAt: formatAgo(5) },
+      { agentName: 'SinergIA CX', action: 'Respostas de FAQ enviadas automaticamente via chat bot.', status: 'SUCCESS', createdAt: formatAgo(15) },
+      { agentName: 'SinergIA Ops', action: 'Webhook de telemetria recebido do n8n com status 200 OK.', status: 'SUCCESS', createdAt: formatAgo(30) },
+      { agentName: 'SinergIA CX', action: 'Boleto pendente de R$ 1.200 recuperado via mensagens ativas.', status: 'SUCCESS', createdAt: formatAgo(50) },
     ]
   }
 
@@ -263,7 +294,7 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
           <h3 className="text-xl font-bold text-white flex items-center gap-2">
              <Bot className="w-5 h-5 text-emerald-400" /> Motores Cognitivos Ativos
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className={`grid grid-cols-1 md:grid-cols-${Math.min(3, agents.length)} gap-6`}>
             {agents.map((agent, idx) => (
               <Card key={idx} className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors rounded-2xl relative overflow-hidden group">
                 <div className="absolute top-0 w-full h-[3px] bg-gradient-to-r from-emerald-500 to-teal-400"></div>
@@ -308,7 +339,7 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
                     <p className="text-xs text-slate-400">Receita blindada e no-shows evitados acumulados (6 semanas)</p>
                   </div>
                   <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono text-sm">
-                    Total: R$ 45.000
+                    Total: {efficiencyGains.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                   </Badge>
                 </div>
                 
@@ -463,7 +494,7 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
                   <div className="space-y-1">
                     <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                       <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                      Aura Sales
+                      SinergIA Sales
                     </div>
                     <div className="text-white font-bold font-mono text-sm">42%</div>
                     <div className="text-[9px] text-slate-500">Comercial / BANT</div>
@@ -471,7 +502,7 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
                   <div className="space-y-1">
                     <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                       <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
-                      Aura CX
+                      SinergIA CX
                     </div>
                     <div className="text-white font-bold font-mono text-sm">30%</div>
                     <div className="text-[9px] text-slate-500">Suporte / Clientes</div>
@@ -479,7 +510,7 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
                   <div className="space-y-1">
                     <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                       <span className="w-2 h-2 rounded-full bg-cyan-500"></span>
-                      Aura Ops
+                      SinergIA Ops
                     </div>
                     <div className="text-white font-bold font-mono text-sm">24%</div>
                     <div className="text-[9px] text-slate-500">Workflows / ERP</div>
@@ -508,18 +539,27 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
             </CardContent>
           </Card>
 
-          {/* Webhooks config */}
+          {/* Webhooks config (SinergIA Unified Gateway) */}
           <Card className="bg-slate-900 border-white/5 hover:border-white/10 transition-colors">
             <CardContent className="p-6 flex items-start gap-4">
               <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center shrink-0">
                 <PlayCircle className="w-6 h-6 text-emerald-400" />
               </div>
-              <div className="space-y-1">
-                <h4 className="font-bold text-white">Console Webhook do CRM</h4>
-                <p className="text-xs text-slate-400 leading-relaxed">Conecte o seu CRM (Pipedrive, Hubspot, Kommo) para receber as qualificações e agendamentos instantaneamente.</p>
-                <Link href="/app/client/settings">
-                  <Button variant="link" className="text-emerald-400 hover:text-emerald-300 p-0 h-auto text-xs font-bold pt-2">Ver Token de API &rarr;</Button>
-                </Link>
+              <div className="space-y-3 w-full">
+                <div>
+                  <h4 className="font-bold text-white">SinergIA Unified Gateway</h4>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    Direcione os payloads do Shopify, Bling ou HubSpot para o barramento de integração:
+                  </p>
+                </div>
+                <div className="relative flex items-center bg-slate-950/80 border border-white/10 rounded-xl p-3 font-mono text-[10px] text-emerald-400 select-all overflow-x-auto whitespace-nowrap">
+                  <span>https://sinergia.business/api/v1/gateways/{lead.companyId}</span>
+                </div>
+                <div>
+                  <Link href="/app/client/settings">
+                    <Button variant="link" className="text-emerald-400 hover:text-emerald-300 p-0 h-auto text-xs font-bold">Ver Token de API &rarr;</Button>
+                  </Link>
+                </div>
               </div>
             </CardContent>
           </Card>
