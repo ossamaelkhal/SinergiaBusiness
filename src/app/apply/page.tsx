@@ -3,7 +3,7 @@
 import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, ArrowRight, ShieldCheck, Zap, Server, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ShieldCheck, Zap, Server, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { submitApplication } from '@/actions/leads';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -35,6 +35,7 @@ function ApplyContent() {
 
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState('');
   const [formData, setFormData] = useState({
     revenue: '',
     teamSize: '',
@@ -52,6 +53,7 @@ function ApplyContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setFormError('');
     
     const utm_source = searchParams.get('utm_source') || '';
     const utm_medium = searchParams.get('utm_medium') || '';
@@ -95,10 +97,11 @@ function ApplyContent() {
       if (res.success) {
         router.push('/app/discover');
       } else {
-        alert(res.error || 'Erro ao processar aplicação.');
+        setFormError(res.error || 'Erro ao processar aplicação. Verifique os dados inseridos.');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Erro ao enviar formulário de aplicação:", err);
+      setFormError(err.message || 'Erro de conexão no servidor. Tente novamente.');
     } finally {
       setIsSubmitting(false);
     }
@@ -131,13 +134,13 @@ function ApplyContent() {
           <div className="hidden lg:block space-y-8">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-widest">
               <ShieldCheck className="w-4 h-4" />
-              Auditoria Operacional
+              Auditoria de Fricção Operacional
             </div>
             <h1 className="text-5xl font-black text-white leading-tight">
-              O primeiro passo para a <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-indigo-400">Autonomia.</span>
+              Mapeamento de Gargalos & <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-indigo-400">Simulação de Retorno.</span>
             </h1>
             <p className="text-slate-400 text-lg leading-relaxed">
-              Devido à alta demanda e ao nosso protocolo de exclusividade de atuação, nós analisamos cuidadosamente cada aplicação. Queremos garantir que nossos sistemas de automação tragam um retorno expressivo para a sua operação.
+              Mapeie os vazamentos de faturamento da sua operação e ative o seu Blueprint do SinergIA OS para visualizar e simular o retorno da automação cognitiva em tempo real.
             </p>
             
             <div className="pt-8 border-t border-white/10 space-y-4">
@@ -244,9 +247,19 @@ function ApplyContent() {
 
              {step === 4 && (
                 <form onSubmit={handleSubmit} className="animate-in fade-in slide-in-from-right-4 duration-500">
-                  <h3 className="text-2xl font-black text-white mb-2">Acesso e Identificação</h3>
-                  <p className="text-sm text-slate-400 mb-8">Forneça os detalhes abaixo para configurar sua credencial corporativa.</p>
+                  <h3 className="text-2xl font-black text-white mb-2">Configuração da Credencial</h3>
+                  <p className="text-sm text-slate-400 mb-8">Preencha os dados abaixo para autenticar sua sessão e acessar o simulador de agentes do SinergIA OS.</p>
                   
+                  {formError && (
+                    <div className="mb-6 bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl text-xs flex items-start gap-2.5 animate-in fade-in duration-300">
+                      <ShieldAlert className="w-4.5 h-4.5 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-bold block mb-0.5">Falha no Processamento</span>
+                        <span>{formError}</span>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="space-y-5">
                      <div>
                         <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Nome Completo</label>
@@ -302,11 +315,11 @@ function ApplyContent() {
                     <Button type="submit" disabled={isSubmitting} className="h-14 px-8 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-black rounded-xl transition-all hover:scale-105 uppercase tracking-widest flex items-center justify-center">
                       {isSubmitting ? (
                         <>
-                          <LoadingSpinner size="sm" className="mr-2" /> Processando...
+                          <LoadingSpinner size="sm" className="mr-2" /> Ativando Blueprint...
                         </>
                       ) : (
                         <>
-                          Iniciar Simulação <ArrowRight className="w-5 h-5 ml-2" />
+                          Ativar Blueprint e Iniciar Simulação <ArrowRight className="w-5 h-5 ml-2" />
                         </>
                       )}
                     </Button>
