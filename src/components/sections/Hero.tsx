@@ -3,7 +3,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Play, Activity, Code, Shield } from 'lucide-react'
+import { Play, Clock, Sparkles, Users } from 'lucide-react'
 
 interface HeroProps {
     onDemoClick: () => void
@@ -25,20 +25,20 @@ export default function Hero({ onDemoClick }: HeroProps) {
                 {/* Status Badge */}
                 <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
                     <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span className="text-xs font-bold text-emerald-400 tracking-wide uppercase">Sistemas Operacionais Autônomos</span>
+                    <span className="text-xs font-bold text-emerald-400 tracking-wide uppercase">Tecnologia com Alma, Crescimento com Consciência</span>
                 </div>
 
                 {/* Main Headline */}
                 <h1 className="text-4xl md:text-6xl lg:text-[5.5rem] font-black tracking-tighter text-white leading-[1.05] mb-6 max-w-[1000px] animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100">
-                    O Fim das Tarefas Manuais.<br/>
+                    Tecnologia com Alma.<br/>
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-400 to-indigo-400">
-                        O Início da Sua Operação Autônoma.
+                        Crescimento com Consciência.
                     </span>
                 </h1>
 
                 {/* Sub-headline */}
                 <p className="mx-auto max-w-[700px] text-slate-400 text-lg md:text-xl leading-relaxed mb-10 font-medium animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
-                    Desenvolvemos sistemas inteligentes sob medida que trabalham lado a lado com a sua equipe. Eliminamos gargalos no atendimento, cobrança e processos internos para que sua empresa cresça com previsibilidade, sem sobrecarregar seu time.
+                    Não acreditamos em escolhas falsas. Não é humano ou máquina. Unimos a força operacional de agentes digitais à sensibilidade e ao propósito da sua equipe. Emancipe seu time da burocracia e resgate o foco no que realmente gera valor.
                 </p>
 
                 {/* CTA Buttons */}
@@ -58,25 +58,28 @@ export default function Hero({ onDemoClick }: HeroProps) {
                     </Button>
                 </div>
 
-                {/* Social Proof / Metrics (Updated to match Real B2B AI Benchmarks) */}
-                <div className="mt-20 grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-16 pt-10 border-t border-white/5 animate-in fade-in duration-1000 delay-500">
+                {/* Social Proof / Metrics (Conscious Growth Outcomes) */}
+                <div className="mt-20 grid grid-cols-1 sm:grid-cols-3 gap-8 md:gap-16 pt-10 border-t border-white/5 animate-in fade-in duration-1000 delay-500 w-full max-w-4xl">
                     <div className="flex flex-col items-center">
                         <div className="flex items-center gap-2 text-white font-black text-2xl md:text-4xl mb-1">
-                            <Activity className="w-6 h-6 text-emerald-500" /> 75%
+                            <Clock className="w-6 h-6 text-emerald-500" /> +80h/mês
                         </div>
-                        <div className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest text-center">Aumento na Conversão</div>
+                        <div className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest text-center mt-1">Burocracia Eliminada</div>
+                        <div className="text-[9px] text-slate-500 text-center font-light mt-0.5">Time focado em estratégia e clientes</div>
                     </div>
                     <div className="flex flex-col items-center">
                         <div className="flex items-center gap-2 text-white font-black text-2xl md:text-4xl mb-1">
-                            <Code className="w-6 h-6 text-indigo-500" /> 65%
+                            <Sparkles className="w-6 h-6 text-indigo-500" /> 65%
                         </div>
-                        <div className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest text-center">Redução no Custo Comercial</div>
+                        <div className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest text-center mt-1">Crescimento Equilibrado</div>
+                        <div className="text-[9px] text-slate-500 text-center font-light mt-0.5">Aceleração livre de burnout operacional</div>
                     </div>
-                    <div className="flex flex-col items-center col-span-2 md:col-span-1">
-                        <div className="flex items-center justify-center gap-2 text-white font-black text-2xl md:text-4xl mb-1">
-                            <Shield className="w-6 h-6 text-cyan-400" /> 3.2x
+                    <div className="flex flex-col items-center">
+                        <div className="flex items-center gap-2 text-white font-black text-2xl md:text-4xl mb-1">
+                            <Users className="w-6 h-6 text-cyan-400" /> 0%
                         </div>
-                        <div className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest text-center">Mais Reuniões Confirmadas</div>
+                        <div className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest text-center mt-1">Desperdício de Talento</div>
+                        <div className="text-[9px] text-slate-500 text-center font-light mt-0.5">Profissionais atuando com arte e propósito</div>
                     </div>
                 </div>
 
