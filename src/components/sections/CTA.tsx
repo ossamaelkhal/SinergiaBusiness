@@ -14,15 +14,15 @@ export default function CTA() {
         <div className="space-y-6 max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-widest mb-2">
             <Rocket className="w-4 h-4 animate-bounce" />
-            O Fim das Tarefas Manuais
+            Crescimento com Consciência
           </div>
           
           <h2 className="text-4xl md:text-6xl font-black tracking-tight text-white leading-tight">
-            Sua operação em <span className="text-emerald-400">piloto automático.</span>
+            Sua operação com <span className="text-emerald-400">mais alma.</span>
           </h2>
           
           <p className="text-slate-400 text-lg font-light leading-relaxed">
-            Elimine gargalos operacionais e erros de digitação humana. Escolha abaixo a porta de entrada para conectar sua empresa ou carteira B2B ao ecossistema SinergIA.
+            Deixe a burocracia mecânica para os agentes digitais e emancipe o potencial estratégico do seu time humano. Escolha abaixo a porta de entrada para conectar sua empresa ao ecossistema SinergIA.
           </p>
         </div>
         
