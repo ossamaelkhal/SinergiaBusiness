@@ -19,7 +19,8 @@ import {
   Clock, 
   Settings, 
   BookOpen, 
-  PlayCircle 
+  PlayCircle,
+  ShieldAlert
 } from "lucide-react"
 import { nichesData } from '@/data/niches'
 import { usePerformance } from '@/hooks/usePerformance'
@@ -43,9 +44,9 @@ const revenueRecoveryConfig = {
 } satisfies ChartConfig
 
 const allocationConfig = {
-  comercial: { label: "Comercial (SinergIA Sales)", color: "#10b981" },
-  suporte: { label: "Atendimento (SinergIA CX)", color: "#6366f1" },
-  backoffice: { label: "Backoffice (SinergIA Ops)", color: "#06b6d4" },
+  comercial: { label: "Crescimento (SinergIA Crescimento)", color: "#10b981" },
+  suporte: { label: "Conexão (SinergIA Conexão)", color: "#6366f1" },
+  backoffice: { label: "Fluxo (SinergIA Fluxo)", color: "#06b6d4" },
 } satisfies ChartConfig
 
 const recoveryData = [
@@ -106,7 +107,7 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
   const nicheInfo = nichesData[activeNicheSlug] || nichesData['commerce-omnichannel-vendas']
 
   const slotsCount = lead.malhas?.length || 0
-  const { efficiencyGains } = usePerformance(slotsCount, lead.nichoSlug)
+  const { efficiencyGains, hoursEmancipated } = usePerformance(slotsCount, lead.nichoSlug)
 
   useEffect(() => {
     // Escuta em tempo real dos logs de operação da empresa do cliente
@@ -120,53 +121,53 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
   const getActiveAgents = () => {
     const activeMalhas = lead.malhas && lead.malhas.length > 0 
       ? lead.malhas 
-      : ['SinergIA Sales', 'SinergIA CX']; // fallback robusto
+      : ['SinergIA Crescimento', 'SinergIA Conexão']; // fallback robusto
 
     return activeMalhas.map((m, idx) => {
       const lower = m.toLowerCase();
-      let name = 'SinergIA Agent';
-      let desc = 'Módulo autônomo de processamento cognitivo.';
-      let ping = '30ms';
-      let uptime = '99.99%';
-      let role = 'Cognitive Engine';
+      let name = 'SinergIA Conexão';
+      let desc = 'Módulo autônomo de conexão e acolhimento conversacional.';
+      let ping = '34ms';
+      let uptime = '99.98%';
+      let role = 'Conscious Engine';
 
-      if (lower.includes('sales') || lower.includes('venda') || lower.includes('comercial') || lower.includes('piloto')) {
-        name = 'SinergIA Sales';
-        desc = nicheInfo.hooks?.pilotoAutomatico?.description || 'Qualificador de leads e fechamento autônomo rodando 24/7 no funil comercial.';
+      if (lower.includes('sales') || lower.includes('venda') || lower.includes('comercial') || lower.includes('crescimento') || lower.includes('growth') || lower.includes('piloto')) {
+        name = 'SinergIA Crescimento';
+        desc = nicheInfo.hooks?.pilotoAutomatico?.description || 'Engrenagem de atração baseada em valor real, links tokenizados e engajamento autônomo.';
         ping = '34ms';
         uptime = '99.98%';
-        role = 'Commercial Engine';
-      } else if (lower.includes('resgate') || lower.includes('intercepção') || lower.includes('cx') || lower.includes('suporte') || lower.includes('support')) {
-        name = 'SinergIA CX';
-        desc = nicheInfo.hooks?.resgateAtivo?.description || 'Monitoramento reativo, recuperação de carrinhos e suporte a clientes de alta retenção.';
+        role = 'Crescimento';
+      } else if (lower.includes('resgate') || lower.includes('intercepção') || lower.includes('conexão') || lower.includes('conexao') || lower.includes('cx') || lower.includes('suporte') || lower.includes('support')) {
+        name = 'SinergIA Conexão';
+        desc = nicheInfo.hooks?.resgateAtivo?.description || 'Acolhimento humanizado no WhatsApp focado em compreender as dores e construir confiança.';
         ping = '42ms';
         uptime = '99.95%';
-        role = 'Retention Engine';
+        role = 'Conexão';
       } else if (lower.includes('backoffice') || lower.includes('conciliação') || lower.includes('ops') || lower.includes('bpo') || lower.includes('fluxo')) {
-        name = 'SinergIA Ops';
-        desc = nicheInfo.hooks?.backoffice?.description || 'Processamento automático de transações, integração com ERP/CRM e auditoria logística.';
+        name = 'SinergIA Fluxo';
+        desc = nicheInfo.hooks?.backoffice?.description || 'Malha de processamento de retaguarda invisível que elimina o trabalho braçal e concilia dados.';
         ping = '28ms';
         uptime = '100.00%';
-        role = 'Operations Engine';
+        role = 'Fluxo';
       } else {
         if (idx === 0) {
-          name = 'SinergIA Sales';
-          desc = nicheInfo.hooks?.pilotoAutomatico?.description || 'Qualificador de leads e fechamento autônomo rodando 24/7 no funil comercial.';
-          ping = '34ms';
-          uptime = '99.98%';
-          role = 'Commercial Engine';
-        } else if (idx === 1) {
-          name = 'SinergIA CX';
-          desc = nicheInfo.hooks?.resgateAtivo?.description || 'Monitoramento reativo, recuperação de carrinhos e suporte a clientes de alta retenção.';
+          name = 'SinergIA Conexão';
+          desc = nicheInfo.hooks?.resgateAtivo?.description || 'Acolhimento humanizado no WhatsApp focado em compreender as dores e construir confiança.';
           ping = '42ms';
           uptime = '99.95%';
-          role = 'Retention Engine';
-        } else {
-          name = 'SinergIA Ops';
-          desc = nicheInfo.hooks?.backoffice?.description || 'Processamento automático de transações, integração com ERP/CRM e auditoria logística.';
+          role = 'Conexão';
+        } else if (idx === 1) {
+          name = 'SinergIA Fluxo';
+          desc = nicheInfo.hooks?.backoffice?.description || 'Malha de processamento de retaguarda invisível que elimina o trabalho braçal e concilia dados.';
           ping = '28ms';
           uptime = '100.00%';
-          role = 'Operations Engine';
+          role = 'Fluxo';
+        } else {
+          name = 'SinergIA Crescimento';
+          desc = nicheInfo.hooks?.pilotoAutomatico?.description || 'Engrenagem de atração baseada em valor real, links tokenizados e engajamento autônomo.';
+          ping = '34ms';
+          uptime = '99.98%';
+          role = 'Crescimento';
         }
       }
 
@@ -185,41 +186,52 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
 
     if (slug === 'faturamento-saude-bemestar') {
       return [
-        { agentName: 'SinergIA Health (CX)', action: 'Paciente detectado sem retorno há 30 dias. Mensagem de reengajamento enviada.', status: 'SUCCESS', createdAt: formatAgo(4) },
-        { agentName: 'SinergIA Health (CX)', action: 'Consulta agendada confirmada pelo paciente via WhatsApp.', status: 'SUCCESS', createdAt: formatAgo(12) },
-        { agentName: 'SinergIA Ops', action: 'Auditoria de guias médicas TISS/TUSS concluída para a operadora SulAmérica.', status: 'SUCCESS', createdAt: formatAgo(25) },
-        { agentName: 'SinergIA Health (CX)', action: 'Paciente solicitou cancelamento. Vaga remanejada automaticamente para lista de espera.', status: 'SUCCESS', createdAt: formatAgo(45) },
+        { agentName: 'SinergIA Conexão', action: 'Paciente manifestou insatisfação grave no atendimento de retorno. Sentimento crítico detectado.', status: 'WARNING', createdAt: formatAgo(2) },
+        { agentName: 'SinergIA Conexão', action: 'Consulta agendada confirmada pelo paciente via WhatsApp.', status: 'SUCCESS', createdAt: formatAgo(12) },
+        { agentName: 'SinergIA Fluxo', action: 'Auditoria de guias médicas TISS/TUSS concluída para a operadora SulAmérica.', status: 'SUCCESS', createdAt: formatAgo(25) },
+        { agentName: 'SinergIA Conexão', action: 'Paciente solicitou cancelamento. Vaga remanejada automaticamente para lista de espera.', status: 'SUCCESS', createdAt: formatAgo(45) },
       ]
     }
     
     if (slug === 'commerce-omnichannel-vendas') {
       return [
-        { agentName: 'SinergIA Sales', action: 'Abandono de carrinho detectado. Recuperação de Pix enviada via WhatsApp.', status: 'SUCCESS', createdAt: formatAgo(3) },
-        { agentName: 'SinergIA Auditor', action: 'Divergência de frete de R$ 14,80 detectada na API dos Correios e contestada no ERP.', status: 'SUCCESS', createdAt: formatAgo(10) },
-        { agentName: 'SinergIA BPO', action: 'Áudio com lista de compras recebido no atacado. Carrinho gerado no ERP em 42s.', status: 'SUCCESS', createdAt: formatAgo(18) },
-        { agentName: 'SinergIA Sales', action: 'Venda de Playbook fechada no Direct do Instagram. Cupom fiscal emitido.', status: 'SUCCESS', createdAt: formatAgo(35) },
+        { agentName: 'SinergIA Conexão', action: 'Cliente no WhatsApp solicitou renegociação complexa de contrato de atacado.', status: 'WARNING', createdAt: formatAgo(1) },
+        { agentName: 'SinergIA Fluxo', action: 'Abandono de carrinho detectado. Recuperação de Pix enviada via WhatsApp.', status: 'SUCCESS', createdAt: formatAgo(3) },
+        { agentName: 'SinergIA Fluxo', action: 'Divergência de frete de R$ 14,80 detectada na API dos Correios e contestada no ERP.', status: 'SUCCESS', createdAt: formatAgo(10) },
+        { agentName: 'SinergIA Crescimento', action: 'Venda de Playbook fechada no Direct do Instagram. Cupom fiscal emitido.', status: 'SUCCESS', createdAt: formatAgo(35) },
       ]
     }
 
     if (slug === 'operacoes-urgencia-logistica') {
       return [
-        { agentName: 'SinergIA Dispatcher', action: 'Endereço validado. Motorista despachado para entrega prioritária.', status: 'SUCCESS', createdAt: formatAgo(5) },
-        { agentName: 'SinergIA Monitor', action: 'Alerta de revisão preventiva emitido por telemetria IoT do ativo #AC-40.', status: 'SUCCESS', createdAt: formatAgo(14) },
-        { agentName: 'SinergIA DocValidator', action: 'Packing list e Invoice auditados. Liberação na SEFAZ concluída.', status: 'SUCCESS', createdAt: formatAgo(22) },
-        { agentName: 'SinergIA Dispatcher', action: 'Ordem de serviço de urgência gerada. Entrega finalizada.', status: 'SUCCESS', createdAt: formatAgo(40) },
+        { agentName: 'SinergIA Fluxo', action: 'Divergência crítica de Nota Fiscal com valor acima do threshold de segurança da IA.', status: 'WARNING', createdAt: formatAgo(2) },
+        { agentName: 'SinergIA Fluxo', action: 'Endereço validado. Motorista despachado para entrega prioritária.', status: 'SUCCESS', createdAt: formatAgo(5) },
+        { agentName: 'SinergIA Visão', action: 'Alerta de revisão preventiva emitido por telemetria IoT do ativo #AC-40.', status: 'SUCCESS', createdAt: formatAgo(14) },
+        { agentName: 'SinergIA Fluxo', action: 'Packing list e Invoice auditados. Liberação na SEFAZ concluída.', status: 'SUCCESS', createdAt: formatAgo(22) },
       ]
     }
 
     // Default Fallback
     return [
-      { agentName: 'SinergIA Sales', action: 'Lead qualificado interceptado e integrado ao funil do Pipefy.', status: 'SUCCESS', createdAt: formatAgo(5) },
-      { agentName: 'SinergIA CX', action: 'Respostas de FAQ enviadas automaticamente via chat bot.', status: 'SUCCESS', createdAt: formatAgo(15) },
-      { agentName: 'SinergIA Ops', action: 'Webhook de telemetria recebido do n8n com status 200 OK.', status: 'SUCCESS', createdAt: formatAgo(30) },
-      { agentName: 'SinergIA CX', action: 'Boleto pendente de R$ 1.200 recuperado via mensagens ativas.', status: 'SUCCESS', createdAt: formatAgo(50) },
+      { agentName: 'SinergIA Conexão', action: 'Mensagem de cliente detectada com sentimentos sensíveis e insatisfação.', status: 'WARNING', createdAt: formatAgo(2) },
+      { agentName: 'SinergIA Crescimento', action: 'Lead qualificado interceptado e integrado ao funil do Pipefy.', status: 'SUCCESS', createdAt: formatAgo(5) },
+      { agentName: 'SinergIA Conexão', action: 'Respostas de FAQ enviadas automaticamente via chatbot.', status: 'SUCCESS', createdAt: formatAgo(15) },
+      { agentName: 'SinergIA Fluxo', action: 'Webhook de telemetria recebido com status 200 OK.', status: 'SUCCESS', createdAt: formatAgo(30) },
     ]
   }
 
   const displayLogs = logs.length > 0 ? logs : getNicheFallbackLogs()
+
+  // Verificar se há necessidade de intervenção humana (Sentimento Crítico ou Exceção de Regra)
+  const needsHumanIntervention = displayLogs.some(log => 
+    log.status === 'WARNING' || 
+    log.action.toLowerCase().includes('artesão') || 
+    log.action.toLowerCase().includes('artesao') || 
+    log.action.toLowerCase().includes('crítico') || 
+    log.action.toLowerCase().includes('critico') || 
+    log.action.toLowerCase().includes('insatisfação') ||
+    log.action.toLowerCase().includes('sensível')
+  );
 
   // Formatação amigável das datas dos logs
   const formatLogTime = (createdAt: any) => {
@@ -329,55 +341,70 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* COLUNA ESQUERDA: GRÁFICO FINANCEIRO + TERMINAL DE LOGS */}
           <div className="lg:col-span-2 space-y-8">
-            {/* CURVA DE RECUPERAÇÃO FINANCEIRA */}
+            {/* TELEMETRIA DE EMANCIPAÇÃO OPERACIONAL */}
             <Card className="bg-slate-900/60 border border-white/10 backdrop-blur-md overflow-hidden relative">
               <div className="absolute top-0 w-full h-[3px] bg-gradient-to-r from-emerald-500 to-teal-400"></div>
-              <CardContent className="p-6 space-y-4">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h4 className="text-lg font-bold text-white">Curva de Recuperação Financeira</h4>
-                    <p className="text-xs text-slate-400">Receita blindada e no-shows evitados acumulados (6 semanas)</p>
+              <CardContent className="p-6 space-y-6">
+                <div>
+                  <h4 className="text-lg font-bold text-white">Telemetria de Emancipação Operacional</h4>
+                  <p className="text-xs text-slate-400">Pacto de Humanidade: Liberação do capital intelectual para estratégia e criatividade</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-4 border-b border-white/5">
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Tempo Humano Emancipado</span>
+                    <div className="text-2xl md:text-3xl font-black text-white font-mono tracking-tight">
+                      {hoursEmancipated.toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}h
+                    </div>
+                    <span className="text-[10px] text-slate-400 block font-light">Horas de Carga Braçal Eliminadas</span>
                   </div>
-                  <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono text-sm">
-                    Total: {efficiencyGains.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                  </Badge>
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Retorno do Capital Intelectual</span>
+                    <div className="text-2xl md:text-3xl font-black text-emerald-400 font-mono tracking-tight">
+                      {efficiencyGains.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </div>
+                    <span className="text-[10px] text-slate-400 block font-light">Capital Intelectual Liberado para Estratégia e Criatividade Humana</span>
+                  </div>
                 </div>
                 
-                <div className="h-64">
-                  <ChartContainer id={areaChartId} config={revenueRecoveryConfig} className="w-full h-full">
-                    <AreaChart data={recoveryData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="colorRecovered" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
-                          <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                      <XAxis 
-                        dataKey="period" 
-                        stroke="rgba(255,255,255,0.3)" 
-                        fontSize={11}
-                        tickLine={false}
-                        axisLine={false}
-                      />
-                      <YAxis 
-                        stroke="rgba(255,255,255,0.3)" 
-                        fontSize={11}
-                        tickLine={false}
-                        axisLine={false}
-                        tickFormatter={(val) => `R$ ${val}`}
-                      />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Area 
-                        type="monotone" 
-                        dataKey="recovered" 
-                        stroke="#10b981" 
-                        strokeWidth={2}
-                        fillOpacity={1} 
-                        fill="url(#colorRecovered)" 
-                      />
-                    </AreaChart>
-                  </ChartContainer>
+                <div className="space-y-2">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Curva de Recuperação Histórica (LTV & Tempo Salvo)</span>
+                  <div className="h-48">
+                    <ChartContainer id={areaChartId} config={revenueRecoveryConfig} className="w-full h-full">
+                      <AreaChart data={recoveryData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="colorRecovered" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
+                            <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                        <XAxis 
+                          dataKey="period" 
+                          stroke="rgba(255,255,255,0.3)" 
+                          fontSize={11}
+                          tickLine={false}
+                          axisLine={false}
+                        />
+                        <YAxis 
+                          stroke="rgba(255,255,255,0.3)" 
+                          fontSize={11}
+                          tickLine={false}
+                          axisLine={false}
+                          tickFormatter={(val) => `R$ ${val}`}
+                        />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Area 
+                          type="monotone" 
+                          dataKey="recovered" 
+                          stroke="#10b981" 
+                          strokeWidth={2}
+                          fillOpacity={1} 
+                          fill="url(#colorRecovered)" 
+                        />
+                      </AreaChart>
+                    </ChartContainer>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -387,6 +414,14 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
               <h3 className="text-xl font-bold text-white flex items-center gap-2">
                  <Terminal className="w-5 h-5 text-indigo-400" /> Console de Telemetria Viva
               </h3>
+              {needsHumanIntervention && (
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex items-start gap-3 text-amber-400 text-xs md:text-sm font-medium animate-pulse">
+                  <ShieldAlert className="w-5 h-5 shrink-0 text-amber-500 mt-0.5" />
+                  <div>
+                    <span className="font-bold">REQUER ARTESÃO</span> — Fluxo suspenso temporariamente. A inteligência artificial identificou uma complexidade sensível que exige a sabedoria e empatia humana.
+                  </div>
+                </div>
+              )}
               <Card className="bg-slate-900/60 border border-white/10 backdrop-blur-md overflow-hidden">
                 <CardContent className="p-0">
                   <div className="overflow-x-auto">
@@ -411,10 +446,16 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
                             <td className="py-4 px-6 text-slate-300">
                               {log.action}
                             </td>
-                            <td className="py-4 px-6 text-right">
-                              <Badge className="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border-0 text-[10px]">
-                                SUCCESS
-                              </Badge>
+                            <td className="py-4 px-6 text-right whitespace-nowrap">
+                              {log.status === 'WARNING' ? (
+                                <Badge className="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px]">
+                                  REQUER ARTESÃO
+                                </Badge>
+                              ) : (
+                                <Badge className="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border-0 text-[10px]">
+                                  SUCCESS
+                                </Badge>
+                              )}
                             </td>
                           </tr>
                         ))}
@@ -494,26 +535,26 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
                   <div className="space-y-1">
                     <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                       <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                      SinergIA Sales
+                      SinergIA Crescimento
                     </div>
                     <div className="text-white font-bold font-mono text-sm">42%</div>
-                    <div className="text-[9px] text-slate-500">Comercial / BANT</div>
+                    <div className="text-[9px] text-slate-500">Atração / Vendas</div>
                   </div>
                   <div className="space-y-1">
                     <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                       <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
-                      SinergIA CX
+                      SinergIA Conexão
                     </div>
                     <div className="text-white font-bold font-mono text-sm">30%</div>
-                    <div className="text-[9px] text-slate-500">Suporte / Clientes</div>
+                    <div className="text-[9px] text-slate-500">Acolhimento / Suporte</div>
                   </div>
                   <div className="space-y-1">
                     <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                       <span className="w-2 h-2 rounded-full bg-cyan-500"></span>
-                      SinergIA Ops
+                      SinergIA Fluxo
                     </div>
                     <div className="text-white font-bold font-mono text-sm">24%</div>
-                    <div className="text-[9px] text-slate-500">Workflows / ERP</div>
+                    <div className="text-[9px] text-slate-500">Processamento / ERP</div>
                   </div>
                 </div>
               </CardContent>

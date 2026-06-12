@@ -479,14 +479,16 @@ export default function DiscoverClient({ lead }: DiscoverClientProps) {
                 
                 <CardContent className="p-8 md:p-12 space-y-6">
                   
-                  {/* Friction Index Header */}
-                  <div className="text-center space-y-2">
-                    <span className="text-[10px] font-mono tracking-widest text-rose-400 uppercase font-black">Laudo Técnico de Auditoria</span>
-                    <div className="text-5xl font-black text-rose-500 mt-2 tracking-tight">
-                      {frictionIndex}% <span className="text-sm font-normal text-slate-400">Fricção Operacional</span>
+                  {/* Laudo de Alocação de Consciência */}
+                  <div className="text-center space-y-3">
+                    <span className="text-[10px] font-mono tracking-widest text-indigo-400 uppercase font-black">Laudo de Alocação de Consciência</span>
+                    <div className="text-6xl font-black text-rose-500 mt-2 tracking-tight relative inline-block">
+                      {frictionIndex}%
+                      <span className="absolute -top-1 -right-12 text-[10px] bg-rose-500/20 text-rose-400 px-1.5 py-0.5 rounded-full font-bold uppercase animate-pulse">Critico</span>
                     </div>
-                    <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed mt-1">
-                      Foi detectada uma perda grave de eficiência nos seus processos comerciais e operacionais.
+                    <div className="text-sm font-bold text-slate-300">Intelecto Aprisionado em Processos Manuais</div>
+                    <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed mt-1">
+                      O diagnóstico constatou que <strong className="text-white">{frictionIndex}%</strong> da energia intelectual da sua equipe está aprisionada na retaguarda burocrática, digitações repetitivas e no-shows evitáveis. A ferramenta deve servir ao artesão.
                     </p>
                   </div>
 

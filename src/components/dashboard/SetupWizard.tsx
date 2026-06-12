@@ -143,7 +143,7 @@ export function SetupWizard({ leadId, onComplete }: SetupWizardProps) {
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
                 <Bot className="text-indigo-400 w-6 h-6" />
-                <h3 className="text-lg font-bold text-white">1. Como sua empresa lida com o atendimento fora do horário comercial?</h3>
+                <h3 className="text-lg font-bold text-white">Fase 1: Conexão & Academia (Acolhimento e Tom de Voz fora de hora)</h3>
               </div>
               <div className="grid grid-cols-1 gap-4">
                 {[
@@ -179,7 +179,7 @@ export function SetupWizard({ leadId, onComplete }: SetupWizardProps) {
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
                 <Bot className="text-indigo-400 w-6 h-6" />
-                <h3 className="text-lg font-bold text-white">2. Como é feito o fluxo de digitação de pedidos e conferência de documentos?</h3>
+                <h3 className="text-lg font-bold text-white">Fase 2: Fluxo (Remoção do gargalo burocrático, digitação e conferência)</h3>
               </div>
               <div className="grid grid-cols-1 gap-4">
                 {[
@@ -218,7 +218,7 @@ export function SetupWizard({ leadId, onComplete }: SetupWizardProps) {
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
                 <Rocket className="text-indigo-400 w-6 h-6" />
-                <h3 className="text-lg font-bold text-white">3. Qual é a maior fonte de perda comercial no seu funil hoje?</h3>
+                <h3 className="text-lg font-bold text-white">Fase 3: Visão & Crescimento (Vazamento de leads e tração do funil comercial)</h3>
               </div>
               <div className="grid grid-cols-1 gap-4">
                 {[
@@ -258,7 +258,7 @@ export function SetupWizard({ leadId, onComplete }: SetupWizardProps) {
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
                 <Rocket className="text-indigo-400 w-6 h-6" />
-                <h3 className="text-lg font-bold text-white">4. Selecione os sistemas e ERPs integrados na sua operação:</h3>
+                <h3 className="text-lg font-bold text-white">Sistemas & Conexões (Ferramentas que centralizam sua operação)</h3>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 {toolsOptions.map((tool) => {

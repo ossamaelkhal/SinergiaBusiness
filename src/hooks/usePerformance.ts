@@ -9,12 +9,15 @@ export function usePerformance(slotsCount: number, nichoSlug: string) {
   const pricePerSlot = 1200;
   const totalCost = platformFee + (slotsCount * pricePerSlot);
 
-  // Headcount Leverage (CLT cost savings in Brazil):
-  // Each agent slot replaces 1 human FTE. Average cost to company: R$ 4.500/month.
-  const headcountLeverage = slotsCount * 4500;
+  // Tempo Humano Emancipado (Carga Braçal Eliminada em horas):
+  // Cada slot de agente ativo assume cerca de 160 horas de trabalho manual mensal
+  const baseHours = slotsCount * 160;
 
-  // Revenue Capture (Operational leakage stopped):
-  // Baselines based on the niche's average monthly leakage.
+  // Valor do Capital Intelectual Liberado (anterior headcount leverage):
+  // Cada slot gera uma alavancagem média de R$ 4.500/mês
+  const intellectualLeverage = slotsCount * 4500;
+
+  // Receita Protegida (Vazamento operacional estancado)
   const baselines: Record<string, number> = {
     'faturamento-saude-bemestar': 12400,
     'commerce-omnichannel-vendas': 18900,
@@ -26,25 +29,30 @@ export function usePerformance(slotsCount: number, nichoSlug: string) {
   const defaultLeakage = 15000;
   const nicheLeakage = baselines[nichoSlug || ''] || defaultLeakage;
   
-  // Revenue Captured = 75% of leakage saved by the agents
+  // Receita Recuperada = 75% do vazamento estancado
   const initialRevenueCapture = nicheLeakage * 0.75;
-  
-  const initialSavings = headcountLeverage + initialRevenueCapture;
+  const initialSavings = intellectualLeverage + initialRevenueCapture;
 
   // Ticker reativo
   const [efficiencyGains, setEfficiencyGains] = useState(initialSavings);
+  const [hoursEmancipated, setHoursEmancipated] = useState(baseHours);
 
   useEffect(() => {
     setEfficiencyGains(initialSavings);
-  }, [initialSavings]);
+    setHoursEmancipated(baseHours);
+  }, [initialSavings, baseHours]);
 
   useEffect(() => {
-    // Incrementa um pequeno valor (centavos/reais) a cada 1.500ms
+    // Incrementa um pequeno valor (centavos/reais e horas) a cada 1.500ms
     // Simula a economia em tempo real dos robôs rodando ativos no back-office
     const interval = setInterval(() => {
       setEfficiencyGains((prev) => {
         const increment = Number((Math.random() * (0.45 - 0.15) + 0.15).toFixed(2));
         return prev + increment;
+      });
+      setHoursEmancipated((prev) => {
+        const incrementHours = Number((Math.random() * (0.0003 - 0.0001) + 0.0001).toFixed(6));
+        return prev + incrementHours;
       });
     }, 1500);
 
@@ -55,7 +63,8 @@ export function usePerformance(slotsCount: number, nichoSlug: string) {
 
   return {
     efficiencyGains,
-    headcountLeverage,
+    hoursEmancipated,
+    intellectualLeverage,
     revenueCapture: initialRevenueCapture,
     totalCost,
     netRoi
