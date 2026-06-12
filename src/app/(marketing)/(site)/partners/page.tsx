@@ -408,7 +408,7 @@ export default function PartnersPage() {
         </div>
       </section>
 
-      {/* QUEBRA DE OBJEÇÃO: APAGÃO DE MÃO DE OBRA E AURA LEARN AI */}
+      {/* QUEBRA DE OBJEÇÃO: APAGÃO DE MÃO DE OBRA E SINERGIA ACADEMY */}
       <section className="py-24 bg-slate-950 relative overflow-hidden border-t border-white/5">
         <div className="container mx-auto px-4 md:px-6 max-w-5xl relative z-10">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -423,12 +423,12 @@ export default function PartnersPage() {
                 Muitos empresários evitam implantar automação e modernização de dados por medo de que seus times internos não saibam operá-los. Nós resolvemos isso na raiz.
               </p>
               <p className="text-slate-400 text-base font-light leading-relaxed">
-                Cada implantação do ecossistema SinergIA inclui de forma nativa a trilha **Aura Learn AI**. Treinamos o time do cliente final a supervisionar e auditar os fluxos automáticos, removendo a barreira técnica de adoção e blindando o seu pós-venda.
+                Cada implantação do ecossistema SinergIA inclui de forma nativa a trilha **SinergIA Academy**. Treinamos o time do cliente final a supervisionar e auditar os fluxos automáticos, removendo a barreira técnica de adoção e blindando o seu pós-venda.
               </p>
             </div>
             
             <div className="bg-slate-900/60 border border-white/10 rounded-3xl p-8 space-y-6">
-              <h4 className="font-bold text-white uppercase text-xs tracking-wider text-emerald-400">Conteúdo Aura Learn AI</h4>
+              <h4 className="font-bold text-white uppercase text-xs tracking-wider text-emerald-400">Conteúdo SinergIA Academy</h4>
               <ul className="space-y-4">
                 <li className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
