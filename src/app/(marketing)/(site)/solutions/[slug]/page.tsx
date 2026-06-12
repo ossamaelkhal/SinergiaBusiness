@@ -9,6 +9,8 @@ import {
 import { NicheCTAButton } from '@/components/features/solutions/NicheCTAButton';
 import { ROICalculator } from '@/components/sections/ROICalculator';
 import SinergiaPricingOS from '@/components/sections/SinergiaPricingOS';
+import { NichePersonalizer } from '@/components/features/solutions/NichePersonalizer';
+
 
 const formatHumanLatency = (seconds: number): string => {
   if (seconds >= 3600) {
@@ -165,6 +167,10 @@ export default function NicheSolutionPage({
             Catálogo Geral de Soluções
           </Link>
         </div>
+
+        {/* Personalização Baseada no Arquétipo Cultural (Next.js Static Build Safe) */}
+        <NichePersonalizer />
+
 
         {/* HERO SECTION */}
         <section className="container mx-auto px-6 py-12 md:py-20 animate-in fade-in slide-in-from-bottom-8 duration-700">

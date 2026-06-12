@@ -414,6 +414,7 @@ export async function saveLeadPreferences(leadId: string, preferences: {
   malhas?: string[];
   selectedTools?: string[];
   stackLevel?: number;
+  archetype?: 'Oprimida por Burocracia' | 'Desconectada do Cliente' | 'Visionária Cautelosa';
 }) {
   try {
     return await fbHelper.saveLeadPreferences(leadId, preferences);
@@ -422,6 +423,24 @@ export async function saveLeadPreferences(leadId: string, preferences: {
     return { success: false, error: error.message || "Falha ao atualizar preferências do lead" };
   }
 }
+
+export async function getActiveLeadSession() {
+  try {
+    const sessionCookie = cookies().get('sinergia_session')?.value;
+    if (!sessionCookie) {
+      return { success: false, error: 'Sem sessão ativa' };
+    }
+    const lead = await fbHelper.getLeadFromSession(sessionCookie);
+    if (!lead) {
+      return { success: false, error: 'Lead não encontrado' };
+    }
+    return { success: true, lead };
+  } catch (error: any) {
+    console.error("Erro em getActiveLeadSession:", error);
+    return { success: false, error: error.message || String(error) };
+  }
+}
+
 
 
 /**

@@ -118,18 +118,36 @@ export default function SinergiaBot() {
 
     if (option.includes('Mapeamento')) {
       addBotMessage({
-          text: 'Ótima escolha. Vou reservar um horário com um dos nossos especialistas em arquitetura de IA.',
-          type: 'text'
-      }, 1000)
+        text: 'Excelente escolha. Antes de reservarmos sua consultoria com o Engenheiro C-Level, precisamos de um alinhamento ético de valores fundamental:',
+        type: 'text'
+      }, 1000);
       addBotMessage({
-          text: 'Selecione a data abaixo na agenda do especialista:',
-          type: 'calendar'
-      }, 2500)
+        text: 'Se você busca uma IA cega para demitir pessoas e robotizar sua marca, a SinergIA OS não é para você. Nosso Pacto de Humanidade garante que a ferramenta sirva ao artesão. Você está pronto para emancipar seu time e lucrar com consciência?',
+        type: 'options',
+        options: [
+          'Sim, estou pronto para emancipar meu time e lucrar com consciência.',
+          'Não, busco apenas redução fria de headcount.'
+        ]
+      }, 2200);
+    } else if (option.includes('Sim, estou pronto')) {
+      addBotMessage({
+        text: 'Espetacular! Alinhamento de valores e Manifesto confirmado. Tecnologia com Alma, Crescimento com Consciência.',
+        type: 'text'
+      }, 1000);
+      addBotMessage({
+        text: 'Selecione a data abaixo na agenda do especialista:',
+        type: 'calendar'
+      }, 2200);
+    } else if (option.includes('Não, busco apenas')) {
+      addBotMessage({
+        text: 'A SinergIA OS não opera sob a lógica da desumanização. Nossos algoritmos existem para amplificar o intelecto, não para silenciar a alma do seu negócio. Se mudar de ideia, estamos aqui.',
+        type: 'text'
+      }, 1000);
     } else {
       addBotMessage({
-          text: 'Sem problemas. Acesse a guia "Soluções" no menu para visualizar nossos Playbooks Self-Service.',
-          type: 'text'
-      }, 1500)
+        text: 'Sem problemas. Acesse a guia "Soluções" no menu para visualizar nossos Playbooks Self-Service.',
+        type: 'text'
+      }, 1500);
     }
   }
 

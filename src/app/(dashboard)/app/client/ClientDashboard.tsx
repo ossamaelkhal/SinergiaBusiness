@@ -214,9 +214,10 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
     // Default Fallback
     return [
       { agentName: 'SinergIA Conexão', action: 'Mensagem de cliente detectada com sentimentos sensíveis e insatisfação.', status: 'WARNING', createdAt: formatAgo(2) },
-      { agentName: 'SinergIA Crescimento', action: 'Lead qualificado interceptado e integrado ao funil do Pipefy.', status: 'SUCCESS', createdAt: formatAgo(5) },
-      { agentName: 'SinergIA Conexão', action: 'Respostas de FAQ enviadas automaticamente via chatbot.', status: 'SUCCESS', createdAt: formatAgo(15) },
-      { agentName: 'SinergIA Fluxo', action: 'Webhook de telemetria recebido com status 200 OK.', status: 'SUCCESS', createdAt: formatAgo(30) },
+      { agentName: 'SinergIA Crescimento', action: 'Lead qualificado de alto ticket interceptado e integrado ao funil de CRM.', status: 'SUCCESS', createdAt: formatAgo(5) },
+      { agentName: 'SinergIA Visão', action: 'Processamento de anomalia comportamental de tráfego web concluído.', status: 'SUCCESS', createdAt: formatAgo(10) },
+      { agentName: 'SinergIA Fluxo', action: 'Conciliação automática de recebíveis do gateway executada.', status: 'SUCCESS', createdAt: formatAgo(18) },
+      { agentName: 'SinergIA Academia', action: 'Playbook de treinamento cognitivo atualizado no repositório de agentes.', status: 'SUCCESS', createdAt: formatAgo(30) },
     ]
   }
 

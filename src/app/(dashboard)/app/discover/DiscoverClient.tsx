@@ -67,6 +67,7 @@ export default function DiscoverClient({ lead }: DiscoverClientProps) {
   const [activeMalhas, setActiveMalhas] = useState<string[]>([])
   const [stackLevel, setStackLevel] = useState<number>(1)
   const [selectedTools, setSelectedTools] = useState<string[]>([])
+  const [archetype, setArchetype] = useState<'Oprimida por Burocracia' | 'Desconectada do Cliente' | 'Visionária Cautelosa' | null>(null)
 
   // Step 1: Provisioning states
   const [progress, setProgress] = useState(0)
@@ -79,7 +80,64 @@ export default function DiscoverClient({ lead }: DiscoverClientProps) {
   const [isTyping, setIsTyping] = useState(false)
   const [telemetryLogs, setTelemetryLogs] = useState<TelemetryLog[]>([])
   const [hasSentMessage, setHasSentMessage] = useState(false)
+  const [pactoStep, setPactoStep] = useState<0 | 1 | 2 | 3>(0) // 0: no chat, 1: showing pacto options, 2: accepted, 3: blocked
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  const handlePactoResponse = (agreed: boolean) => {
+    const userText = agreed
+      ? "Sim, estou pronto para emancipar meu time e lucrar com consciência."
+      : "Não, busco apenas redução de custos e substituição de headcount."
+
+    const timestampStr = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    setChatMessages(prev => [...prev, {
+      id: Date.now().toString(),
+      text: userText,
+      sender: 'user',
+      timestamp: timestampStr
+    }])
+
+    setIsTyping(true)
+    setTimeout(() => {
+      const respTimestampStr = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+      if (agreed) {
+        setChatMessages(prev => [...prev, {
+          id: (Date.now() + 1).toString(),
+          text: "Espetacular! Alinhamento ético homologado com o nosso Manifesto. O SinergIA OS existe para libertar as pessoas e humanizar sua marca. Passo 2 concluído.",
+          sender: 'bot',
+          timestamp: respTimestampStr
+        }])
+        setPactoStep(2)
+        setTelemetryLogs(prev => [
+          ...prev,
+          {
+            id: `tel-${Date.now()}-5`,
+            text: `[Manifesto] Pacto de Humanidade assinado digitalmente`,
+            type: 'success',
+            timestamp: new Date().toLocaleTimeString('pt-BR')
+          }
+        ])
+      } else {
+        setChatMessages(prev => [...prev, {
+          id: (Date.now() + 1).toString(),
+          text: "O provisionamento do seu OS foi suspenso. A SinergIA OS se baseia no Pacto de Humanidade para garantir que a automação sirva ao artesão. Não apoiamos a desumanização cega. Por favor, reconsidere seus objetivos para continuar.",
+          sender: 'bot',
+          timestamp: respTimestampStr
+        }])
+        setPactoStep(3)
+        setTelemetryLogs(prev => [
+          ...prev,
+          {
+            id: `tel-${Date.now()}-5`,
+            text: `[POLICY WARNING] Pacto rejeitado: bloqueio de provisionamento ativo`,
+            type: 'warn',
+            timestamp: new Date().toLocaleTimeString('pt-BR')
+          }
+        ])
+      }
+      setIsTyping(false)
+    }, 1500)
+  }
+
 
   // Step 4: Booking states
   const [bookingConfirmed, setBookingConfirmed] = useState(false)
@@ -248,7 +306,23 @@ export default function DiscoverClient({ lead }: DiscoverClientProps) {
           timestamp: new Date().toLocaleTimeString('pt-BR')
         }
       ])
-    }, 1800)
+
+      // Disparar o Pacto de Humanidade após um pequeno intervalo
+      setTimeout(() => {
+        setIsTyping(true)
+        setTimeout(() => {
+          setChatMessages(prev => [...prev, {
+            id: (Date.now() + 2).toString(),
+            text: `Antes de avançarmos para as configurações e liberação do cockpit, preciso de um alinhamento de valores crucial com o Manifesto SinergIA:\n\n"Se você busca uma IA cega para demitir pessoas e robotizar sua marca, a SinergIA OS não é para você. Nosso Pacto de Humanidade garante que a ferramenta sirva ao artesão. Você está pronto para emancipar seu time e lucrar com consciência?"`,
+            sender: 'bot',
+            timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+          }])
+          setIsTyping(false)
+          setPactoStep(1)
+        }, 1200)
+      }, 1500)
+
+    }, 1500)
   }
 
   // Booking call handler
@@ -375,27 +449,67 @@ export default function DiscoverClient({ lead }: DiscoverClientProps) {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Chat Input */}
-              <form onSubmit={handleSendMessage} className="p-4 bg-slate-950/80 border-t border-white/10 flex gap-2 relative z-10 w-full">
-                <input 
-                  type="text"
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  placeholder="Envie uma mensagem (ex: CEP 01310-200 ou Dúvida)..."
-                  className="flex-1 h-12 bg-white/5 border border-white/10 focus:border-emerald-500/50 rounded-xl px-4 text-xs md:text-sm text-white placeholder:text-slate-500 outline-none transition-colors"
-                />
-                <button
-                  type="submit"
-                  disabled={!inputText.trim()}
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
-                    inputText.trim() 
-                      ? 'bg-emerald-500 text-slate-950 hover:bg-emerald-400' 
-                      : 'bg-white/5 text-slate-600 border border-white/10'
-                  }`}
-                >
-                  <Send className="w-5 h-5 ml-0.5" />
-                </button>
-              </form>
+              {/* Chat Input or Pacto Choices */}
+              {pactoStep === 0 && (
+                <form onSubmit={handleSendMessage} className="p-4 bg-slate-950/80 border-t border-white/10 flex gap-2 relative z-10 w-full">
+                  <input 
+                    type="text"
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    placeholder="Envie uma mensagem (ex: CEP 01310-200 ou Dúvida)..."
+                    className="flex-1 h-12 bg-white/5 border border-white/10 focus:border-emerald-500/50 rounded-xl px-4 text-xs md:text-sm text-white placeholder:text-slate-500 outline-none transition-colors"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!inputText.trim()}
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
+                      inputText.trim() 
+                        ? 'bg-emerald-500 text-slate-950 hover:bg-emerald-400' 
+                        : 'bg-white/5 text-slate-600 border border-white/10'
+                    }`}
+                  >
+                    <Send className="w-5 h-5 ml-0.5" />
+                  </button>
+                </form>
+              )}
+
+              {pactoStep === 1 && (
+                <div className="p-4 bg-slate-950/85 border-t border-white/10 flex flex-col gap-2 relative z-10 w-full animate-in fade-in">
+                  <button
+                    type="button"
+                    onClick={() => handlePactoResponse(true)}
+                    className="w-full text-left bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 hover:border-emerald-500 text-emerald-400 font-bold p-3 rounded-xl text-xs transition-all"
+                  >
+                    Sim, estou pronto para emancipar meu time e lucrar com consciência.
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handlePactoResponse(false)}
+                    className="w-full text-left bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 hover:border-rose-500 text-rose-400 font-bold p-3 rounded-xl text-xs transition-all"
+                  >
+                    Não, busco apenas redução de custos e substituição de headcount.
+                  </button>
+                </div>
+              )}
+
+              {pactoStep === 3 && (
+                <div className="p-4 bg-slate-950/85 border-t border-white/10 flex flex-col gap-2 relative z-10 w-full animate-in fade-in">
+                  <p className="text-[10px] text-rose-400 font-mono text-center font-bold mb-1">PROVISIONAMENTO SUSPENSO - REQUER ALINHAMENTO ÉTICO</p>
+                  <button
+                    type="button"
+                    onClick={() => handlePactoResponse(true)}
+                    className="w-full text-left bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 hover:border-emerald-500 text-emerald-400 font-bold p-3 rounded-xl text-xs transition-all"
+                  >
+                    Reconsiderar: Estou pronto para emancipar meu time e lucrar com consciência.
+                  </button>
+                </div>
+              )}
+
+              {pactoStep === 2 && (
+                <div className="p-4 bg-slate-950/80 border-t border-white/10 text-center text-xs text-emerald-400 font-mono font-bold py-5">
+                  ✓ Pacto de Humanidade Assinado e Homologado
+                </div>
+              )}
             </div>
 
             {/* Live Telemetry View */}
@@ -433,7 +547,7 @@ export default function DiscoverClient({ lead }: DiscoverClientProps) {
                 </div>
 
                 <Button
-                  disabled={!hasSentMessage}
+                  disabled={pactoStep !== 2}
                   onClick={() => setStep(3)}
                   className="w-full h-12 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-black uppercase tracking-wider text-xs rounded-xl transition-all shadow-[0_0_15px_rgba(52,211,153,0.3)] flex items-center justify-center gap-1.5"
                 >
@@ -449,12 +563,13 @@ export default function DiscoverClient({ lead }: DiscoverClientProps) {
           <div className="animate-in fade-in duration-500">
             <SetupWizard 
               leadId={lead.id} 
-              onComplete={(friction, blueprint, malhasList, level, tools) => {
+              onComplete={(friction, blueprint, malhasList, level, tools, arch) => {
                 setFrictionIndex(friction);
                 setRecommendedBlueprintId(blueprint);
                 setActiveMalhas(malhasList);
                 setStackLevel(level);
                 setSelectedTools(tools);
+                setArchetype(arch);
                 setStep(4);
               }} 
             />

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Zap, Sliders, Database, Server, ArrowRight, ShieldCheck, ShieldAlert, Info } from 'lucide-react';
+import { Zap, Sliders, Database, Server, ArrowRight, ShieldCheck, ShieldAlert, Info, Heart, CheckSquare, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface SinergiaPricingOSProps {
@@ -82,9 +82,21 @@ const colorMaps: Record<string, {
   }
 };
 
+const repetitiveTasks = [
+  { id: 'redigitacao-notas', name: 'Redigitação de Notas no ERP', hours: 8, emotional: 'Crítico' },
+  { id: 'triagem-chats', name: 'Triagem Manual de Chats (WhatsApp)', hours: 12, emotional: 'Médio' },
+  { id: 'conciliacao-comprovantes', name: 'Conciliação de Comprovantes', hours: 6, emotional: 'Crítico' },
+  { id: 'crm-leads', name: 'Alimentação de Planilhas e CRM', hours: 5, emotional: 'Médio' },
+  { id: 'auditoria-notas', name: 'Auditoria Manual de Notas de Entrada', hours: 10, emotional: 'Crítico' }
+];
+
 export default function SinergiaPricingOS({ nicheColor = 'emerald', nicheSlug = '' }: SinergiaPricingOSProps) {
   const [slots, setSlots] = useState(2);
   const [stackLevel, setStackLevel] = useState<1 | 2 | 3>(2);
+  const [selectedTasks, setSelectedTasks] = useState<string[]>([
+    'redigitacao-notas',
+    'triagem-chats'
+  ]);
 
   const colors = colorMaps[nicheColor] || colorMaps.emerald;
 
@@ -101,6 +113,44 @@ export default function SinergiaPricingOS({ nicheColor = 'emerald', nicheSlug = 
   const monthlyTotal = platformFee + (slots * pricePerSlot);
   const setupTotal = setupCosts[stackLevel];
 
+  const handleToggleTask = (taskId: string) => {
+    setSelectedTasks(prev => {
+      const next = prev.includes(taskId)
+        ? prev.filter(id => id !== taskId)
+        : [...prev, taskId];
+      
+      // Ajusta dinamicamente a quantidade de slots recomendados com base nas tarefas selecionadas
+      if (next.length > 0) {
+        setSlots(Math.max(1, next.length));
+      }
+      return next;
+    });
+  };
+
+  // Cálculo das Horas de Propósito Recuperadas
+  const baseWeeklyHours = repetitiveTasks
+    .filter(t => selectedTasks.includes(t.id))
+    .reduce((sum, t) => sum + t.hours, 0);
+
+  // Mapeamento de Custo Emocional (reduz conforme ativamos slots para cobrir as tarefas)
+  const coverageRatio = selectedTasks.length > 0 ? Math.min(1, slots / selectedTasks.length) : 1;
+  const emotionalCost = Math.max(0, 100 - Math.round(coverageRatio * 100));
+
+  // Determinar cores da barra de progresso do custo emocional
+  let progressColor = 'bg-rose-500';
+  let progressLabel = 'Carga Braçal Extrema / Sugadores de Alma';
+  let labelColor = 'text-rose-400';
+
+  if (emotionalCost <= 60 && emotionalCost > 15) {
+    progressColor = 'bg-amber-500';
+    progressLabel = 'Mitigação Límbica / Transição Operacional';
+    labelColor = 'text-amber-400';
+  } else if (emotionalCost <= 15) {
+    progressColor = 'bg-emerald-500';
+    progressLabel = 'Capital Intelectual Liberado / Emancipação';
+    labelColor = 'text-emerald-400';
+  }
+
   return (
     <section id="pricing-section" className="border-t border-white/5 py-24 bg-slate-900/10 relative overflow-hidden">
       {/* Background Glow */}
@@ -111,13 +161,13 @@ export default function SinergiaPricingOS({ nicheColor = 'emerald', nicheSlug = 
         {/* Header da Seção */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className={`text-xs px-3 py-1.5 rounded-full bg-white/5 border border-white/10 ${colors.text} font-bold uppercase tracking-widest`}>
-            Alocação de Infraestrutura
+            Alocação de Consciência
           </span>
           <h2 className="text-3xl md:text-5xl font-black text-white mt-6 tracking-tight">
-            SinergIA OS: Dimensionamento Corporativo
+            Simulador de Emancipação Cognitiva
           </h2>
           <p className="text-slate-400 mt-4 leading-relaxed font-light">
-            Monetização baseada em consumo de capacidade computacional ativa. O SinergIA OS roda em nuvem proprietária conectada às chaves de API da sua empresa, garantindo soberania de dados.
+            Monetização consciente baseada em consumo de capacidade ativa e remoção de custos emocionais. Mapeie a carga operacional e veja o impacto humano em tempo real.
           </p>
         </div>
 
@@ -126,24 +176,66 @@ export default function SinergiaPricingOS({ nicheColor = 'emerald', nicheSlug = 
           
           {/* Lado Esquerdo: Simulador de Parâmetros (Lg: Col-span 7) */}
           <div className="lg:col-span-7 bg-slate-900/40 border border-white/5 rounded-[2rem] p-8 md:p-10 flex flex-col justify-between backdrop-blur-md relative overflow-hidden">
-            <div className="space-y-10">
+            <div className="space-y-8">
               
-              {/* Seção 1: Quantidade de Slots */}
+              {/* Seção A: Tarefas Repetitivas / Engessadas */}
               <div className="space-y-4">
+                <div className="space-y-1">
+                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <Heart className="w-5 h-5 text-rose-400 animate-pulse" />
+                    1. Mapeamento de Carga Braçal
+                  </h3>
+                  <p className="text-xs text-slate-400 font-light">Selecione as tarefas operacionais que atualmente drenam o propósito do seu time:</p>
+                </div>
+
+                <div className="space-y-2.5">
+                  {repetitiveTasks.map((task) => {
+                    const isChecked = selectedTasks.includes(task.id);
+                    return (
+                      <button
+                        key={task.id}
+                        type="button"
+                        onClick={() => handleToggleTask(task.id)}
+                        className={`w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all hover:scale-[1.01] ${
+                          isChecked 
+                            ? 'bg-slate-900 border-white/15 text-white' 
+                            : 'bg-slate-950/40 border-white/5 text-slate-500 hover:border-white/10'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          {isChecked ? (
+                            <CheckSquare className={`w-5 h-5 ${colors.text}`} />
+                          ) : (
+                            <Square className="w-5 h-5 text-slate-700" />
+                          )}
+                          <div>
+                            <span className="text-xs font-bold block">{task.name}</span>
+                            <span className="text-[10px] text-slate-500 font-light">Custo Emocional: <strong className={task.emotional === 'Crítico' ? 'text-rose-400' : 'text-slate-400'}>{task.emotional}</strong></span>
+                          </div>
+                        </div>
+                        <span className="text-xs font-mono font-bold">{task.hours}h/sem</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Seção B: Quantidade de Slots */}
+              <div className="space-y-4 pt-4 border-t border-white/5">
                 <div className="flex justify-between items-center">
                   <div className="space-y-1">
                     <h3 className="text-lg font-bold text-white flex items-center gap-2">
                       <Sliders className="w-5 h-5 text-indigo-400" />
-                      Slots de Agentes Cognitivos
+                      2. Slots de Agentes Cognitivos
                     </h3>
-                    <p className="text-xs text-slate-400 font-light">Quantidade de fluxos ou rotinas operacionais executando de forma concorrente.</p>
+                    <p className="text-xs text-slate-400 font-light">Quantidade de fluxos ou rotinas ativas em paralelo assumindo o trabalho braçal.</p>
                   </div>
-                  <span className={`text-3xl font-black ${colors.text} bg-white/5 px-4 py-1 border border-white/10 rounded-xl`}>
-                    {slots}
+                  <span className={`text-2xl font-black ${colors.text} bg-white/5 px-4 py-1 border border-white/10 rounded-xl`}>
+                    {slots} {slots === 1 ? 'Slot' : 'Slots'}
                   </span>
                 </div>
                 
-                <div className="relative pt-4">
+                <div className="relative pt-2">
                   <input
                     type="range"
                     min="1"
@@ -156,89 +248,106 @@ export default function SinergiaPricingOS({ nicheColor = 'emerald', nicheSlug = 
                     }}
                   />
                   <div className="flex justify-between text-[10px] text-slate-500 font-bold uppercase tracking-widest pt-2">
-                    <span>1 Slot</span>
-                    <span>5 Slots</span>
-                    <span>10 Slots</span>
+                    <span>1 Agente</span>
+                    <span>5 Agentes</span>
+                    <span>10 Agentes</span>
                   </div>
                 </div>
               </div>
 
-              {/* Seção 2: Complexidade da Stack */}
-              <div className="space-y-4">
+              {/* Seção C: Mapeamento de Custo Emocional & Progresso */}
+              <div className="space-y-3 pt-6 border-t border-white/5">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-400 font-bold uppercase tracking-wider">Mapeamento de Custo Emocional</span>
+                  <span className={`font-bold uppercase tracking-wide text-[10px] ${labelColor}`}>
+                    {progressLabel} ({emotionalCost}%)
+                  </span>
+                </div>
+                
+                <div className="h-3 w-full bg-slate-950/60 border border-white/5 rounded-full overflow-hidden relative">
+                  <div 
+                    className={`h-full transition-all duration-500 ease-out ${progressColor}`} 
+                    style={{ width: `${emotionalCost}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Seção D: Complexidade da Stack */}
+              <div className="space-y-4 pt-6 border-t border-white/5">
                 <div className="space-y-1">
                   <h3 className="text-lg font-bold text-white flex items-center gap-2">
                     <Database className="w-5 h-5 text-indigo-400" />
-                    Maturidade & Complexidade da Stack
+                    3. Complexidade Sistêmica (Setup)
                   </h3>
-                  <p className="text-xs text-slate-400 font-light">O nível de setup é calculado upfront com base no grau de integração exigido pelo seu ecossistema atual.</p>
+                  <p className="text-xs text-slate-400 font-light">Complexidade técnica dos seus sistemas atuais para integração da IA.</p>
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-4 pt-2">
+                <div className="grid md:grid-cols-3 gap-4 pt-1">
                   
                   {/* Nível 1 */}
                   <button
                     type="button"
                     onClick={() => setStackLevel(1)}
-                    className={`text-left p-5 rounded-2xl border transition-all flex flex-col justify-between ${
+                    className={`text-left p-4 rounded-xl border transition-all flex flex-col justify-between ${
                       stackLevel === 1 
                         ? `bg-slate-900 border-emerald-500/50 shadow-[0_0_15px_rgba(52,211,153,0.15)]` 
                         : 'bg-slate-950/40 border-white/5 hover:border-white/15'
                     }`}
                   >
-                    <div className="space-y-2">
-                      <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full ${
+                    <div className="space-y-1">
+                      <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${
                         stackLevel === 1 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-900 text-slate-400'
                       }`}>
                         Nível 1
                       </span>
-                      <h4 className="text-sm font-bold text-white">SaaS Nativo</h4>
-                      <p className="text-[11px] text-slate-400 font-light leading-relaxed">Shopify, Bling, HubSpot, RD Station (Nativo), etc.</p>
+                      <h4 className="text-xs font-bold text-white">SaaS Nativo</h4>
+                      <p className="text-[10px] text-slate-500 font-light leading-relaxed">Shopify, Bling, HubSpot, etc.</p>
                     </div>
-                    <span className="text-xs font-bold text-slate-300 mt-4 block">R$ 3.000 <span className="text-[9px] text-slate-500 font-normal">setup</span></span>
+                    <span className="text-xs font-bold text-slate-300 mt-4 block">R$ 3.000 <span className="text-[9px] text-slate-600 font-normal">setup</span></span>
                   </button>
 
                   {/* Nível 2 */}
                   <button
                     type="button"
                     onClick={() => setStackLevel(2)}
-                    className={`text-left p-5 rounded-2xl border transition-all flex flex-col justify-between ${
+                    className={`text-left p-4 rounded-xl border transition-all flex flex-col justify-between ${
                       stackLevel === 2 
                         ? `bg-slate-900 border-emerald-500/50 shadow-[0_0_15px_rgba(52,211,153,0.15)]` 
                         : 'bg-slate-950/40 border-white/5 hover:border-white/15'
                     }`}
                   >
-                    <div className="space-y-2">
-                      <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full ${
+                    <div className="space-y-1">
+                      <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${
                         stackLevel === 2 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-900 text-slate-400'
                       }`}>
                         Nível 2
                       </span>
-                      <h4 className="text-sm font-bold text-white">Sistemas Múltiplos</h4>
-                      <p className="text-[11px] text-slate-400 font-light leading-relaxed">ActiveCampaign, Salesforce, Pipefy, ERPs fechados.</p>
+                      <h4 className="text-xs font-bold text-white">Sistemas Múltiplos</h4>
+                      <p className="text-[10px] text-slate-500 font-light leading-relaxed">Salesforce, Pipefy, ActiveCampaign.</p>
                     </div>
-                    <span className="text-xs font-bold text-slate-300 mt-4 block">R$ 12.000 <span className="text-[9px] text-slate-500 font-normal">setup</span></span>
+                    <span className="text-xs font-bold text-slate-300 mt-4 block">R$ 12.000 <span className="text-[9px] text-slate-600 font-normal">setup</span></span>
                   </button>
 
                   {/* Nível 3 */}
                   <button
                     type="button"
                     onClick={() => setStackLevel(3)}
-                    className={`text-left p-5 rounded-2xl border transition-all flex flex-col justify-between ${
+                    className={`text-left p-4 rounded-xl border transition-all flex flex-col justify-between ${
                       stackLevel === 3 
                         ? `bg-slate-900 border-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.1)]` 
                         : 'bg-slate-950/40 border-white/5 hover:border-white/15'
                     }`}
                   >
-                    <div className="space-y-2">
-                      <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full ${
+                    <div className="space-y-1">
+                      <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${
                         stackLevel === 3 ? 'bg-red-500/20 text-red-300' : 'bg-slate-900 text-slate-400'
                       }`}>
                         Nível 3
                       </span>
-                      <h4 className="text-sm font-bold text-white">Legado / Corp</h4>
-                      <p className="text-[11px] text-slate-400 font-light leading-relaxed">TOTVS, SAP, Senior, ERPs Proprietários, SEFAZ.</p>
+                      <h4 className="text-xs font-bold text-white">Legado / Corp</h4>
+                      <p className="text-[10px] text-slate-500 font-light leading-relaxed">TOTVS, SAP, Senior, Portais SEFAZ.</p>
                     </div>
-                    <span className="text-xs font-bold text-slate-300 mt-4 block">R$ 35.000 <span className="text-[9px] text-slate-500 font-normal">setup</span></span>
+                    <span className="text-xs font-bold text-slate-300 mt-4 block">R$ 35.000 <span className="text-[9px] text-slate-600 font-normal">setup</span></span>
                   </button>
 
                 </div>
@@ -247,7 +356,7 @@ export default function SinergiaPricingOS({ nicheColor = 'emerald', nicheSlug = 
             </div>
 
             {/* Avisos Dinâmicos de Governança */}
-            <div className="mt-10 pt-6 border-t border-white/5">
+            <div className="mt-8 pt-6 border-t border-white/5">
               {stackLevel === 3 ? (
                 <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex gap-3 text-xs text-red-400">
                   <ShieldAlert className="w-5 h-5 shrink-0 mt-0.5 animate-pulse" />
@@ -275,7 +384,25 @@ export default function SinergiaPricingOS({ nicheColor = 'emerald', nicheSlug = 
               
               <div className="flex items-center gap-2 pb-4 border-b border-white/5">
                 <Server className="w-5 h-5 text-emerald-400" />
-                <h3 className="font-bold text-xs uppercase tracking-widest text-slate-400">Demonstrativo de Alocação</h3>
+                <h3 className="font-bold text-xs uppercase tracking-widest text-slate-400">Demonstrativo de Impacto</h3>
+              </div>
+
+              {/* Contadores de Impacto Humano */}
+              <div className="grid grid-cols-2 gap-4 pb-4 border-b border-white/5 text-center">
+                <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Propósito Recuperado</span>
+                  <div className="text-xl md:text-2xl font-black text-emerald-400 font-mono mt-1">
+                    {baseWeeklyHours}h<span className="text-[10px] font-normal text-slate-500">/sem</span>
+                  </div>
+                  <span className="text-[9px] text-slate-500 font-light block mt-0.5">Time focado em estratégia</span>
+                </div>
+                <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Impacto Mensal</span>
+                  <div className="text-xl md:text-2xl font-black text-indigo-400 font-mono mt-1">
+                    {baseWeeklyHours * 4}h<span className="text-[10px] font-normal text-slate-500">/mês</span>
+                  </div>
+                  <span className="text-[9px] text-slate-500 font-light block mt-0.5">Horas libertadas de burocracia</span>
+                </div>
               </div>
 
               {/* Tabela de Preço Dinâmica */}
@@ -284,7 +411,7 @@ export default function SinergiaPricingOS({ nicheColor = 'emerald', nicheSlug = 
                 {/* Linha 1: Platform Fee */}
                 <div className="flex justify-between items-center text-sm py-2">
                   <div className="space-y-0.5">
-                    <span className="text-white font-medium">Platform Fee (SinergIA OS Core)</span>
+                    <span className="text-white font-medium">Platform Fee (SinergIA Core)</span>
                     <span className="text-[10px] text-slate-500 block">Licença base do sistema operacional autônomo</span>
                   </div>
                   <span className="text-white font-bold">R$ 1.500<span className="text-xs text-slate-500 font-normal">/mês</span></span>
@@ -320,7 +447,7 @@ export default function SinergiaPricingOS({ nicheColor = 'emerald', nicheSlug = 
                 <div className="flex justify-between items-center text-sm py-3 border-t border-white/5 mt-4">
                   <div className="space-y-0.5">
                     <span className="text-white font-medium">Taxa de Setup Upfront</span>
-                    <span className="text-[10px] text-slate-500 block">Scoring de Complexidade da Stack: Nível {stackLevel}</span>
+                    <span className="text-[10px] text-slate-500 block">Complexidade da Stack: Nível {stackLevel}</span>
                   </div>
                   <span className="text-white font-black text-lg">
                     {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 }).format(setupTotal)}

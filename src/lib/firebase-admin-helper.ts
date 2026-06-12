@@ -270,7 +270,8 @@ export async function saveLeadPreferences(leadId: string, preferences: any) {
         blueprintId: preferences.blueprintId || null,
         malhas: preferences.malhas || null,
         selectedTools: preferences.selectedTools || null,
-        stackLevel: preferences.stackLevel || null
+        stackLevel: preferences.stackLevel || null,
+        archetype: preferences.archetype || null
       },
       niche: preferences.niche,
       tone: preferences.tone,
@@ -280,6 +281,10 @@ export async function saveLeadPreferences(leadId: string, preferences: any) {
       malhas: preferences.malhas || null,
       selectedTools: preferences.selectedTools || null,
       stackLevel: preferences.stackLevel || null,
+      archetype: preferences.archetype || null,
+      userProfile: {
+        archetype: preferences.archetype || null
+      },
       updatedAt: new Date().toISOString()
     });
     return { success: true };
@@ -299,7 +304,8 @@ export async function saveLeadPreferences(leadId: string, preferences: any) {
             blueprintId: preferences.blueprintId || null,
             malhas: preferences.malhas || null,
             selectedTools: preferences.selectedTools || null,
-            stackLevel: preferences.stackLevel || null
+            stackLevel: preferences.stackLevel || null,
+            archetype: preferences.archetype || null
           },
           niche: preferences.niche,
           tone: preferences.tone,
@@ -309,6 +315,10 @@ export async function saveLeadPreferences(leadId: string, preferences: any) {
           malhas: preferences.malhas || null,
           selectedTools: preferences.selectedTools || null,
           stackLevel: preferences.stackLevel || null,
+          archetype: preferences.archetype || null,
+          userProfile: {
+            archetype: preferences.archetype || null
+          },
           updatedAt: new Date().toISOString()
         };
         await writeMockLeads(leads);
