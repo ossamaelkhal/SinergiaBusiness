@@ -578,3 +578,68 @@ export async function saveClientContextAction(leadId: string, rawTextContext: st
     return { success: false, error: error.message || 'Erro interno ao processar base de conhecimento.' };
   }
 }
+
+export async function getCurrentLead() {
+  try {
+    const sessionCookie = cookies().get('sinergia_session')?.value;
+    if (!sessionCookie) {
+      return null;
+    }
+    const lead = await fbHelper.getLeadFromSession(sessionCookie);
+    if (!lead) return null;
+    return {
+      companyName: lead.name || '',
+      archetype: lead.archetype || lead.preferences?.archetype || 'Visionária Cautelosa'
+    };
+  } catch (error) {
+    console.error("Erro no getCurrentLead Server Action:", error);
+    return null;
+  }
+}
+
+export async function getCurrentPartner() {
+  try {
+    const sessionCookie = cookies().get('sinergia_session')?.value;
+    if (!sessionCookie) return null;
+    
+    const lead = await fbHelper.getLeadFromSession(sessionCookie);
+    if (!lead || !lead.email) return null;
+    
+    const email = lead.email;
+    
+    try {
+      const dbAdmin = admin.firestore();
+      const snap = await dbAdmin.collection('partners').where('email', '==', email).limit(1).get();
+      if (!snap.empty) {
+        return snap.docs[0].data();
+      }
+    } catch (err) {
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      const PARTNERS_MOCK_PATH = path.join(process.cwd(), 'src/data/mock-partners-db.json');
+      try {
+        const data = await fs.readFile(PARTNERS_MOCK_PATH, 'utf-8');
+        const partners = JSON.parse(data);
+        const p = partners.find((x: any) => x.email === email);
+        if (p) return p;
+      } catch {}
+    }
+    
+    const partnerToken = crypto
+      .createHash('sha256')
+      .update(`${email}:NexusPartner`)
+      .digest('hex')
+      .substring(0, 16);
+      
+    return {
+      email,
+      name: lead.name || 'Parceiro Nexus',
+      agencyName: 'Agência SinergIA',
+      partnerToken
+    };
+  } catch (error) {
+    console.error("Erro no getCurrentPartner:", error);
+    return null;
+  }
+}
+
