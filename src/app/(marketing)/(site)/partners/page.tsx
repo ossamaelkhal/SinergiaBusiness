@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { 
@@ -9,46 +9,9 @@ import {
   DollarSign, Calculator, HelpCircle, AlertCircle, ShieldCheck, Shield,
   Building2, GraduationCap
 } from 'lucide-react'
+import SinergiaNexus from '@/components/sections/SinergiaNexus'
 
 export default function PartnersPage() {
-  // Calculator States
-  const [squadsCount, setSquadsCount] = useState(3)
-  const [averageSquadTicket, setAverageSquadTicket] = useState(10000) // MRR do cliente
-  const [monthlyPocs, setMonthlyPocs] = useState(2) // setups de PoC por mês
-
-  // Commission Calculations based on Active Squads (Tiers)
-  const calculationResult = useMemo(() => {
-    let commissionPercentage = 20
-    let tierName = 'Homologado'
-    let setupRebate = 50 // % do PoC Setup Fee (R$ 997) retornado ao parceiro
-
-    if (squadsCount >= 10) {
-      commissionPercentage = 30
-      tierName = 'Master Partner'
-      setupRebate = 100
-    } else if (squadsCount >= 5) {
-      commissionPercentage = 25
-      tierName = 'Growth Partner'
-      setupRebate = 70
-    }
-
-    const pocSetupPrice = 997
-    const monthlyPocCommission = monthlyPocs * pocSetupPrice * (setupRebate / 100)
-    const monthlyActiveMRR = squadsCount * averageSquadTicket
-    const monthlyRecurringCommission = monthlyActiveMRR * (commissionPercentage / 100)
-    const totalMonthlyRevenue = monthlyPocCommission + monthlyRecurringCommission
-
-    return {
-      tierName,
-      commissionPercentage,
-      setupRebate,
-      monthlyPocCommission,
-      monthlyRecurringCommission,
-      totalMonthlyRevenue,
-      monthlyActiveMRR
-    }
-  }, [squadsCount, averageSquadTicket, monthlyPocs])
-
   return (
     <div className="min-h-screen bg-slate-950 text-slate-300 font-sans selection:bg-emerald-500/30 selection:text-emerald-200">
       
@@ -148,139 +111,8 @@ export default function PartnersPage() {
       </section>
 
       {/* Interactive Commissions Simulation Tool */}
-      <section className="py-24 bg-slate-950 relative">
-        <div className="container mx-auto px-4 md:px-6 max-w-5xl relative z-10">
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <span className="text-emerald-400 font-bold uppercase tracking-wider text-xs bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-              Simulador Realista e Transparente
-            </span>
-            <h2 className="text-3xl md:text-5xl font-black text-white mt-4 tracking-tight">
-              Calcule Seus Ganhos Nexus
-            </h2>
-            <p className="text-slate-400 mt-4 leading-relaxed font-light text-base">
-              Ajuste as métricas de indicações e fechamentos de projetos para visualizar em tempo real a comissão vitalícia e o bônus de setup imediato que você receberá.
-            </p>
-          </div>
+      <SinergiaNexus />
 
-          <div className="grid lg:grid-cols-12 gap-8 bg-slate-900/40 p-8 md:p-12 rounded-[2.5rem] border border-white/10 backdrop-blur-md">
-            
-            {/* Left Col: Sliders */}
-            <div className="lg:col-span-7 space-y-8">
-              
-              {/* Squads Slider */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="font-bold text-white uppercase tracking-wider text-xs">Clientes Ativos com Esquadrão de IA:</span>
-                  <span className="text-emerald-400 font-mono font-bold text-lg">{squadsCount} {squadsCount === 1 ? 'cliente' : 'clientes'}</span>
-                </div>
-                <input 
-                  type="range" 
-                  min="0" 
-                  max="25" 
-                  step="1"
-                  value={squadsCount}
-                  onChange={(e) => setSquadsCount(Number(e.target.value))}
-                  className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-400"
-                />
-                <div className="flex justify-between text-[10px] text-slate-500 font-bold uppercase">
-                  <span>0 (Sem Recorrência)</span>
-                  <span>5 (Growth Partner: 25%)</span>
-                  <span>10+ (Master Partner: 30% LTV)</span>
-                </div>
-              </div>
-
-              {/* Average Ticket Selector */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="font-bold text-white uppercase tracking-wider text-xs">Ticket Médio Mensal do Cliente (MRR):</span>
-                  <span className="text-indigo-400 font-mono font-bold text-lg">R$ {averageSquadTicket.toLocaleString('pt-BR')}</span>
-                </div>
-                <input 
-                  type="range" 
-                  min="5000" 
-                  max="20000" 
-                  step="2500"
-                  value={averageSquadTicket}
-                  onChange={(e) => setAverageSquadTicket(Number(e.target.value))}
-                  className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-400"
-                />
-                <div className="flex justify-between text-[10px] text-slate-500 font-bold uppercase">
-                  <span>R$ 5k (PoC Expandido)</span>
-                  <span>R$ 10k (Squad Médio)</span>
-                  <span>R$ 20k (Enterprise Máximo)</span>
-                </div>
-              </div>
-
-              {/* Monthly PoC Sells */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="font-bold text-white uppercase tracking-wider text-xs">Novos Pilotos (PoC) Fechados no Mês:</span>
-                  <span className="text-cyan-400 font-mono font-bold text-lg">{monthlyPocs} {monthlyPocs === 1 ? 'setup' : 'setups'} / mês</span>
-                </div>
-                <input 
-                  type="range" 
-                  min="0" 
-                  max="10" 
-                  step="1"
-                  value={monthlyPocs}
-                  onChange={(e) => setMonthlyPocs(Number(e.target.value))}
-                  className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
-                />
-                <div className="flex justify-between text-[10px] text-slate-500 font-bold uppercase">
-                  <span>0 setups</span>
-                  <span>5 setups</span>
-                  <span>10 setups</span>
-                </div>
-              </div>
-
-            </div>
-
-            {/* Right Col: Simulation Output Card */}
-            <div className="lg:col-span-5 bg-slate-950 p-6 md:p-8 rounded-3xl border border-white/5 flex flex-col justify-between relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
-              
-              <div className="space-y-6">
-                <div>
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Nível de Parceria Simulado</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl font-extrabold text-white">{calculationResult.tierName}</span>
-                    <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-                      {calculationResult.commissionPercentage}% LTV
-                    </span>
-                  </div>
-                </div>
-
-                <div className="space-y-3 border-y border-white/5 py-4">
-                  <div className="flex justify-between items-center text-sm text-slate-400">
-                    <span>Retorno Setup (PoC):</span>
-                    <span className="font-mono text-white">R$ {calculationResult.monthlyPocCommission.toLocaleString('pt-BR')} ({calculationResult.setupRebate}%)</span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm text-slate-400">
-                    <span>Recorrência Mensal (MRR):</span>
-                    <span className="font-mono text-white">R$ {calculationResult.monthlyRecurringCommission.toLocaleString('pt-BR')}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs text-slate-500 uppercase tracking-wider">
-                    <span>Volume sob custódia:</span>
-                    <span className="font-mono">R$ {calculationResult.monthlyActiveMRR.toLocaleString('pt-BR')}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-6">
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Sua Estimativa de Ganhos / Mês</span>
-                <div className="text-4xl md:text-5xl font-black text-emerald-400 tracking-tighter">
-                  R$ {calculationResult.totalMonthlyRevenue.toLocaleString('pt-BR')}
-                </div>
-                <p className="text-[10px] text-slate-500 mt-2 leading-relaxed">
-                  *Valores projetados baseados em comissões nominais. Impostos incidentes aplicados em nota fiscal de serviços.
-                </p>
-              </div>
-
-            </div>
-
-          </div>
-        </div>
-      </section>
 
       {/* 3 Categorias de Embaixadores */}
       <section className="py-24 bg-slate-900/20 border-t border-white/5">

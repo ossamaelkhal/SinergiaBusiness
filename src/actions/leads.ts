@@ -174,6 +174,7 @@ export async function submitApplication(payload: SubmitApplicationPayload) {
       bottleneck: bottleneck || '',
       nichoSlug: nichoSlug || '',
       auditedLoss: auditedLoss || 0,
+      partnerId: cleanAffiliateId || null,
       status: 'prospect_vip',
       createdAt: new Date().toISOString(),
       tracking: {

@@ -183,6 +183,7 @@ export async function submitLeadApplication(userData: any, trackingData: any, cl
       bottleneck: userData.bottleneck || '',
       nichoSlug: userData.nichoSlug || '',
       auditedLoss: userData.auditedLoss || 0,
+      partnerId: trackingData.sinergia_affiliate_id || null,
       status: 'prospect_vip',
       createdAt: new Date().toISOString(),
       tracking: {
@@ -236,6 +237,7 @@ export async function submitLeadApplication(userData: any, trackingData: any, cl
         bottleneck: userData.bottleneck || '',
         nichoSlug: userData.nichoSlug || '',
         auditedLoss: userData.auditedLoss || 0,
+        partnerId: trackingData.sinergia_affiliate_id || null,
         status: 'prospect_vip',
         createdAt: new Date().toISOString(),
         tracking: {
