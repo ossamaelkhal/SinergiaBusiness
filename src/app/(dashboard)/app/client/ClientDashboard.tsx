@@ -258,8 +258,8 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
     <div className="min-h-screen bg-slate-950 text-slate-50 relative overflow-hidden pb-12">
       {/* Background Glowing Orbs */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[100px]" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[100px]" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
       </div>
 
       {/* Admin Status Bar */}
@@ -291,7 +291,7 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
             <h2 className="text-3xl font-black text-white tracking-tight">
               Olá, {lead.name}
             </h2>
-            <p className="text-slate-400 mt-2 font-medium flex items-center gap-2 text-sm">
+            <p className="text-slate-400 mt-2 font-medium flex items-center gap-2 text-sm font-light">
               SinergIA OS rodando com infraestrutura privada para a sua empresa <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
             </p>
           </div>
@@ -305,11 +305,11 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
         {/* SEÇÃO 1: STATUS DOS AGENTES POR NICHO */}
         <section className="space-y-4">
           <h3 className="text-xl font-bold text-white flex items-center gap-2">
-             <Bot className="w-5 h-5 text-emerald-400" /> Motores Cognitivos Ativos
+             <Bot className="w-5 h-5 text-emerald-400 animate-pulse" /> Motores Cognitivos Ativos
           </h3>
           <div className={`grid grid-cols-1 md:grid-cols-${Math.min(3, agents.length)} gap-6`}>
             {agents.map((agent, idx) => (
-              <Card key={idx} className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors rounded-2xl relative overflow-hidden group">
+              <Card key={idx} className="bg-slate-950/40 border border-white/5 hover:border-emerald-500/30 transition-all duration-500 rounded-2xl relative overflow-hidden group transform-gpu will-change-transform shadow-[0_0_30px_rgba(16,185,129,0.02)] hover:shadow-[0_0_30px_rgba(16,185,129,0.08)]">
                 <div className="absolute top-0 w-full h-[3px] bg-gradient-to-r from-emerald-500 to-teal-400"></div>
                 <CardContent className="p-6 space-y-4">
                   <div className="flex justify-between items-start">
@@ -321,7 +321,7 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
                       <Wifi className="w-3 h-3 animate-pulse" /> OPERACIONAL
                     </Badge>
                   </div>
-                  <p className="text-slate-400 text-xs leading-relaxed min-h-[40px]">{agent.desc}</p>
+                  <p className="text-slate-400 text-xs leading-relaxed min-h-[40px] font-light">{agent.desc}</p>
                   
                   <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/5 text-center text-xs">
                     <div>
@@ -343,7 +343,7 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
           {/* COLUNA ESQUERDA: GRÁFICO FINANCEIRO + TERMINAL DE LOGS */}
           <div className="lg:col-span-2 space-y-8">
             {/* TELEMETRIA DE EMANCIPAÇÃO OPERACIONAL */}
-            <Card className="bg-slate-900/60 border border-white/10 backdrop-blur-md overflow-hidden relative">
+            <Card className="bg-slate-950/40 border border-white/10 backdrop-blur-xl overflow-hidden relative transform-gpu will-change-transform shadow-[0_0_50px_rgba(99,102,241,0.02)]">
               <div className="absolute top-0 w-full h-[3px] bg-gradient-to-r from-emerald-500 to-teal-400"></div>
               <CardContent className="p-6 space-y-6">
                 <div>
@@ -374,7 +374,7 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
                     <ChartContainer id={areaChartId} config={revenueRecoveryConfig} className="w-full h-full">
                       <AreaChart data={recoveryData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                         <defs>
-                          <linearGradient id="colorRecovered" x1="0" y1="0" x2="0" y2="1">
+                          <linearGradient id="sinergia-gradient-recovered" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
                             <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
                           </linearGradient>
@@ -394,14 +394,14 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
                           axisLine={false}
                           tickFormatter={(val) => `R$ ${val}`}
                         />
-                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <ChartTooltip content={<ChartTooltipContent className="bg-slate-950/80 border-white/10 backdrop-blur-md" />} />
                         <Area 
                           type="monotone" 
                           dataKey="recovered" 
                           stroke="#10b981" 
                           strokeWidth={2}
                           fillOpacity={1} 
-                          fill="url(#colorRecovered)" 
+                          fill="url(#sinergia-gradient-recovered)" 
                         />
                       </AreaChart>
                     </ChartContainer>
@@ -416,19 +416,24 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
                  <Terminal className="w-5 h-5 text-indigo-400" /> Console de Telemetria Viva
               </h3>
               {needsHumanIntervention && (
-                <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex items-start gap-3 text-amber-400 text-xs md:text-sm font-medium animate-pulse">
-                  <ShieldAlert className="w-5 h-5 shrink-0 text-amber-500 mt-0.5" />
+                <div className="bg-amber-950/40 border border-amber-500/30 shadow-[0_0_30px_rgba(245,158,11,0.15)] rounded-2xl p-5 flex items-start gap-4 text-amber-400 text-xs md:text-sm font-medium animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite] backdrop-blur-xl transform-gpu will-change-transform">
+                  <div className="p-2 bg-amber-500/10 rounded-xl border border-amber-500/30 shrink-0">
+                    <ShieldAlert className="w-5 h-5 text-amber-500" />
+                  </div>
                   <div>
-                    <span className="font-bold">REQUER ARTESÃO</span> — Fluxo suspenso temporariamente. A inteligência artificial identificou uma complexidade sensível que exige a sabedoria e empatia humana.
+                    <span className="font-extrabold uppercase tracking-widest text-[9px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/30 block w-max mb-1.5">REQUER ARTESÃO</span>
+                    <p className="leading-relaxed text-slate-300 font-light">
+                      Fluxo de atendimento pausado temporariamente. Nossa inteligência artificial detectou uma complexidade sensível e com sentimentos profundos. O cliente agora aguarda a empatia e a sabedoria do <strong className="text-amber-400 font-bold">Artesão Humano</strong>.
+                    </p>
                   </div>
                 </div>
               )}
-              <Card className="bg-slate-900/60 border border-white/10 backdrop-blur-md overflow-hidden">
+              <Card className="bg-slate-950/40 border border-white/10 backdrop-blur-xl overflow-hidden transform-gpu will-change-transform shadow-[0_0_40px_rgba(99,102,241,0.02)]">
                 <CardContent className="p-0">
                   <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                       <thead>
-                        <tr className="border-b border-white/5 bg-slate-950/40 text-xs font-black text-slate-500 uppercase tracking-widest">
+                        <tr className="border-b border-white/5 bg-slate-950/60 text-xs font-black text-slate-500 uppercase tracking-widest">
                           <th className="py-3 px-6">Timestamp</th>
                           <th className="py-3 px-6">Agente</th>
                           <th className="py-3 px-6">Ação Realizada</th>
@@ -470,8 +475,8 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
           
           {/* COLUNA DIREITA: SONAR RADAR + ALOCAÇÃO COGNITIVA */}
           <div className="space-y-8">
-            {/* SONAR MILITAR (RADAR CHART) */}
-            <Card className="bg-slate-900/60 border border-white/10 backdrop-blur-md overflow-hidden relative group">
+            {/* SONAR (RADAR CHART) */}
+            <Card className="bg-slate-950/40 border border-white/10 backdrop-blur-xl overflow-hidden relative group transform-gpu will-change-transform shadow-[0_0_50px_rgba(6,182,212,0.02)]">
               <div className="absolute top-0 w-full h-[3px] bg-gradient-to-r from-cyan-500 to-indigo-500"></div>
               <CardContent className="p-6 space-y-4">
                 <div>
@@ -485,17 +490,23 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
                 <div className="flex justify-center items-center h-[260px]">
                   <ChartContainer id={radarChartId} config={darkFunnelConfig} className="w-full h-full aspect-square max-h-[250px]">
                     <RadarChart cx="50%" cy="50%" outerRadius="80%" data={sonarData}>
+                      <defs>
+                        <linearGradient id="sinergia-gradient-radar" x1="0" y1="0" x2="1" y2="1">
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
+                          <stop offset="95%" stopColor="#10b981" stopOpacity={0.05} />
+                        </linearGradient>
+                      </defs>
                       <PolarGrid stroke="rgba(255,255,255,0.08)" />
                       <PolarAngleAxis dataKey="item" tick={{ fill: "rgba(255,255,255,0.6)", fontSize: 10 }} />
                       <Radar 
                         name="Intensidade" 
                         dataKey="score" 
                         stroke="#10b981" 
-                        fill="#10b981" 
-                        fillOpacity={0.25} 
+                        fill="url(#sinergia-gradient-radar)" 
+                        fillOpacity={0.7} 
                         dot={{ r: 4, fill: "#10b981", stroke: "#020617", strokeWidth: 2 }}
                       />
-                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <ChartTooltip content={<ChartTooltipContent className="bg-slate-950/80 border-white/10 backdrop-blur-md" />} />
                     </RadarChart>
                   </ChartContainer>
                 </div>
@@ -503,12 +514,12 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
             </Card>
 
             {/* MATRIZ DE ALOCAÇÃO DE CARGA COGNITIVA (BAR CHART EMPILHADO HORIZONTAL) */}
-            <Card className="bg-slate-900/60 border border-white/10 backdrop-blur-md overflow-hidden relative">
+            <Card className="bg-slate-950/40 border border-white/10 backdrop-blur-xl overflow-hidden relative transform-gpu will-change-transform shadow-[0_0_50px_rgba(16,185,129,0.02)]">
               <div className="absolute top-0 w-full h-[3px] bg-gradient-to-r from-emerald-500 to-cyan-500"></div>
               <CardContent className="p-6 space-y-6">
                 <div>
                   <h4 className="text-lg font-bold text-white flex items-center gap-2">
-                    <Cpu className="w-5 h-5 text-emerald-400" />
+                    <Cpu className="w-5 h-5 text-emerald-400 animate-pulse" />
                     Matriz de Alocação Cognitiva
                   </h4>
                   <p className="text-xs text-slate-400">Distribuição de processamento do Swarm AI ativo</p>
@@ -521,12 +532,26 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
                       layout="vertical" 
                       margin={{ top: 0, right: 10, left: -40, bottom: 0 }}
                     >
+                      <defs>
+                        <linearGradient id="sinergia-gradient-comercial" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="5%" stopColor="#10b981" />
+                          <stop offset="95%" stopColor="#059669" />
+                        </linearGradient>
+                        <linearGradient id="sinergia-gradient-suporte" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="5%" stopColor="#6366f1" />
+                          <stop offset="95%" stopColor="#4f46e5" />
+                        </linearGradient>
+                        <linearGradient id="sinergia-gradient-backoffice" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="5%" stopColor="#06b6d4" />
+                          <stop offset="95%" stopColor="#0891b2" />
+                        </linearGradient>
+                      </defs>
                       <XAxis type="number" hide domain={[0, 100]} />
                       <YAxis type="category" dataKey="category" hide />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="comercial" stackId="a" fill="#10b981" radius={[4, 0, 0, 4]} />
-                      <Bar dataKey="suporte" stackId="a" fill="#6366f1" />
-                      <Bar dataKey="backoffice" stackId="a" fill="#06b6d4" radius={[0, 4, 4, 0]} />
+                      <ChartTooltip content={<ChartTooltipContent className="bg-slate-950/80 border-white/10 backdrop-blur-md" />} />
+                      <Bar dataKey="comercial" stackId="a" fill="url(#sinergia-gradient-comercial)" radius={[4, 0, 0, 4]} />
+                      <Bar dataKey="suporte" stackId="a" fill="url(#sinergia-gradient-suporte)" />
+                      <Bar dataKey="backoffice" stackId="a" fill="url(#sinergia-gradient-backoffice)" radius={[0, 4, 4, 0]} />
                     </BarChart>
                   </ChartContainer>
                 </div>
@@ -534,24 +559,24 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
                 {/* Legendas de consumo */}
                 <div className="grid grid-cols-3 gap-2 pt-2 text-center border-t border-white/5">
                   <div className="space-y-1">
-                    <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <div className="flex items-center justify-center gap-1.5 text-[9px] text-slate-400 font-bold uppercase tracking-wider">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                       SinergIA Crescimento
                     </div>
                     <div className="text-white font-bold font-mono text-sm">42%</div>
                     <div className="text-[9px] text-slate-500">Atração / Vendas</div>
                   </div>
                   <div className="space-y-1">
-                    <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                      <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
+                    <div className="flex items-center justify-center gap-1.5 text-[9px] text-slate-400 font-bold uppercase tracking-wider">
+                      <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
                       SinergIA Conexão
                     </div>
                     <div className="text-white font-bold font-mono text-sm">30%</div>
                     <div className="text-[9px] text-slate-500">Acolhimento / Suporte</div>
                   </div>
                   <div className="space-y-1">
-                    <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                      <span className="w-2 h-2 rounded-full bg-cyan-500"></span>
+                    <div className="flex items-center justify-center gap-1.5 text-[9px] text-slate-400 font-bold uppercase tracking-wider">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-500"></span>
                       SinergIA Fluxo
                     </div>
                     <div className="text-white font-bold font-mono text-sm">24%</div>
@@ -566,14 +591,14 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
         {/* Quick Base References */}
         <section className="grid md:grid-cols-2 gap-6">
           {/* Base de Conhecimento */}
-          <Card className="bg-slate-900 border-white/5 hover:border-white/10 transition-colors">
+          <Card className="bg-slate-950/40 border border-white/5 hover:border-indigo-500/20 transition-all duration-300 transform-gpu will-change-transform shadow-[0_0_20px_rgba(99,102,241,0.01)] hover:shadow-[0_0_30px_rgba(99,102,241,0.05)]">
             <CardContent className="p-6 flex items-start gap-4">
               <div className="w-12 h-12 bg-indigo-500/10 border border-indigo-500/20 rounded-xl flex items-center justify-center shrink-0">
                 <BookOpen className="w-6 h-6 text-indigo-400" />
               </div>
               <div className="space-y-1">
-                <h4 className="font-bold text-white">Treinamento & Playbooks</h4>
-                <p className="text-xs text-slate-400 leading-relaxed">Injete PDFs de contexto sobre seu negócio para o robô aprender as regras de prospecção e BANT da empresa.</p>
+                <h4 className="font-bold text-white text-sm md:text-base">Treinamento & Playbooks</h4>
+                <p className="text-xs text-slate-400 leading-relaxed font-light">Injete PDFs de contexto sobre seu negócio para o robô aprender as regras de prospecção e BANT da empresa.</p>
                 <Link href="/app/client/settings">
                   <Button variant="link" className="text-indigo-400 hover:text-indigo-300 p-0 h-auto text-xs font-bold pt-2">Acessar Base de Conhecimento &rarr;</Button>
                 </Link>
@@ -582,19 +607,19 @@ export default function ClientDashboard({ lead }: ClientDashboardProps) {
           </Card>
 
           {/* Webhooks config (SinergIA Unified Gateway) */}
-          <Card className="bg-slate-900 border-white/5 hover:border-white/10 transition-colors">
+          <Card className="bg-slate-950/40 border border-white/5 hover:border-emerald-500/20 transition-all duration-300 transform-gpu will-change-transform shadow-[0_0_20px_rgba(16,185,129,0.01)] hover:shadow-[0_0_30px_rgba(16,185,129,0.05)]">
             <CardContent className="p-6 flex items-start gap-4">
               <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center shrink-0">
                 <PlayCircle className="w-6 h-6 text-emerald-400" />
               </div>
               <div className="space-y-3 w-full">
                 <div>
-                  <h4 className="font-bold text-white">SinergIA Unified Gateway</h4>
-                  <p className="text-xs text-slate-400 leading-relaxed">
+                  <h4 className="font-bold text-white text-sm md:text-base">SinergIA Unified Gateway</h4>
+                  <p className="text-xs text-slate-400 leading-relaxed font-light">
                     Direcione os payloads do Shopify, Bling ou HubSpot para o barramento de integração:
                   </p>
                 </div>
-                <div className="relative flex items-center bg-slate-950/80 border border-white/10 rounded-xl p-3 font-mono text-[10px] text-emerald-400 select-all overflow-x-auto whitespace-nowrap">
+                <div className="relative flex items-center bg-black/90 border border-white/10 rounded-xl p-3 font-mono text-[9px] text-emerald-400 select-all overflow-x-auto whitespace-nowrap shadow-[inset_0_0_15px_rgba(16,185,129,0.03)]">
                   <span>https://sinergia.business/api/v1/gateways/{lead.companyId}</span>
                 </div>
                 <div>

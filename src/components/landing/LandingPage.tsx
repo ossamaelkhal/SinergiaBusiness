@@ -6,10 +6,10 @@ import { Zap, ChevronRight, Fingerprint, ShieldCheck } from 'lucide-react'
 
 // Componentes das Seções Estruturais
 import Hero from '@/components/sections/Hero'
-import SinergiaBlueprint from '@/components/sections/SinergiaBlueprint' // Carrier Deck
-import MultiAgentFleet from '@/components/features/fleet/MultiAgentFleet' // 4 Unidades Táticas do Swarm AI
-import SinergiaOS from '@/components/sections/SinergiaOS' // 4 Pilares da Operação Autônoma
-import SinergiaCosmos from '@/components/sections/SinergiaCosmos' // Memória RAG
+import SinergiaBlueprint from '@/components/sections/SinergiaBlueprint' // SinergIA Blueprint
+import MultiAgentFleet from '@/components/features/fleet/MultiAgentFleet' // SinergIA Swarm Consciência
+import SinergiaOS from '@/components/sections/SinergiaOS' // Os Quatro Pilares da Emancipação Consciente
+import SinergiaCosmos from '@/components/sections/SinergiaCosmos' // Expansão Consciente
 import SinergiaFAQ from '@/components/sections/SinergiaFAQ' // FAQ e Quebra de Objeções
 import CTA from '@/components/sections/CTA' // CTA Dupla (Diagnóstico / Licenciamento)
 import SinergiaPricingOS from '@/components/sections/SinergiaPricingOS'
@@ -27,20 +27,20 @@ export default function LandingPage() {
                 {/* Linha separadora */}
                 <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                 
-                {/* 1. Carrier Deck (Mapa da Solução / Arquitetura SinergIA) */}
+                {/* 1. SinergIA Blueprint (Mapa da Solução / Arquitetura SinergIA) */}
                 <SinergiaBlueprint />
 
                 <div className="w-full h-px bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent my-10" />
 
-                {/* 2. As 4 Unidades Táticas do Swarm AI */}
+                {/* 2. SinergIA Swarm Consciência */}
                 <MultiAgentFleet />
                 
-                {/* 3. Os 4 Pilares da Operação Autônoma */}
+                {/* 3. Os Quatro Pilares da Emancipação Consciente */}
                 <SinergiaOS />
                 
                 <div className="w-full h-px bg-gradient-to-r from-transparent via-fuchsia-500/20 to-transparent my-10" />
                 
-                {/* 4. A Memória RAG e Conexão Cosmos */}
+                {/* 4. A Memória RAG e Expansão Consciente */}
                 <SinergiaCosmos />
 
                 {/* 5. Simulador de Alocação de Infraestrutura SinergIA OS */}
@@ -67,7 +67,7 @@ export default function LandingPage() {
                             <span className="ml-2 text-2xl font-black text-white">SinergIA</span>
                         </Link>
                         <p className="text-sm text-slate-400 leading-relaxed pr-6">
-                            Ecossistema B2B focado em orquestração de inteligência operacional. Escalamos receitas, cortamos custos e conectamos parceiros via telemetria autônoma.
+                            Orquestração de tecnologia com alma e crescimento com consciência. Elevamos a operação de PMEs liberando as pessoas de tarefas repetitivas para focarem no valor estratégico e na criatividade de artesão.
                         </p>
                         <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg w-max mt-4">
                             <ShieldCheck className="w-4 h-4 text-emerald-500" />

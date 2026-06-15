@@ -147,47 +147,88 @@ export function SetupWizard({ leadId, onComplete }: SetupWizardProps) {
     }
   }
 
+  // Helper de cores do estágio atual para design psicológico de transição
+  const getStepVisualState = (s: number) => {
+    if (s <= 2) {
+      return {
+        accent: 'rose-500',
+        textClass: 'text-rose-400',
+        bgAccentClass: 'bg-rose-500/10',
+        borderAccentClass: 'border-rose-500/30',
+        cardBorderGlow: 'border-rose-500/20 shadow-[0_0_50px_rgba(244,63,94,0.12)]',
+        activeBtnClass: 'bg-rose-500/10 border-rose-500/50 text-rose-300 shadow-[0_0_15px_rgba(244,63,94,0.1)]'
+      };
+    }
+    if (s <= 4) {
+      return {
+        accent: 'fuchsia-500',
+        textClass: 'text-fuchsia-400',
+        bgAccentClass: 'bg-fuchsia-500/10',
+        borderAccentClass: 'border-fuchsia-500/30',
+        cardBorderGlow: 'border-fuchsia-500/20 shadow-[0_0_50px_rgba(217,70,239,0.12)]',
+        activeBtnClass: 'bg-fuchsia-500/10 border-fuchsia-500/50 text-fuchsia-300 shadow-[0_0_15px_rgba(217,70,239,0.1)]'
+      };
+    }
+    return {
+      accent: 'emerald-500',
+      textClass: 'text-emerald-400',
+      bgAccentClass: 'bg-emerald-500/10',
+      borderAccentClass: 'border-emerald-500/30',
+      cardBorderGlow: 'border-emerald-500/20 shadow-[0_0_50px_rgba(16,185,129,0.12)]',
+      activeBtnClass: 'bg-emerald-500/10 border-emerald-500/50 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
+    };
+  };
+
+  const visualState = getStepVisualState(step);
+
   return (
-    <div className="w-full max-w-3xl mx-auto mt-12">
+    <div className="w-full max-w-3xl mx-auto mt-12 px-4">
       <div className="text-center mb-10">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-500/10 border border-indigo-500/30 mb-6">
-          <Heart className="w-8 h-8 text-indigo-400" />
+        <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full ${visualState.bgAccentClass} border ${visualState.borderAccentClass} mb-6 transition-colors duration-500`}>
+          <Heart className={`w-8 h-8 ${visualState.textClass} transition-colors duration-500 animate-pulse`} />
         </div>
-        <h2 className="text-3xl font-black text-white mb-3 tracking-tight">Diagnóstico de Maturidade Cultural</h2>
-        <p className="text-slate-400">Responda com honestidade radical para mapearmos a alma digital do seu negócio.</p>
+        <h2 className="text-3xl font-black text-white mb-3 tracking-tight">Auditoria de Alocação de Consciência</h2>
+        <p className="text-slate-400 text-sm">Responda com honestidade radical para mapearmos o propósito e a alma digital do seu negócio.</p>
       </div>
 
       {/* Indicador de Passos */}
       <div className="flex items-center justify-between mb-8 px-4 relative">
         <div className="absolute top-1/2 left-8 right-8 h-0.5 bg-slate-800 -z-10 translate-y-[-50%]">
           <div 
-            className="h-full bg-indigo-500 transition-all duration-500" 
+            className="h-full bg-gradient-to-r from-rose-500 via-fuchsia-500 to-emerald-500 transition-all duration-500" 
             style={{ width: `${((step - 1) / 5) * 100}%` }}
           />
         </div>
-        {[1, 2, 3, 4, 5, 6].map((num) => (
-          <div 
-            key={num} 
-            className={`w-10 h-10 rounded-full flex items-center justify-center font-bold border-2 transition-all duration-300 bg-slate-950 ${
-              step >= num 
-                ? 'border-indigo-500 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.3)]' 
-                : 'border-slate-800 text-slate-600'
-            }`}
-          >
-            {step > num ? <CheckCircle2 className="w-5 h-5 text-indigo-400" /> : num}
-          </div>
-        ))}
+        {[1, 2, 3, 4, 5, 6].map((num) => {
+          const isCurrentOrPassed = step >= num;
+          const numState = getStepVisualState(num);
+          return (
+            <div 
+              key={num} 
+              className={`w-10 h-10 rounded-full flex items-center justify-center font-bold border-2 transition-all duration-500 bg-slate-950 transform-gpu will-change-transform ${
+                isCurrentOrPassed 
+                  ? `border-${numState.accent} ${numState.textClass} shadow-[0_0_15px_rgba(255,255,255,0.05)]` 
+                  : 'border-slate-800 text-slate-600'
+              }`}
+              style={{
+                boxShadow: isCurrentOrPassed ? `0 0 15px ${numState.cardBorderGlow.split('rgba(')[1]?.split(')')[0] ? 'rgba(' + numState.cardBorderGlow.split('rgba(')[1] : 'transparent'}` : 'none'
+              }}
+            >
+              {step > num ? <CheckCircle2 className="w-5 h-5" /> : num}
+            </div>
+          );
+        })}
       </div>
 
-      <Card className="bg-slate-900 border-white/5 border-t-white/10 shadow-2xl">
-        <CardContent className="p-8">
+      <Card className={`bg-slate-950/60 backdrop-blur-xl border transform-gpu will-change-transform transition-all duration-500 ease-in-out ${visualState.cardBorderGlow}`}>
+        <CardContent className="p-6 md:p-8">
           
           {/* PASSO 1: Foco Humano */}
           {step === 1 && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
-                <Bot className="text-indigo-400 w-6 h-6" />
-                <h3 className="text-lg font-bold text-white">1. Tempo & Foco Humano: Seu time gasta mais tempo operando softwares ou cuidando de pessoas?</h3>
+                <Bot className={`${visualState.textClass} w-6 h-6 shrink-0 transition-colors duration-500`} />
+                <h3 className="text-base md:text-lg font-bold text-white leading-tight">1. Tempo & Foco Humano: Seu time gasta mais tempo operando softwares ou cuidando de pessoas?</h3>
               </div>
               <div className="grid grid-cols-1 gap-4">
                 {[
@@ -198,13 +239,13 @@ export function SetupWizard({ leadId, onComplete }: SetupWizardProps) {
                   <button
                     key={item.id}
                     onClick={() => setAns1(item.id)}
-                    className={`p-4 rounded-xl border text-left transition-all hover:scale-[1.01] ${
+                    className={`p-4 rounded-xl border text-left transition-all hover:scale-[1.01] transform-gpu will-change-transform duration-300 ${
                       ans1 === item.id 
-                        ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-300' 
-                        : 'bg-slate-950 border-white/5 text-slate-400 hover:border-white/20'
+                        ? visualState.activeBtnClass
+                        : 'bg-slate-950/40 border-white/5 text-slate-400 hover:border-white/20'
                     }`}
                   >
-                    <div className="font-bold mb-1">{item.label}</div>
+                    <div className="font-bold text-sm text-white mb-1">{item.label}</div>
                     <div className="text-xs text-slate-500">{item.desc}</div>
                   </button>
                 ))}
@@ -212,7 +253,7 @@ export function SetupWizard({ leadId, onComplete }: SetupWizardProps) {
               <Button 
                 onClick={() => setStep(2)} 
                 disabled={!ans1}
-                className="w-full mt-8 bg-white text-slate-950 hover:bg-slate-200 uppercase font-black tracking-wider"
+                className={`w-full mt-8 bg-white hover:bg-slate-200 text-slate-950 hover:scale-[1.01] transition-all transform-gpu will-change-transform uppercase font-black tracking-wider text-xs h-12 rounded-xl`}
               >
                 Próxima Etapa
               </Button>
@@ -223,8 +264,8 @@ export function SetupWizard({ leadId, onComplete }: SetupWizardProps) {
           {step === 2 && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
-                <Bot className="text-indigo-400 w-6 h-6" />
-                <h3 className="text-lg font-bold text-white">2. Tomada de Decisão: Como as decisões nascem no dia a dia da sua empresa?</h3>
+                <Bot className={`${visualState.textClass} w-6 h-6 shrink-0 transition-colors duration-500`} />
+                <h3 className="text-base md:text-lg font-bold text-white leading-tight">2. Tomada de Decisão: Como as decisões nascem no dia a dia da sua empresa?</h3>
               </div>
               <div className="grid grid-cols-1 gap-4">
                 {[
@@ -235,23 +276,23 @@ export function SetupWizard({ leadId, onComplete }: SetupWizardProps) {
                   <button
                     key={item.id}
                     onClick={() => setAns2(item.id)}
-                    className={`p-4 rounded-xl border text-left transition-all hover:scale-[1.01] ${
+                    className={`p-4 rounded-xl border text-left transition-all hover:scale-[1.01] transform-gpu will-change-transform duration-300 ${
                       ans2 === item.id 
-                        ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-300' 
-                        : 'bg-slate-950 border-white/5 text-slate-400 hover:border-white/20'
+                        ? visualState.activeBtnClass
+                        : 'bg-slate-950/40 border-white/5 text-slate-400 hover:border-white/20'
                     }`}
                   >
-                    <div className="font-bold mb-1">{item.label}</div>
+                    <div className="font-bold text-sm text-white mb-1">{item.label}</div>
                     <div className="text-xs text-slate-500">{item.desc}</div>
                   </button>
                 ))}
               </div>
               <div className="flex gap-4 mt-8">
-                <Button variant="ghost" onClick={() => setStep(1)} className="text-slate-400 hover:text-white">Voltar</Button>
+                <Button variant="ghost" onClick={() => setStep(1)} className="text-slate-400 hover:text-white text-xs font-bold uppercase">Voltar</Button>
                 <Button 
                   onClick={() => setStep(3)} 
                   disabled={!ans2}
-                  className="flex-1 bg-white text-slate-950 hover:bg-slate-200 uppercase font-black"
+                  className="flex-1 bg-white hover:bg-slate-200 text-slate-950 uppercase font-black text-xs h-12 rounded-xl transition-all hover:scale-[1.01]"
                 >
                   Próxima Etapa
                 </Button>
@@ -263,8 +304,8 @@ export function SetupWizard({ leadId, onComplete }: SetupWizardProps) {
           {step === 3 && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
-                <Bot className="text-indigo-400 w-6 h-6" />
-                <h3 className="text-lg font-bold text-white">3. Relacionamento: Qual é a maior dor ou atrito que seu cliente enfrenta na sua jornada hoje?</h3>
+                <Bot className={`${visualState.textClass} w-6 h-6 shrink-0 transition-colors duration-500`} />
+                <h3 className="text-base md:text-lg font-bold text-white leading-tight">3. Relacionamento: Qual é a maior dor ou atrito que seu cliente enfrenta na sua jornada hoje?</h3>
               </div>
               <div className="grid grid-cols-1 gap-4">
                 {[
@@ -275,23 +316,23 @@ export function SetupWizard({ leadId, onComplete }: SetupWizardProps) {
                   <button
                     key={item.id}
                     onClick={() => setAns3(item.id)}
-                    className={`p-4 rounded-xl border text-left transition-all hover:scale-[1.01] ${
+                    className={`p-4 rounded-xl border text-left transition-all hover:scale-[1.01] transform-gpu will-change-transform duration-300 ${
                       ans3 === item.id 
-                        ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-300' 
-                        : 'bg-slate-950 border-white/5 text-slate-400 hover:border-white/20'
+                        ? visualState.activeBtnClass
+                        : 'bg-slate-950/40 border-white/5 text-slate-400 hover:border-white/20'
                     }`}
                   >
-                    <div className="font-bold mb-1">{item.label}</div>
+                    <div className="font-bold text-sm text-white mb-1">{item.label}</div>
                     <div className="text-xs text-slate-500">{item.desc}</div>
                   </button>
                 ))}
               </div>
               <div className="flex gap-4 mt-8">
-                <Button variant="ghost" onClick={() => setStep(2)} className="text-slate-400 hover:text-white">Voltar</Button>
+                <Button variant="ghost" onClick={() => setStep(2)} className="text-slate-400 hover:text-white text-xs font-bold uppercase">Voltar</Button>
                 <Button 
                   onClick={() => setStep(4)} 
                   disabled={!ans3}
-                  className="flex-1 bg-white text-slate-950 hover:bg-slate-200 uppercase font-black"
+                  className="flex-1 bg-white hover:bg-slate-200 text-slate-950 uppercase font-black text-xs h-12 rounded-xl transition-all hover:scale-[1.01]"
                 >
                   Próxima Etapa
                 </Button>
@@ -303,8 +344,8 @@ export function SetupWizard({ leadId, onComplete }: SetupWizardProps) {
           {step === 4 && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
-                <Bot className="text-indigo-400 w-6 h-6" />
-                <h3 className="text-lg font-bold text-white">4. Escala: Se o volume de clientes duplicar amanhã, o que acontece com sua empresa?</h3>
+                <Bot className={`${visualState.textClass} w-6 h-6 shrink-0 transition-colors duration-500`} />
+                <h3 className="text-base md:text-lg font-bold text-white leading-tight">4. Escala: Se o volume de clientes duplicar amanhã, o que acontece com sua empresa?</h3>
               </div>
               <div className="grid grid-cols-1 gap-4">
                 {[
@@ -315,23 +356,23 @@ export function SetupWizard({ leadId, onComplete }: SetupWizardProps) {
                   <button
                     key={item.id}
                     onClick={() => setAns4(item.id)}
-                    className={`p-4 rounded-xl border text-left transition-all hover:scale-[1.01] ${
+                    className={`p-4 rounded-xl border text-left transition-all hover:scale-[1.01] transform-gpu will-change-transform duration-300 ${
                       ans4 === item.id 
-                        ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-300' 
-                        : 'bg-slate-950 border-white/5 text-slate-400 hover:border-white/20'
+                        ? visualState.activeBtnClass
+                        : 'bg-slate-950/40 border-white/5 text-slate-400 hover:border-white/20'
                     }`}
                   >
-                    <div className="font-bold mb-1">{item.label}</div>
+                    <div className="font-bold text-sm text-white mb-1">{item.label}</div>
                     <div className="text-xs text-slate-500">{item.desc}</div>
                   </button>
                 ))}
               </div>
               <div className="flex gap-4 mt-8">
-                <Button variant="ghost" onClick={() => setStep(3)} className="text-slate-400 hover:text-white">Voltar</Button>
+                <Button variant="ghost" onClick={() => setStep(3)} className="text-slate-400 hover:text-white text-xs font-bold uppercase">Voltar</Button>
                 <Button 
                   onClick={() => setStep(5)} 
                   disabled={!ans4}
-                  className="flex-1 bg-white text-slate-950 hover:bg-slate-200 uppercase font-black"
+                  className="flex-1 bg-white hover:bg-slate-200 text-slate-950 uppercase font-black text-xs h-12 rounded-xl transition-all hover:scale-[1.01]"
                 >
                   Próxima Etapa
                 </Button>
@@ -343,8 +384,8 @@ export function SetupWizard({ leadId, onComplete }: SetupWizardProps) {
           {step === 5 && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
-                <Bot className="text-indigo-400 w-6 h-6" />
-                <h3 className="text-lg font-bold text-white">5. Filosofia da IA: Qual é o principal papel que você enxerga para a IA na sua empresa?</h3>
+                <Bot className={`${visualState.textClass} w-6 h-6 shrink-0 transition-colors duration-500`} />
+                <h3 className="text-base md:text-lg font-bold text-white leading-tight">5. Filosofia da IA: Qual é o principal papel que você enxerga para a IA na sua empresa?</h3>
               </div>
               <div className="grid grid-cols-1 gap-4">
                 {[
@@ -355,23 +396,23 @@ export function SetupWizard({ leadId, onComplete }: SetupWizardProps) {
                   <button
                     key={item.id}
                     onClick={() => setAns5(item.id)}
-                    className={`p-4 rounded-xl border text-left transition-all hover:scale-[1.01] ${
+                    className={`p-4 rounded-xl border text-left transition-all hover:scale-[1.01] transform-gpu will-change-transform duration-300 ${
                       ans5 === item.id 
-                        ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-300' 
-                        : 'bg-slate-950 border-white/5 text-slate-400 hover:border-white/20'
+                        ? visualState.activeBtnClass
+                        : 'bg-slate-950/40 border-white/5 text-slate-400 hover:border-white/20'
                     }`}
                   >
-                    <div className="font-bold mb-1">{item.label}</div>
+                    <div className="font-bold text-sm text-white mb-1">{item.label}</div>
                     <div className="text-xs text-slate-500">{item.desc}</div>
                   </button>
                 ))}
               </div>
               <div className="flex gap-4 mt-8">
-                <Button variant="ghost" onClick={() => setStep(4)} className="text-slate-400 hover:text-white">Voltar</Button>
+                <Button variant="ghost" onClick={() => setStep(4)} className="text-slate-400 hover:text-white text-xs font-bold uppercase">Voltar</Button>
                 <Button 
                   onClick={() => setStep(6)} 
                   disabled={!ans5}
-                  className="flex-1 bg-white text-slate-950 hover:bg-slate-200 uppercase font-black"
+                  className="flex-1 bg-white hover:bg-slate-200 text-slate-950 uppercase font-black text-xs h-12 rounded-xl transition-all hover:scale-[1.01]"
                 >
                   Próxima Etapa
                 </Button>
@@ -383,8 +424,8 @@ export function SetupWizard({ leadId, onComplete }: SetupWizardProps) {
           {step === 6 && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
-                <Rocket className="text-indigo-400 w-6 h-6" />
-                <h3 className="text-lg font-bold text-white">Sistemas & Conexões (Ferramentas que centralizam sua operação)</h3>
+                <Rocket className={`${visualState.textClass} w-6 h-6 shrink-0 transition-colors duration-500`} />
+                <h3 className="text-base md:text-lg font-bold text-white">Sistemas & Conexões (Ferramentas que centralizam sua operação)</h3>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 {toolsOptions.map((tool) => {
@@ -394,10 +435,10 @@ export function SetupWizard({ leadId, onComplete }: SetupWizardProps) {
                       key={tool.id}
                       type="button"
                       onClick={() => handleToggleTool(tool.id)}
-                      className={`p-4 rounded-xl border text-left transition-all hover:scale-[1.01] flex flex-col justify-between ${
+                      className={`p-4 rounded-xl border text-left transition-all hover:scale-[1.01] transform-gpu will-change-transform duration-300 flex flex-col justify-between ${
                         isSelected 
-                          ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-300' 
-                          : 'bg-slate-950 border-white/5 text-slate-400 hover:border-white/10'
+                          ? visualState.activeBtnClass
+                          : 'bg-slate-950/40 border-white/5 text-slate-400 hover:border-white/10'
                       }`}
                     >
                       <div className="font-bold text-sm text-white">{tool.name}</div>
@@ -414,7 +455,7 @@ export function SetupWizard({ leadId, onComplete }: SetupWizardProps) {
 
               <div className="mt-8 p-4 bg-slate-950 border border-white/5 rounded-xl">
                  <div className="flex items-start gap-3">
-                    <ShieldCheck className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
+                    <ShieldCheck className={`w-5 h-5 ${visualState.textClass} shrink-0 mt-0.5`} />
                     <p className="text-xs text-slate-400">
                       Sistemas legados de <strong className="text-rose-400">Nível 3 (como TOTVS e SAP)</strong> exigem homologação dedicada e auditoria de escopo fechado com nossa engenharia comercial.
                     </p>
@@ -422,11 +463,11 @@ export function SetupWizard({ leadId, onComplete }: SetupWizardProps) {
               </div>
 
               <div className="flex gap-4 mt-8">
-                <Button variant="ghost" onClick={() => setStep(5)} className="text-slate-400 hover:text-white" disabled={loading}>Voltar</Button>
+                <Button variant="ghost" onClick={() => setStep(5)} className="text-slate-400 hover:text-white text-xs font-bold uppercase" disabled={loading}>Voltar</Button>
                 <Button 
                   onClick={handleFinish} 
                   disabled={selectedTools.length === 0 || loading}
-                  className="flex-1 bg-indigo-500 hover:bg-indigo-400 text-white uppercase font-black"
+                  className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 uppercase font-black text-xs h-12 rounded-xl transition-all hover:scale-[1.01]"
                 >
                   {loading ? (
                     <div className="flex items-center gap-2 justify-center">
