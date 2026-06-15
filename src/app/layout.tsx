@@ -13,12 +13,12 @@ import FloatingJetski from "@/components/FloatingJetski"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "SinergIA | Automação Cognitiva e Multi-Agent Swarm B2B",
-  description: "Substitua gargalos humanos por uma arquitetura determinística de IA. O SinergIA OS raspa a web, qualifica leads e fecha negócios em escala industrial.",
-  keywords: ["Automação Cognitiva", "Multi-Agent Swarm", "SinergIA OS", "Sales Engine", "Vendas B2B", "Inteligência Artificial", "CRM", "N8N"],
+  title: "SinergIA | Orquestração Consciente e Agentes Cognitivos B2B",
+  description: "Integre a malha de agentes cognitivos SinergIA com o seu ecossistema. Emancipe seu time da digitação repetitiva e burocrática sob a salvaguarda do Pacto de Humanidade.",
+  keywords: ["Automação Cognitiva", "Multi-Agent Swarm", "SinergIA OS", "Tecnologia com Alma", "Crescimento Consciente", "Inteligência Artificial", "CRM", "N8N"],
   openGraph: {
-    title: "SinergIA | O Início do Seu Império B2B",
-    description: "Sua operação não precisa de mais planilhas, precisa de Autonomia. Descubra o SinergIA Genesis Core.",
+    title: "SinergIA | Orquestração Consciente de Agentes Cognitivos",
+    description: "Sua operação não precisa de mais burocracia, precisa de harmonia e emancipação. Descubra a Inteligência Humanocêntrica SinergIA.",
     url: "https://sinergia.business",
     siteName: "SinergIA Business",
     images: [
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
         url: "/og-image-enterprise.jpg",
         width: 1200,
         height: 630,
-        alt: "SinergIA OS Cockpit - Automação Nível 5",
+        alt: "SinergIA OS Cockpit - Inteligência Humanocêntrica",
       },
     ],
     locale: "pt_BR",
