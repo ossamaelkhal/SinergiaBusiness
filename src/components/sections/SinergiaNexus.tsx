@@ -84,13 +84,13 @@ export default function SinergiaNexus() {
             <span>SinergIA Nexus: Expansão Continental</span>
           </div>
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-6 text-white leading-tight">
-            Não governe uma cidade.<br/>
+            Não aprisione o tempo.<br/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">
-              Licencie um Império.
+              Semeie um Ecossistema de Emancipação.
             </span>
           </h2>
           <p className="max-w-[800px] mx-auto text-slate-400 leading-relaxed font-medium md:text-xl">
-            Sua agência, consultoria ou fundo domina carteiras de clientes? Com o <strong>Protocolo Nexus</strong>, você distribui a inteligência artificial da SinergIA OS. Instale esquadrões cognitivos em seus clientes e fature com split de alta conversão.
+            Transforme sua carteira de clientes em um organismo vivo de alta alavancagem e receita recorrente estável através da Inteligência Humanocêntrica SinergIA. Distribua a nossa malha de agentes cognitivos sob a salvaguarda estrita do Pacto de Humanidade, suporte contínuo ao Artesão e governança de split automatizado direto na fonte.
           </p>
         </div>
 

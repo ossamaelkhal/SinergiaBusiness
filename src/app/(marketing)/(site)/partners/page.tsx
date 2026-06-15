@@ -29,14 +29,14 @@ export default function PartnersPage() {
             </div>
             
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-white leading-tight">
-              Não governe uma cidade.<br />
+              Não aprisione o tempo.<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-indigo-400 to-teal-300">
-                Licencie um Império.
+                Semeie um Ecossistema de Emancipação.
               </span>
             </h1>
             
             <p className="text-lg md:text-xl text-slate-400 max-w-3xl font-light leading-relaxed">
-              Transforme sua base de clientes em receita recorrente (MRR) com IA White-Label. Distribua a infraestrutura de agentes cognitivos SinergIA com total garantia de SLA, suporte técnico e conformidade regulatória.
+              Transforme sua carteira de clientes em um organismo vivo de alta alavancagem e receita recorrente estável através da Inteligência Humanocêntrica SinergIA. Distribua a nossa malha de agentes cognitivos sob a salvaguarda estrita do Pacto de Humanidade, suporte contínuo ao Artesão e governança de split automatizado direto na fonte.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto pt-6">
