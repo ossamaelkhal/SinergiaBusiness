@@ -355,3 +355,65 @@ export async function updateLeadBilling(leadId: string, billingData: any) {
     throw error;
   }
 }
+
+const SANDBOX_MOCK_PATH = path.join(process.cwd(), 'src/data/mock-sandbox-db.json');
+
+async function readMockSandbox(): Promise<any[]> {
+  try {
+    const data = await fs.readFile(SANDBOX_MOCK_PATH, 'utf-8');
+    return JSON.parse(data);
+  } catch { return []; }
+}
+
+async function writeMockSandbox(data: any[]) {
+  try {
+    await fs.mkdir(path.dirname(SANDBOX_MOCK_PATH), { recursive: true });
+    await fs.writeFile(SANDBOX_MOCK_PATH, JSON.stringify(data, null, 2), 'utf-8');
+  } catch (e) { console.error(e); }
+}
+
+export async function getSandboxLeadById(companyId: string): Promise<any | null> {
+  try {
+    const dbAdmin = admin.firestore();
+    const snap = await dbAdmin.collection('sandboxLeads').doc(companyId).get();
+    if (snap.exists) return { id: snap.id, ...snap.data() };
+    return null;
+  } catch (error) {
+    if (isCredentialsError(error)) {
+      const leads = await readMockSandbox();
+      return leads.find(l => l.companyId === companyId) || null;
+    }
+    throw error;
+  }
+}
+
+export async function saveSandboxLead(companyId: string, leadData: any) {
+  try {
+    const dbAdmin = admin.firestore();
+    await dbAdmin.collection('sandboxLeads').doc(companyId).set({
+      ...leadData,
+      updatedAt: new Date().toISOString()
+    });
+    return { success: true };
+  } catch (error) {
+    if (isCredentialsError(error)) {
+      console.warn("[Firebase Admin Helper] Executando saveSandboxLead em modo Mock.");
+      const leads = await readMockSandbox();
+      const idx = leads.findIndex(l => l.companyId === companyId);
+      const entry = {
+        ...leadData,
+        companyId,
+        updatedAt: new Date().toISOString()
+      };
+      if (idx !== -1) {
+        leads[idx] = entry;
+      } else {
+        leads.push(entry);
+      }
+      await writeMockSandbox(leads);
+      return { success: true };
+    }
+    throw error;
+  }
+}
+
