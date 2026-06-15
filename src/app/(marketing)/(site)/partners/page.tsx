@@ -210,7 +210,7 @@ export default function PartnersPage() {
                 </div>
                 <h3 className="text-2xl font-bold text-white tracking-tight">3. Master Partner</h3>
                 <p className="text-slate-400 text-sm leading-relaxed font-light">
-                  Nível máximo de licenciamento com direito à infraestrutura White-Label total. Permite customizar a aplicação e implantar esquadrões de automação sob servidores dedicados e isolados.
+                  Nível máximo de licenciamento com direito à infraestrutura White-Label total. Permite customizar a aplicação e implantar malhas cognitivas sob servidores dedicados e isolados.
                 </p>
                 <ul className="space-y-3 pt-2 text-xs text-slate-300">
                   <li className="flex items-center gap-2">

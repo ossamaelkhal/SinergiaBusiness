@@ -480,7 +480,7 @@ export default function NicheSolutionPage({
               </h2>
               
               <p className="text-slate-400 text-md font-light leading-relaxed">
-                Preencha nossa triagem rápida em 3 passos para validarmos a viabilidade da sua operação técnica e direcionar o esquadrão cognitivo correto para sua empresa.
+                Preencha nossa triagem rápida em 3 passos para validarmos a viabilidade da sua operação técnica e direcionar a malha cognitiva correta para sua empresa.
               </p>
 
               <div className="pt-4 flex justify-center">

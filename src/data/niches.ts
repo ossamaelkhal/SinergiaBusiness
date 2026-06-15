@@ -278,7 +278,7 @@ export const nichesData: Record<string, NicheSolution> = {
     slug: "operacoes-urgencia-logistica",
     title: "SinergIA para Operações de Urgência, Logística & Distribuição",
     shortTitle: "Logística & Urgência",
-    subtitle: "Despache ordens de serviço em segundos, elimine a ociosidade da frota e blinde sua operação contra gargalos humanos.",
+    subtitle: "Despache ordens de serviço em segundos, elimine a ociosidade da frota e blinde sua operação contra latências e falhas manuais.",
     description: "Em operações de urgência e logística, o tempo de resposta decide quem fica com o contrato. Centralizar o recebimento em telefones ou planilhas cria um gargalo perigoso que limita sua escala. Nossa infraestrutura assume a triagem de rotas, controle preditivo de ativos e auditoria documental sem intervenção manual.",
     icon: Factory,
     color: "rose",

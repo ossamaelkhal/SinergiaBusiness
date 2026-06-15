@@ -98,10 +98,10 @@ export default function MultiAgentFleet() {
                  
                  // Explicit mapping of classes to prevent Tailwind purging and optimize GPU render
                  const colorClasses = {
-                   cyan: 'bg-slate-900/60 border-cyan-500/40 shadow-[0_0_40px_rgba(6,182,212,0.25)]',
-                   fuchsia: 'bg-slate-900/60 border-fuchsia-500/40 shadow-[0_0_40px_rgba(217,70,239,0.25)]',
-                   amber: 'bg-slate-900/60 border-amber-500/40 shadow-[0_0_40px_rgba(245,158,11,0.25)]',
-                   emerald: 'bg-slate-900/60 border-emerald-500/40 shadow-[0_0_40px_rgba(16,185,129,0.25)]'
+                   cyan: 'bg-slate-900/60 border-cyan-500/40 shadow-neon-identity',
+                   fuchsia: 'bg-slate-900/60 border-fuchsia-500/40 shadow-neon-identity',
+                   amber: 'bg-slate-900/60 border-amber-500/40 shadow-neon-artesao animate-neon-artesao-pulsar',
+                   emerald: 'bg-slate-900/60 border-emerald-500/40 shadow-neon-pacto'
                  }[agent.color as 'cyan' | 'fuchsia' | 'amber' | 'emerald'] || '';
 
                  return (
