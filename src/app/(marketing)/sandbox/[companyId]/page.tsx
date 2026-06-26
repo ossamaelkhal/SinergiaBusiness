@@ -1,186 +1,298 @@
-import React from 'react'
-import { notFound } from 'next/navigation'
-import Link from 'next/link'
-import { 
-  ShieldCheck, 
-  Cpu, 
-  Clock, 
-  Sparkles, 
-  TrendingUp, 
-  Heart, 
-  ArrowRight,
-  AlertTriangle,
-  Brain
-} from 'lucide-react'
-import { getSandboxLeadById } from '@/lib/firebase-admin-helper'
-import { Button } from '@/components/ui/button'
+'use client';
 
-// Garantir que o Next.js não pré-renderize esta rota de forma estática no build
-export const dynamic = 'force-dynamic'
+import React, { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { getSandboxLeadAction } from '@/actions/growth';
+import { sandboxScenarios, defaultScenario, SimulationScenario } from '@/data/sandbox-scenarios';
+import { ShieldCheck, Terminal, AlertTriangle, CheckCircle, ArrowRight, HelpCircle, Heart } from 'lucide-react';
 
-interface SandboxPageProps {
-  params: {
-    companyId: string
-  }
-}
+// Força a rota como dinâmica para compatibilidade com a esteira do Next.js
+export const dynamic = 'force-dynamic';
 
-export default async function SandboxPage({ params }: SandboxPageProps) {
-  const { companyId } = params
+export default function SandboxDynamicPage() {
+  const { companyId } = useParams() as { companyId: string };
+  const router = useRouter();
   
-  // Buscar os dados do lead de sandbox
-  const lead = await getSandboxLeadById(companyId)
+  const [loading, setLoading] = useState(true);
+  const [leadData, setLeadData] = useState<any>(null);
+  const [scenario, setScenario] = useState<SimulationScenario>(defaultScenario);
   
-  if (!lead) {
-    notFound()
-  }
+  // Estados do Simulador de Atração
+  const [simulationStep, setSimulationStep] = useState<'monitoring' | 'interrupted' | 'resolving' | 'success'>('monitoring');
+  const [editedText, setEditedText] = useState('');
+  const [logs, setLogs] = useState<string[]>([]);
 
-  // Formatador de Moeda
-  const formatCurrency = (value: number) => {
-    return value.toLocaleString('pt-BR', {
+  useEffect(() => {
+    async function initSandbox() {
+      try {
+        // Recupera o diagnóstico do prospect via Server Action e ID SHA-256
+        const result = await getSandboxLeadAction(companyId);
+        if (result && result.success && result.lead) {
+          setLeadData(result.lead);
+          
+          // Mapeia o cenário dinâmico com base no nicho do Lead
+          const slug = String(result.lead.nicheSlug || result.lead.niche || '').toLowerCase();
+          let nicheKey = 'default';
+          if (slug.includes('saude') || slug.includes('clinica') || slug.includes('bemestar')) nicheKey = 'saude';
+          else if (slug.includes('logistica') || slug.includes('frota') || slug.includes('urgencia')) nicheKey = 'logistica';
+          else if (slug.includes('advocacia') || slug.includes('juridico') || slug.includes('legal') || slug.includes('servico')) nicheKey = 'advocacia';
+
+          if (sandboxScenarios[nicheKey]) {
+            setScenario(sandboxScenarios[nicheKey]);
+            setEditedText(sandboxScenarios[nicheKey].rawBotOutput);
+          } else {
+            setScenario(defaultScenario);
+            setEditedText(defaultScenario.rawBotOutput);
+          }
+        }
+      } catch (err) {
+        console.error("Erro na hidratação do Sandbox:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    initSandbox();
+  }, [companyId]);
+
+  // Loop de logs teatrais da malha cognitiva rodando em background
+  useEffect(() => {
+    if (loading || simulationStep !== 'monitoring') return;
+
+    const baseLogs = [
+      `[SISTEMA] Malha Cognitiva SinergIA inicializada para ${leadData?.name || 'Empresa'}.`,
+      `[TELEMETRIA] Escutando canais síncronos (?aff=) e gatilhos de latência...`,
+      `[MONITORAMENTO] Varrendo fluxos operacionais buscando inteligência aprisionada...`
+    ];
+
+    let currentLogIndex = 0;
+    setLogs([baseLogs[0]]);
+
+    const interval = setInterval(() => {
+      currentLogIndex++;
+      if (currentLogIndex < baseLogs.length) {
+        setLogs(prev => [...prev, baseLogs[currentLogIndex]]);
+      } else if (currentLogIndex === baseLogs.length) {
+        // Dispara o sinal de entrada e força a interrupção ética ("Requer Artesão")
+        setLogs(prev => [...prev, scenario.triggerEvent]);
+      } else {
+        clearInterval(interval);
+        setSimulationStep('interrupted');
+      }
+    }, 1800);
+
+    return () => clearInterval(interval);
+  }, [loading, simulationStep, leadData, scenario]);
+
+  const handleApprovePact = () => {
+    setSimulationStep('resolving');
+    setTimeout(() => {
+      setSimulationStep('success');
+    }, 1500);
+  };
+
+  const formatCurrency = (val: number) => {
+    return val.toLocaleString('pt-BR', {
       style: 'currency',
       currency: 'BRL',
       maximumFractionDigits: 0
-    })
+    });
   }
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white">
+        <div className="w-12 h-12 border-4 border-fuchsia-500/20 border-t-fuchsia-500 rounded-full animate-spin transform-gpu"></div>
+        <p className="mt-4 text-slate-400 font-mono text-sm animate-pulse">Sintonizando Malha de Consciência...</p>
+      </div>
+    );
+  }
+
+  const yearlyRevenueLeak = leadData?.yearlyRevenueLeak || (Number(leadData?.employeeCount || 10) * 1200 * 12);
+  const weeklyWastedHours = (Number(leadData?.employeeCount || 10) * 3.2).toFixed(0);
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 relative overflow-hidden flex flex-col justify-between py-12 md:py-24">
-      {/* Background Glowing HSL Orbs */}
-      <div className="absolute inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-violet-600/10 rounded-full blur-[140px] mix-blend-screen" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[140px] mix-blend-screen" />
-        {/* Subtly animated middle orb */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-cyan-500/5 rounded-full blur-[120px]" />
-      </div>
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center p-4 md:p-8 relative overflow-hidden selection:bg-fuchsia-500/30">
+      
+      {/* Orbes Neon com Glassmorfismo acelerado por GPU */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-rose-500/5 blur-[120px] pointer-events-none transform-gpu will-change-transform" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-fuchsia-500/5 blur-[120px] pointer-events-none transform-gpu will-change-transform" />
 
-      {/* Grid Pattern overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f46e50d_1px,transparent_1px),linear-gradient(to_bottom,#4f46e50d_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20 pointer-events-none z-0"></div>
-
-      <div className="max-w-4xl mx-auto px-6 relative z-10 w-full my-auto">
-        {/* Header - Brand */}
-        <div className="text-center mb-12 animate-in fade-in slide-in-from-top-4 duration-700">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900 border border-slate-800 shadow-xl text-xs font-black text-slate-300 mb-6 uppercase tracking-widest">
-            <Heart className="w-3.5 h-3.5 text-rose-500 animate-pulse" />
-            <span>SinergIA Crescimento • Outbound Mirror</span>
+      {/* Header do Cockpit de Testes */}
+      <header className="w-full max-w-7xl flex flex-col md:flex-row items-center justify-between border-b border-white/5 pb-6 mb-8 z-10">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-fuchsia-500 to-rose-500 flex items-center justify-center shadow-lg shadow-fuchsia-500/20">
+            <Terminal className="w-5 h-5 text-white" />
           </div>
-          <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white leading-tight">
-            Diagnóstico de Alocação de Consciência
-          </h1>
-          <p className="text-slate-400 mt-3 max-w-xl mx-auto text-sm md:text-base font-light leading-relaxed">
-            Olá, <strong className="text-white font-semibold">{lead.ownerName || 'Diretor'}</strong>. Mapeamos as métricas de fricção e desperdício operacional da <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 font-bold">{lead.name}</span>.
-          </p>
+          <div>
+            <h1 className="text-xl font-bold tracking-tight">SinergIA OS <span className="text-xs font-mono px-2 py-0.5 rounded bg-white/5 border border-white/10 text-fuchsia-400">Sandbox</span></h1>
+            <p className="text-xs text-slate-400 font-mono">Ambiente de Entrega Antecipada • ID: {companyId.substring(0, 8)}</p>
+          </div>
         </div>
+        <div className="mt-4 md:mt-0 px-4 py-2 rounded-xl bg-slate-900/50 border border-white/5 backdrop-blur-md flex items-center gap-2 font-mono text-xs text-slate-300">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          Arquétipo Mapeado: <strong className="text-fuchsia-400">Oprimida por Burocracia</strong>
+        </div>
+      </header>
 
-        {/* Main Glassmorphic Panel (Mapa de Energia & Calculadora de Alma) */}
-        <div className="bg-slate-900/30 border border-white/10 backdrop-blur-xl rounded-[2.5rem] p-8 md:p-12 transform-gpu will-change-transform shadow-[0_0_60px_rgba(99,102,241,0.08)] space-y-10 animate-in fade-in zoom-in-95 duration-500 delay-200">
-          
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6 border-b border-white/5 pb-8">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
-                <Brain className="w-6 h-6 text-indigo-400" />
-              </div>
+      <main className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-[1fr_1.618fr] gap-8 lg:gap-12 z-10 flex-1 items-start">
+        
+        {/* Painel Esquerdo: Telemetria e Impacto Financeiro */}
+        <div className="flex flex-col gap-6 w-full">
+          <div className="rounded-2xl bg-slate-900/40 border border-white/10 p-6 backdrop-blur-xl transform-gpu will-change-transform shadow-2xl relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity">
+              <HelpCircle className="w-5 h-5" />
+            </div>
+            <h2 className="text-sm font-mono text-slate-400 tracking-wider uppercase mb-4">Diagnóstico de Fricção Operacional</h2>
+            <div className="space-y-4">
               <div>
-                <h3 className="text-lg font-bold text-white leading-tight">Mapa de Energia da Empresa</h3>
-                <p className="text-xs text-slate-400 mt-1">Consciência vs Carga Braçal Repetitiva</p>
+                <p className="text-xs text-slate-400 font-mono">Empresa Analisada</p>
+                <p className="text-lg font-semibold text-white">{leadData?.name || 'Sua Empresa'}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4 pt-2">
+                <div className="p-4 rounded-xl bg-slate-950/60 border border-rose-500/20 shadow-inner group-hover:border-rose-500/40 transition-colors">
+                  <span className="text-xs font-mono text-rose-400">Vazamento Anual</span>
+                  <p className="text-xl font-bold text-white mt-1">{formatCurrency(yearlyRevenueLeak)}</p>
+                </div>
+                <div className="p-4 rounded-xl bg-slate-950/60 border border-fuchsia-500/20 shadow-inner group-hover:border-fuchsia-500/40 transition-colors">
+                  <span className="text-xs font-mono text-fuchsia-400">Tempo Prisioneiro</span>
+                  <p className="text-xl font-bold text-white mt-1">{weeklyWastedHours}h / sem</p>
+                </div>
               </div>
             </div>
-            <div className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-1.5 shadow-[inset_0_0_10px_rgba(16,185,129,0.05)]">
-              <ShieldCheck className="w-4 h-4" />
-              Arquétipo: {lead.archetype}
-            </div>
           </div>
-
-          {/* Metric Dashboard Display Grid */}
-          <div className="grid md:grid-cols-2 gap-8">
+ 
+          <div className="rounded-2xl bg-slate-900/20 border border-white/5 p-6 backdrop-blur-md">
+            <h3 className="text-sm font-semibold text-slate-200 mb-2">Instruções do Artesão</h3>
+            <p className="text-xs text-slate-400 leading-relaxed font-mono">
+              A IA travou eticamente em Amber. Cure o fluxo dando intencionalidade humana à malha.
+            </p>
+          </div>
+        </div>
+ 
+        {/* Painel Direito: O Espetáculo Interativo da Sandbox */}
+        <div className="w-full flex flex-col">
+          <div className="flex-1 rounded-2xl bg-slate-950 border border-white/10 backdrop-blur-xl flex flex-col overflow-hidden relative shadow-2xl shadow-neon-artesao/5 min-h-[480px]">
             
-            {/* CARD 1: TIME LOSS */}
-            <div className="bg-slate-950/50 border border-white/5 rounded-2xl p-6 relative overflow-hidden group hover:border-violet-500/20 transition-all duration-300">
-              <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-violet-500 to-indigo-500"></div>
-              <div className="flex justify-between items-start mb-4">
-                <div className="w-10 h-10 bg-violet-500/10 border border-violet-500/20 rounded-xl flex items-center justify-center">
-                  <Clock className="w-5 h-5 text-violet-400" />
-                </div>
-                <span className="text-[9px] font-mono font-bold text-slate-500 uppercase tracking-widest">Semanal</span>
+            {/* Header do Terminal */}
+            <div className="px-4 py-3 bg-slate-900/60 border-b border-white/5 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-rose-500/40"></span>
+                <span className="w-3 h-3 rounded-full bg-amber-500/40"></span>
+                <span className="w-3 h-3 rounded-full bg-emerald-500/40"></span>
+                <span className="text-xs font-mono text-slate-400 ml-2">swarm-consciencia-terminal.log</span>
               </div>
-              <div className="space-y-1">
-                <span className="text-xs text-slate-400 block font-light">Horas de Intelecto Aprisionadas</span>
-                <div className="text-4xl md:text-5xl font-black text-white font-mono tracking-tight group-hover:text-violet-300 transition-colors">
-                  {lead.imprisonedIntellectHours}h
-                </div>
-                <span className="text-[10px] text-slate-500 block leading-relaxed pt-2 font-light">
-                  Estimativa de tempo que sua equipe de {lead.employeeCount} colaboradores passa resolvendo digitações manuais e tarefas repetitivas evitáveis.
-                </span>
+              <div className="flex items-center font-mono text-[10px]">
+                Status: 
+                {simulationStep === 'monitoring' && <span className="text-blue-400 ml-1 animate-pulse">RASTREANDO...</span>}
+                {simulationStep === 'interrupted' && <span className="text-amber-400 ml-1 font-bold animate-pulse">REQUER ARTESÃO</span>}
+                {simulationStep === 'resolving' && <span className="text-fuchsia-400 ml-1 animate-pulse">SINCRONIZANDO...</span>}
+                {simulationStep === 'success' && <span className="text-emerald-400 ml-1 font-bold">EMANCIPADO</span>}
               </div>
             </div>
 
-            {/* CARD 2: FINANCIAL LEAKAGE */}
-            <div className="bg-slate-950/50 border border-white/5 rounded-2xl p-6 relative overflow-hidden group hover:border-emerald-500/20 transition-all duration-300">
-              <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-emerald-500 to-teal-500"></div>
-              <div className="flex justify-between items-start mb-4">
-                <div className="w-10 h-10 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-emerald-400" />
+            {/* Tela Interna do Terminal */}
+            <div className="p-6 flex-1 font-mono text-xs space-y-3 overflow-y-auto max-h-[380px]">
+              {logs.map((log, index) => (
+                <div 
+                  key={index}
+                  className={`leading-relaxed animate-in fade-in slide-in-from-left-2 duration-300 ${log.includes('[SINAL') ? 'text-cyan-400 font-bold' : 'text-slate-400'}`}
+                >
+                  {log}
                 </div>
-                <span className="text-[9px] font-mono font-bold text-slate-500 uppercase tracking-widest">Anual Preditivo</span>
-              </div>
-              <div className="space-y-1">
-                <span className="text-xs text-slate-400 block font-light">Vazamento Financeiro Estimado</span>
-                <div className="text-4xl md:text-5xl font-black text-emerald-400 font-mono tracking-tight">
-                  {formatCurrency(lead.yearlyRevenueLeak)}
+              ))}
+
+              {/* CONTEXTO: INTERRUPÇÃO ÉTICA AMBER */}
+              {simulationStep === 'interrupted' && (
+                <div className="mt-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 animate-neon-artesao-pulsar space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                  <div className="flex items-start gap-2 text-amber-400">
+                    <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-bold text-sm">Pausa Ética Ativada: Requer Artesão Humano</p>
+                      <p className="text-[11px] text-slate-300 mt-1 leading-relaxed">{scenario.contextNote}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] uppercase text-slate-400 tracking-wider block text-left">Rascunho Frio gerado pela IA (Edite em tempo real para dar Alma ao fluxo):</label>
+                    <textarea 
+                      className="w-full h-24 bg-slate-950 border border-white/10 rounded-lg p-3 text-slate-200 focus:outline-none focus:border-amber-500/60 font-mono text-xs leading-relaxed resize-none transition-colors"
+                      value={editedText}
+                      onChange={(e) => setEditedText(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="flex flex-wrap justify-end gap-3 pt-1">
+                    <button 
+                      onClick={() => setEditedText(scenario.curatedOutput)}
+                      className="px-3 py-1.5 rounded-lg border border-white/10 hover:bg-white/5 transition-colors text-[11px] text-slate-400"
+                    >
+                      Injetar Sugestão Humanocêntrica
+                    </button>
+                    <button 
+                      onClick={handleApprovePact}
+                      className="px-4 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold transition-all flex items-center gap-1 shadow-lg shadow-amber-500/15"
+                    >
+                      Aprovar Pacto &amp; Liberar Envio
+                    </button>
+                  </div>
                 </div>
-                <span className="text-[10px] text-slate-500 block leading-relaxed pt-2 font-light">
-                  Perda estimada devido a no-shows de agendas, latência humana de resposta inicial a leads e falhas de conciliação com sistemas ERPs.
-                </span>
-              </div>
+              )}
+
+              {/* CONTEXTO: SINCRONIZANDO (RESOLVING) */}
+              {simulationStep === 'resolving' && (
+                <div className="py-8 flex flex-col items-center justify-center text-fuchsia-400 gap-2">
+                  <div className="w-6 h-6 border-2 border-fuchsia-500/20 border-t-fuchsia-500 rounded-full animate-spin"></div>
+                  <p className="text-[11px] animate-pulse">Semeando intencionalidade humana na malha cognitiva...</p>
+                </div>
+              )}
+
+              {/* CONTEXTO: SUCESSO EMERALD */}
+              {simulationStep === 'success' && (
+                <div className="mt-4 p-6 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-4 shadow-2xl shadow-emerald-500/5 animate-in fade-in zoom-in-95 duration-500">
+                  <div className="w-12 h-12 rounded-full bg-emerald-500/20 mx-auto flex items-center justify-center border border-emerald-500/40">
+                    <CheckCircle className="w-6 h-6 text-emerald-400" />
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="text-emerald-400 font-bold text-base">Processo Curado com Sucesso!</h4>
+                    <p className="text-[11px] text-slate-300 font-mono">Status da Telemetria: SUCCESS [LOG_ID: SHA-256_VERIFIED]</p>
+                  </div>
+                  <p className="text-slate-400 text-xs leading-relaxed max-w-md mx-auto font-sans font-light">
+                    Você acabou de ver a filosofia da <strong className="font-bold text-white">SinergIA</strong> rodando na prática. O fluxo robótico foi impedido de danificar uma conexão de alto valor e foi emancipado com a sua assinatura moral.
+                  </p>
+                  <div className="pt-2">
+                    <button 
+                      onClick={() => router.push(`/apply?companyId=${companyId}`)}
+                      className="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-slate-950 font-bold tracking-tight text-sm shadow-xl shadow-emerald-500/20 transition-all flex items-center gap-2 mx-auto group transform-gpu hover:scale-[1.02]"
+                    >
+                      Estancar Vazamentos Invisíveis Agora
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
             </div>
 
+            {/* Rodapé do Terminal */}
+            <div className="px-4 py-2 bg-slate-900/40 border-t border-white/5 font-mono text-[10px] text-slate-500 flex justify-between">
+              <span>SinergIA Engine v2.4-Aware</span>
+              <span>Pacto de Humanidade Salvaguardado</span>
+            </div>
           </div>
-
-          {/* Calculadora de Alma Alert Message */}
-          <div className="bg-slate-950/80 border border-white/5 rounded-2xl p-6 flex flex-col md:flex-row items-start gap-4">
-            <div className="p-2.5 bg-amber-500/10 border border-amber-500/25 rounded-xl shrink-0 mt-0.5">
-              <AlertTriangle className="w-5 h-5 text-amber-500" />
-            </div>
-            <div className="space-y-1">
-              <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
-                O Diagnóstico de Propósito
-              </h4>
-              <p className="text-xs text-slate-400 leading-relaxed font-light">
-                Com base no nicho <strong className="text-white font-semibold">{lead.nicheTitle || lead.nicheSlug}</strong>, confirmamos que a operação está no limite da carga braçal. Isso gera um pico invisível de estresse, atrito de dados e burnout. A SinergIA OS propõe a libertação estratégica por meio da automação com alma.
-              </p>
-            </div>
-          </div>
-
-          {/* CTA Box / Action */}
-          <div className="pt-6 border-t border-white/5 flex flex-col items-center text-center space-y-6">
-            <div className="space-y-2">
-              <h4 className="text-md font-bold text-white flex items-center justify-center gap-2">
-                <Cpu className="w-4 h-4 text-emerald-400 animate-pulse" />
-                Seu Slot de Homologação Está Disponível
-              </h4>
-              <p className="text-xs text-slate-400 max-w-lg leading-relaxed font-light">
-                Ao reivindicar seu slot, iniciaremos o provisionamento privado da nossa inteligência multi-agente de Crescimento e Conexão para a sua operação.
-              </p>
-            </div>
-            
-            <Link 
-              href={`/apply?companyId=${companyId}&niche=${lead.nicheSlug}`}
-              className="w-full md:w-auto"
-            >
-              <Button className="w-full md:w-auto py-7 px-10 bg-gradient-to-r from-emerald-500 to-indigo-500 hover:from-emerald-600 hover:to-indigo-600 font-bold rounded-2xl shadow-[0_0_35px_rgba(16,185,129,0.2)] hover:shadow-[0_0_45px_rgba(99,102,241,0.35)] transition-all flex items-center justify-center gap-3 text-white border-0 text-sm tracking-wider uppercase">
-                <span>Reivindicar Meu Slot SinergIA OS</span>
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </Link>
-          </div>
-
         </div>
 
-        {/* Small Bottom Brand Info */}
-        <div className="text-center mt-12 text-[10px] text-slate-600 font-medium tracking-widest uppercase flex items-center justify-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
-          <span>SinergIA OS • Tecnologia com Alma</span>
+      </main>
+
+      {/* Selo Criptográfico de Luxo no Rodapé do Sandbox */}
+      <footer className="w-full max-w-7xl mt-8 pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between text-[11px] font-mono text-slate-500 z-10 gap-4">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-fuchsia-500/60" />
+          <span>Certificado Digital SinergIA OS Garantido</span>
         </div>
-      </div>
+        <div className="text-slate-600 text-center sm:text-right selection:bg-slate-800">
+          Hash de Sessão: <span className="text-slate-400">{companyId}</span>
+        </div>
+      </footer>
     </div>
-  )
+  );
 }

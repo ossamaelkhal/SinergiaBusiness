@@ -6,6 +6,7 @@ import { Zap, ChevronRight, Fingerprint, ShieldCheck } from 'lucide-react'
 
 // Componentes das Seções Estruturais
 import Hero from '@/components/sections/Hero'
+import LiveCurationTerminal from '@/components/sections/LiveCurationTerminal'
 import SinergiaBlueprint from '@/components/sections/SinergiaBlueprint' // SinergIA Blueprint
 import MultiAgentFleet from '@/components/features/fleet/MultiAgentFleet' // SinergIA Swarm Consciência
 import SinergiaOS from '@/components/sections/SinergiaOS' // Os Quatro Pilares da Emancipação Consciente
@@ -23,6 +24,9 @@ export default function LandingPage() {
                   const element = document.getElementById('cta-section');
                   if (element) element.scrollIntoView({ behavior: 'smooth' });
                 }} />
+
+                {/* Janela de Curadoria do Artesão ao Vivo */}
+                <LiveCurationTerminal />
                 
                 {/* Linha separadora */}
                 <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />

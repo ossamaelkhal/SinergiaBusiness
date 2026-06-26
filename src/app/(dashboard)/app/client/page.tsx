@@ -19,9 +19,9 @@ export default async function ClientPage() {
   }
 
   // BLOQUEIO SEGURO DE ATIVAÇÃO
-  // Se o usuário não for do grupo dev mock E o status for diferente de 'active_client' ou 'CLOSED', redirect imediato
+  // Se o usuário não for do grupo dev mock E o status for diferente de 'active_client', 'CLOSED', 'prospect_vip' ou 'waiting_onboarding_call', redirect imediato
   const isDevMock = sessionCookie.includes('mock') || lead.email === 'mock-admin@sinergia.business';
-  const isActive = lead.status === 'active_client' || lead.status === 'CLOSED' || lead.status === 'prospect_vip';
+  const isActive = lead.status === 'active_client' || lead.status === 'CLOSED' || lead.status === 'prospect_vip' || lead.status === 'waiting_onboarding_call';
 
   if (!isDevMock && !isActive) {
     redirect('/app/discover');

@@ -238,15 +238,24 @@ export function Header() {
           <DropdownMenuContent className="w-60 bg-slate-950/95 border border-white/10 backdrop-blur-xl p-2 rounded-2xl shadow-2xl mt-2" align="end">
             <div className="flex flex-col space-y-1 p-3 border-b border-white/5 mb-2">
               <p className="text-xs font-bold text-white truncate">{user.displayName || user.email}</p>
-              <p className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded w-max mt-1 ${
-                leadInfo?.archetype === 'Oprimida por Burocracia' 
-                  ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' 
-                  : leadInfo?.archetype === 'Desconectada do Cliente'
-                  ? 'bg-fuchsia-500/10 text-fuchsia-400 border border-fuchsia-500/20'
-                  : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-              }`}>
-                {leadInfo?.archetype || 'Cliente SinergIA'}
-              </p>
+              <div className="flex items-center gap-1.5 mt-1">
+                <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ${
+                  leadInfo?.archetype === 'Oprimida por Burocracia' 
+                    ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' 
+                    : leadInfo?.archetype === 'Desconectada do Cliente'
+                    ? 'bg-fuchsia-500/10 text-fuchsia-400 border border-fuchsia-500/20'
+                    : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                }`}>
+                  {leadInfo?.archetype || 'Cliente SinergIA'}
+                </span>
+                <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded border ${
+                  user.uid === 'mock-uid-123456'
+                    ? 'bg-amber-500/10 text-amber-400 border-amber-500/20 shadow-neon-artesao'
+                    : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-neon-pacto'
+                }`}>
+                  {user.uid === 'mock-uid-123456' ? 'MOCK LOCAL' : 'CLOUD'}
+                </span>
+              </div>
             </div>
             
             <Link href="/app/client">
@@ -287,9 +296,18 @@ export function Header() {
             <DropdownMenuContent className="w-60 bg-slate-950/95 border border-white/10 backdrop-blur-xl p-2 rounded-2xl shadow-2xl mt-2" align="end">
               <div className="flex flex-col space-y-1 p-3 border-b border-white/5 mb-2">
                 <p className="text-xs font-bold text-white truncate">{partnerInfo?.name || user.displayName || user.email}</p>
-                <p className="text-[9px] text-cyan-400 font-bold uppercase tracking-widest bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded w-max mt-1">
-                  PARCEIRO NEXUS
-                </p>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <p className="text-[9px] text-cyan-400 font-bold uppercase tracking-widest bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded w-max">
+                    PARCEIRO NEXUS
+                  </p>
+                  <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded border ${
+                    user.uid === 'mock-uid-123456'
+                      ? 'bg-amber-500/10 text-amber-400 border-amber-500/20 shadow-neon-artesao'
+                      : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-neon-pacto'
+                  }`}>
+                    {user.uid === 'mock-uid-123456' ? 'MOCK LOCAL' : 'CLOUD'}
+                  </span>
+                </div>
               </div>
 
               <Link href={userRole === 'agency' ? '/hub/developer' : '/hub/ambassador'}>

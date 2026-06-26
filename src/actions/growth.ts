@@ -2,7 +2,7 @@
 
 import crypto from 'crypto';
 import { estimateCompanyFriction } from '@/lib/frictionEngine';
-import { saveSandboxLead } from '@/lib/firebase-admin-helper';
+import { saveSandboxLead, getSandboxLeadById } from '@/lib/firebase-admin-helper';
 
 export interface CompanyDataInput {
   name: string;
@@ -64,5 +64,18 @@ export async function triggerOutboundSandbox(companyData: CompanyDataInput) {
       success: false,
       error: error.message || String(error)
     };
+  }
+}
+
+export async function getSandboxLeadAction(companyId: string) {
+  try {
+    const lead = await getSandboxLeadById(companyId);
+    if (lead) {
+      return { success: true, lead };
+    }
+    return { success: false, error: 'Lead do Sandbox não encontrado.' };
+  } catch (error: any) {
+    console.error('Erro ao buscar sandbox lead:', error);
+    return { success: false, error: error.message || 'Erro interno.' };
   }
 }

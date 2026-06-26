@@ -171,3 +171,19 @@ export async function bookOnboardingCall(leadId: string, datetime: string) {
     return { success: false, error: error.message || 'Erro ao agendar horário.' };
   }
 }
+
+export async function simulatePixPaymentSuccess(leadId: string) {
+  try {
+    await fbHelper.updateLeadBilling(leadId, {
+      billing_status: 'paid',
+      status: 'active_client',
+      payment_completed_at: new Date().toISOString()
+    });
+    revalidatePath('/checkout');
+    revalidatePath('/app/client');
+    return { success: true };
+  } catch (error: any) {
+    console.error('Erro ao simular pagamento Pix:', error);
+    return { success: false, error: error.message || 'Erro ao simular pagamento.' };
+  }
+}

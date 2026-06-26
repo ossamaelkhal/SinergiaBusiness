@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, Suspense, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, ArrowRight, ShieldCheck, Zap, Server, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { submitApplication } from '@/actions/leads';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { getSandboxLeadAction } from '@/actions/growth';
 
 function getCookie(name: string): string {
   if (typeof document === 'undefined') return '';
@@ -32,6 +33,7 @@ function ApplyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const domainParam = searchParams.get('domain') || '';
+  const companyIdParam = searchParams.get('companyId') || '';
 
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,6 +48,51 @@ function ApplyContent() {
     phone: '',
     domain: domainParam
   });
+
+  const mapRevenue = (rev: number) => {
+    if (rev < 100000) return 'Até R$ 100 mil';
+    if (rev <= 500000) return 'De R$ 100 mil a R$ 500 mil';
+    if (rev <= 2000000) return 'De R$ 500 mil a R$ 2 milhões';
+    return 'Acima de R$ 2 milhões';
+  };
+
+  const mapTeamSize = (employees: number) => {
+    if (employees <= 5) return '1 a 5 pessoas';
+    if (employees <= 20) return '6 a 20 pessoas';
+    if (employees <= 50) return '21 a 50 pessoas';
+    return 'Mais de 50 pessoas';
+  };
+
+  useEffect(() => {
+    if (companyIdParam) {
+      const loadSandbox = async () => {
+        try {
+          const res = await getSandboxLeadAction(companyIdParam);
+          if (res.success && res.lead) {
+            const l = res.lead;
+            const approxMonthlyRevenue = l.yearlyRevenueLeak ? Math.round(l.yearlyRevenueLeak / 1.44) : 150000;
+            const resolvedRevenue = mapRevenue(approxMonthlyRevenue);
+            const resolvedTeam = mapTeamSize(l.employeeCount || 10);
+            
+            setFormData(prev => ({
+              ...prev,
+              name: l.ownerName || '',
+              email: l.email || '',
+              phone: l.phone || '',
+              revenue: resolvedRevenue,
+              teamSize: resolvedTeam,
+              bottleneck: 'Sistemas desconectados e muito trabalho manual interno',
+              domain: l.name || '',
+            }));
+            setStep(4); // Pula direto para o passo 4 (dados pessoais)
+          }
+        } catch (e) {
+          console.error("Erro ao pré-carregar lead de sandbox:", e);
+        }
+      };
+      loadSandbox();
+    }
+  }, [companyIdParam]);
 
   const nextStep = () => setStep(prev => prev + 1);
   const prevStep = () => setStep(prev => prev - 1);
